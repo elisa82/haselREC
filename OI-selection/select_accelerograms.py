@@ -1,9 +1,9 @@
 from openquake.hazardlib.gsim.mgmpe import akkar_coeff_table as act
 from openquake.hazardlib import gsim, imt, const
-import numpy as np 
-import pandas as pd 
-import os, sys 
-import csv 
+import numpy as np
+import pandas as pd
+import os, sys
+import csv
 import matplotlib.pyplot as plt
 import matplotlib
 import time
@@ -15,18 +15,18 @@ import re
 import string
 
 
-site_code=[1]
+scale_accelerograms=0 #(0=no, 1=yes)
 
-#0=T1 specify the period at which spectra should be scaled and matched
-#1=AvgSA
-selection_type=1
+selection_type=0 #=1 uses AvgSA, =0 uses T1 (period at which spectra should be scaled and matched)
 T1=0 #conditioning period. Used only if selection_type=0, for PGA uses T1=0
+site_code=[1]
+rlz_code=[1]
 
 #PSHA and disaggregation parameters
-path_results='out'
-num_disagg=87
-num_classical=87
-probability_of_exceedance=0.1
+path_results='../OQ-hazard/SA/outs'
+num_disagg=36
+num_classical=36
+probability_of_exceedance=0.02
 investigation_time=50
 
 #parameters for conditional spectrum computation
@@ -40,11 +40,11 @@ AR=1
 Vs30=300
 
 #database
-database_path='database_flatfile.csv'
+database_path='database_flatfile_NGA2_only_filtered3.csv'
 #screen for suitable ground motions
-allowedRecs_Vs30=[0,10000]     # upper and lower bound of allowable Vs30 values
-allowedEC8code='None'
-maxsf=3.0 #The maximum allowable scale factor
+allowedRecs_Vs30=[180,360]     # upper and lower bound of allowable Vs30 values
+allowedEC8code='C'
+maxsf=5.0 #The maximum allowable scale factor
 radius_dist=50 #km
 radius_mag=0.25
 maximum_depth=30
@@ -59,8 +59,8 @@ nGM=30 #number of records to select ==> number of records to select since the co
 nLoop=2 #Number of loops of optimization to perform
 penalty=10 #>0 to penalize selected spectra moire than 3 sigma from the target at any period, =0 otherwise.
 
-path_NGA_folder='../../NGA2records' #NGA recordings have to be stored
-output_ESM='../../ESM/'
+path_NGA_folder='NGA2records' #NGA recordings have to be stored
+output_ESM='ESM'
 #If not, found in the folder, ESM recording are authomatically downloaded from internet, need to generate the file token.txt
 #At first you need to register at: http://tex.mi.ingv.it/
 #curl -X POST -F 'message={"user_email": "elisa.zuccolo@eucentre.it","user_password": "password"}' "http://tex.mi.ingv.it/esmws/generate-signed-message/1/query" > token.txt
@@ -383,10 +383,10 @@ def screen_database(database_path,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D
             SA_geo=rotD50/981 #in g
         if(source[i]=='NGA-West2'):
             SA_geo=rotD50 #already in g
-        SA_list.append(SA_geo) 
+        SA_list.append(SA_geo)
         if(all(v > 0 for v in SA_geo)):
             if(source[i]=='ESM'):
-                if(event_depth[i]<=maximum_depth): 
+                if(event_depth[i]<=maximum_depth):
                     if(is_free_field_ESM[i]==0):
                         if(event_mw[i]>=allowedRecs_Mag[0] and event_mw[i]<=allowedRecs_Mag[1]):
                             if(acc_distance[i]>=allowedRecs_D[0] and acc_distance[i]<=allowedRecs_D[1]):
@@ -400,17 +400,17 @@ def screen_database(database_path,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D
 
             if(source[i]=='NGA-West2'):
                 if(epi_lon[i]<-31 or epi_lon[i]>70):
-                    if(event_depth[i]<=maximum_depth): 
+                    if(event_depth[i]<=maximum_depth):
                         if(is_free_field_NGA[i]=="I"):
                             if(event_mag[i]>=allowedRecs_Mag[0] and event_mag[i]<=allowedRecs_Mag[1]):
                                 if(acc_distance[i]>=allowedRecs_D[0] and acc_distance[i]<=allowedRecs_D[1]):
                                     if(station_vs30[i]>=allowedRecs_Vs30[0] and station_vs30[i]<allowedRecs_Vs30[1]):
                                         allowedIndex.append(i)
-    SA=np.vstack(SA_list)         
+    SA=np.vstack(SA_list)
     SaKnown=SA[allowedIndex]
 
     # count number of allowed spectra
-    nBig = len(allowedIndex);  
+    nBig = len(allowedIndex)
     print(['Number of allowed ground motions = ', nBig])
     assert (nBig >= nGM), 'Warning: there are not enough allowable ground motions'
 
@@ -459,7 +459,7 @@ def compute_rho_avgSA(per,avg_periods,sctx,rctx,dctx,stddvs_avgsa):
 
     denominatore=len(avg_periods)*stddvs_avgsa
     rho_avgSA=sum_numeratore/denominatore
-    return rho_avgSA 
+    return rho_avgSA
 
 def simulate_spectra(nTrials,meanReq,covReq,stdevs,nGM):
 # simulate response spectra from the target mean and covariance matrix
@@ -482,15 +482,26 @@ def simulate_spectra(nTrials,meanReq,covReq,stdevs,nGM):
 
 #****************************************************************************************************************
 
-for site in site_code:
+for ii in np.arange(len(site_code)):
+
+    site = site_code[ii]
+    rlz = rlz_code[ii]
 
     for poe in [probability_of_exceedance]:
-        name='site_'+str(site)+'-poe-'+str(poe)
-        print(name)
         if(selection_type==1):
-            disagg_results='rlz-0-AvgSA-sid-0-poe-0_Mag_Dist_'+str(num_disagg)+'.csv'
+            disagg_results='rlz-'+str(rlz)+'-AvgSA-sid-'+str(site)+'-poe-0_Mag_Dist_'+str(num_disagg)+'.csv'
+            name='AvgSA-site_'+str(site)+'-poe-'+str(poe)
+        elif(selection_type==0):
+            if T1 == 0: #need to handle T1=PGA
+                disagg_results='rlz-'+str(rlz)+'-PGA-sid-'+str(site)+'-poe-0_Mag_Dist_'+str(num_disagg)+'.csv'
+                name='PGA-site_'+str(site)+'-poe-'+str(poe)
+            else:
+                disagg_results='rlz-'+str(rlz)+'-SA('+Tstar+')-sid-'+str(site)+'-poe-0_Mag_Dist_'+str(num_disagg)+'.csv'
+                name='SA('+Tstar+')-site_'+str(site)+'-poe-'+str(poe)
+            print('This needs to be fixed, dont know why. maybe to automate the filename inputs?')
         else: #TODO
             print('TODO')
+        print(name)
 
         file_with_OQ_acc_value='hazard_map-mean_'+str(num_classical)+'.csv'
 
@@ -722,7 +733,7 @@ for site in site_code:
 
         print('Please wait...This algorithm takes a few minutes depending on the number of records to be selected')
 
-        for k in np.arange(nLoop): 
+        for k in np.arange(nLoop):
             for i in np.arange(nGM): # consider replacing each ground motion in the selected set
                 minDev=100000
 
@@ -796,7 +807,7 @@ for site in site_code:
         if not os.path.exists(name):
             os.makedirs(name)
 
-        name_fig=name+'/'+name+'_UHS_selection.png'
+        name_fig=name+'/'+name+'_selection.png'
         plt.savefig(name_fig, bbox_inches='tight')
 
         plt.close()
@@ -813,51 +824,56 @@ for site in site_code:
                 elemento=recIdx[i]
                 if(source[elemento]=='ESM'):
                     f.write("{} {} {} {} {} {} {} {:6.2f} \n".format(i+1,source[elemento],event_id[elemento],station_code[elemento],blank,event_mw[elemento],acc_distance[elemento],finalScaleFactors[i]))
-                if(source[elemento]=='NGA-West2'): 
+                if(source[elemento]=='NGA-West2'):
                     val=int(record_sequence_number_NGA[elemento])
                     f.write("{} {} {} {} {} {} {} {:6.2f} \n".format(i+1,source[elemento],blank,blank,val,event_mag[elemento],acc_distance[elemento],finalScaleFactors[i]))
         f.close()
 
-        #Read accelegrams, save them and apply scaling factor
-        for i in np.arange(nGM):
-            time1=[]
-            time2=[]
-            inp_acc1=[]
-            inp_acc2=[]
-            npts1=0
-            npts2=0
-            comp1=''
-            comp2=''
-            desc1=''
-            desc2=''
-            elemento=recIdx[i]
-            if(source[elemento]=='NGA-West2'):
-                val=int(record_sequence_number_NGA[elemento])
-                [desc1,desc2,time1,time2,inp_acc1, inp_acc2,npts1,npts2]=create_NGA_acc(val,path_NGA_folder)
-                desc1='%'+desc1
-                desc2='%'+desc2
-            if(source[elemento]=='ESM'):
-                folder_output=output_ESM+event_id[elemento]+station_code[elemento]
-                if (os.path.isdir(folder_output)==False):
-                    zip_output='output_'+str(i)+'.zip'
-                    command='curl -X POST -F "message=@token.txt" "http://tex.mi.ingv.it/esmws/eventdata/1/query?eventid='+event_id[elemento]+'&data-type=ACC&station='+station_code[elemento]+'&format=ascii" -o '+zip_output
-                    os.system(command)
-                    command='unzip -o '+zip_output+' -d '+folder_output
-                    os.system(command)
-                    command='rm '+zip_output
-                    os.system(command)
-                [time1,time2,inp_acc1,inp_acc2,npts1,npts2,comp1,comp2]=create_ESM_acc(folder_output)
-                desc1='%'+event_id[elemento]+' '+station_code[elemento]+' '+comp1
-                desc2='%'+event_id[elemento]+' '+station_code[elemento]+' '+comp2
-            file_acc_out_1=name+'/scaled_acc_'+str(i+1)+'_1.txt'
-            file_acc_out_2=name+'/scaled_acc_'+str(i+1)+'_2.txt'
-            with open(file_acc_out_1, "w",newline='') as f1:
-                f1.write("{} \n".format(desc1))
-                for j in np.arange(npts1):
-                    f1.write("{:10.3f} {:15.10f}\n".format(time1[j],inp_acc1[j]*finalScaleFactors[i]))
-            f1.close()
-            with open(file_acc_out_2, "w",newline='') as f2:
-                f2.write("{} \n".format(desc2))
-                for j in np.arange(npts2):
-                    f2.write("{:10.3f} {:15.10f}\n".format(time2[j],inp_acc2[j]*finalScaleFactors[i]))
-            f2.close()
+        if(scale_accelerograms==1):
+
+            #Read accelegrams, save them and apply scaling factor
+            for i in np.arange(nGM):
+                time1=[]
+                time2=[]
+                inp_acc1=[]
+                inp_acc2=[]
+                npts1=0
+                npts2=0
+                comp1=''
+                comp2=''
+                desc1=''
+                desc2=''
+                elemento=recIdx[i]
+                if(source[elemento]=='NGA-West2'):
+                    val=int(record_sequence_number_NGA[elemento])
+                    [desc1,desc2,time1,time2,inp_acc1, inp_acc2,npts1,npts2]=create_NGA_acc(val,path_NGA_folder)
+                    desc1='%'+desc1
+                    desc2='%'+desc2
+                if(source[elemento]=='ESM'):
+                    folder_output=output_ESM+event_id[elemento]+station_code[elemento]
+                    if (os.path.isdir(folder_output)==False):
+                        zip_output='output_'+str(i)+'.zip'
+                        command='curl -X POST -F "message=@token.txt" "http://tex.mi.ingv.it/esmws/eventdata/1/query?eventid='+event_id[elemento]+'&data-type=ACC&station='+station_code[elemento]+'&format=ascii" -o '+zip_output
+                        os.system(command)
+                        command='unzip -o '+zip_output+' -d '+folder_output
+                        os.system(command)
+                        command='rm '+zip_output
+                        os.system(command)
+                    [time1,time2,inp_acc1,inp_acc2,npts1,npts2,comp1,comp2]=create_ESM_acc(folder_output)
+                    desc1='%'+event_id[elemento]+' '+station_code[elemento]+' '+comp1
+                    desc2='%'+event_id[elemento]+' '+station_code[elemento]+' '+comp2
+
+                # Create the filenames
+                file_time_scaled_acc_out_1=name+'/GMR_time_scaled_acc_'+str(i+1)+'_1.txt'
+                file_time_scaled_acc_out_2=name+'/GMR_time_scaled_acc_'+str(i+1)+'_2.txt'
+
+                with open(file_time_scaled_acc_out_1, "w",newline='') as f1:
+                    f1.write("{} \n".format(desc1))
+                    for j in np.arange(npts1):
+                        f1.write("{:10.3f} {:15.10f}\n".format(time1[j],inp_acc1[j]*finalScaleFactors[i]))
+                f1.close()
+                with open(file_time_scaled_acc_out_2, "w",newline='') as f2:
+                    f2.write("{} \n".format(desc2))
+                    for j in np.arange(npts2):
+                        f2.write("{:10.3f} {:15.10f}\n".format(time2[j],inp_acc2[j]*finalScaleFactors[i]))
+                f2.close()
