@@ -18,7 +18,7 @@ import string
 scale_accelerograms=0 #(0=no, 1=yes)
 
 selection_type=0 #=1 uses AvgSA, =0 uses T1 (period at which spectra should be scaled and matched)
-T1=0 #conditioning period. Used only if selection_type=0, for PGA uses T1=0
+Tstar=0 #conditioning period. Used only if selection_type=0, for PGA uses 'PGA'
 site_code=[1]
 rlz_code=[1]
 
@@ -175,7 +175,7 @@ def create_ESM_acc(folder):
 
         # read file
         fh = open(filename_in, 'rt')
-        for i in range(64): 
+        for i in range(64):
             key, value = fh.readline().strip().split(':', 1)
             headers[key.strip()] = value.strip()
 
@@ -374,7 +374,7 @@ def screen_database(database_path,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D
     # provided in databases
     indPer = np.unique(indPer);
     recPer = knownPer[indPer];
-    
+
     SA_list=[]
     allowedIndex=[]
     for i in np.arange(len(event_id)):
@@ -490,9 +490,9 @@ for ii in np.arange(len(site_code)):
     for poe in [probability_of_exceedance]:
         if(selection_type==1):
             disagg_results='rlz-'+str(rlz)+'-AvgSA-sid-'+str(site)+'-poe-0_Mag_Dist_'+str(num_disagg)+'.csv'
-            name='AvgSA-site_'+str(site)+'-poe-'+str(poe)
+            name='AvgSA-'+str(num_disagg)+'-site_'+str(site)+'-poe-'+str(poe)
         elif(selection_type==0):
-            if T1 == 0: #need to handle T1=PGA
+            if Tstar == 'PGA':
                 disagg_results='rlz-'+str(rlz)+'-PGA-sid-'+str(site)+'-poe-0_Mag_Dist_'+str(num_disagg)+'.csv'
                 name='PGA-site_'+str(site)+'-poe-'+str(poe)
             else:
@@ -514,14 +514,14 @@ for ii in np.arange(len(site_code)):
 
         #Retrieve disaggregation results
 
-        meanLst = [],[] 
+        meanLst = [],[]
         df=pd.read_csv(''.join([path_results,'/',disagg_results]),skiprows=1) 
-        df['rate'] = -np.log(1-df['poe'])/investigation_time 
-        df['rate_norm'] = df['rate']/ df['rate'].sum() 
+        df['rate'] = -np.log(1-df['poe'])/investigation_time
+        df['rate_norm'] = df['rate']/ df['rate'].sum()
         mode=df.sort_values(by='rate_norm',ascending=False)[0:1] 
-        meanMag=np.sum(df['mag']*df['rate_norm']) 
-        meanDist=np.sum(df['dist']*df['rate_norm']) 
-        print(meanMag,meanDist)
+        meanMag=np.sum(df['mag']*df['rate_norm'])
+        meanDist=np.sum(df['dist']*df['rate_norm'])
+#        print(meanMag,meanDist)
         allowedRecs_D=[meanDist-radius_dist,meanDist+radius_dist]
         allowedRecs_Mag=[meanMag-radius_mag,meanMag+radius_mag]
 
@@ -588,7 +588,7 @@ for ii in np.arange(len(site_code)):
                     ry=np.abs(rx*1./np.tan(np.radians(azimuth)))
                 rrup=np.sqrt(np.square(rrup1)+np.square(ry))
 
-            print(rjb,rx,rrup)
+#            print(rjb,rx,rrup)
 
         Dist = np.arange(meanDist,meanDist+1,1.)
         if(GMPE=='Chiou_Youngs_2014'):
@@ -617,10 +617,10 @@ for ii in np.arange(len(site_code)):
             [mean_SaTcond,stddvs_SaTcond]=compute_avgSA(avg_periods,sctx, rctx, dctx)
             epsilon=(np.log(output_oq)-np.log(mean_SaTcond))/stddvs_SaTcond
         if(selection_type==0):
-            if(T1==0):
+            if(Tstar=='PGA'):
                 P = imt.PGA()
             else:
-                P = imt.SA(period=T1)
+                P = imt.SA(period=Tstar)
             S=[const.StdDev.TOTAL]
             mean_SaTcond,stddvs_SaTcond=bgmpe.get_mean_and_stddevs(sctx,rctx,dctx,P,S)
             stddvs_SaTcond=stddvs_SaTcond[0]
@@ -640,9 +640,9 @@ for ii in np.arange(len(site_code)):
                 rho.append(rho_per[0])
             if(selection_type==0):
                 if(corr_type=='baker_jayaram'):
-                    rho_per = baker_jayaram_correlation(per,T1)
+                    rho_per = baker_jayaram_correlation(per,Tstar)
                 if(corr_type=='akkar'):
-                    rho_per = akkar_correlation(per,T1)
+                    rho_per = akkar_correlation(per,Tstar)
                 rho.append(rho_per)
             spectrum=bMean_SA+rho_per*bStDev_SA[0]*epsilon
             # (Log) Response Spectrum Mean: TgtMean
@@ -686,7 +686,7 @@ for ii in np.arange(len(site_code)):
 
         if(selection_type==1):
             id_avgSA=[]
-            id_avgSA_bool=np.isin(TgtPer,avg_periods) 
+            id_avgSA_bool=np.isin(TgtPer,avg_periods)
             for i in np.arange(len(TgtPer)):
                 if(id_avgSA_bool[i] == True):
                     id_avgSA.append(i)
@@ -694,7 +694,7 @@ for ii in np.arange(len(site_code)):
             lnSa1=np.mean(meanReq[id_avgSA])
         if(selection_type==0):
             id_T1=[]
-            id_T1=np.where(TgtPer==T1)
+            id_T1=np.where(TgtPer==Tstar)
             lnSa1=np.mean(meanReq[id_T1])
 
         recID = np.zeros(nGM,dtype=int)
