@@ -426,7 +426,7 @@ def screen_database(database_path,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D
     SaKnown=SA[allowedIndex]
 
     # count number of allowed spectra
-    nBig = len(allowedIndex);
+    nBig = len(allowedIndex)
     print(['Number of allowed ground motions = ', nBig])
     assert (nBig >= nGM), 'Warning: there are not enough allowable ground motions'
 
@@ -517,6 +517,7 @@ for ii in np.arange(len(site_code)):
             print('This needs to be fixed, dont know why. maybe to automate the filename inputs?')
         else: #TODO
             print('TODO')
+        print(name)
 
         file_with_OQ_acc_value='hazard_map-mean_'+str(num_classical)+'.csv'
 
@@ -611,7 +612,7 @@ for ii in np.arange(len(site_code)):
                     ry=np.abs(rx*1./np.tan(np.radians(azimuth)))
                 rrup=np.sqrt(np.square(rrup1)+np.square(ry))
 
-            print(rjb,rx,rrup)
+#            print(rjb,rx,rrup)
 
         Dist = np.arange(meanDist,meanDist+1,1.)
         if(GMPE=='Chiou_Youngs_2014'):
@@ -641,10 +642,10 @@ for ii in np.arange(len(site_code)):
             [mean_SaTcond,stddvs_SaTcond]=compute_avgSA(avg_periods,sctx, rctx, dctx)
             epsilon=(np.log(output_oq)-np.log(mean_SaTcond))/stddvs_SaTcond
         if(selection_type==0):
-            if(T1==0):
+            if(Tstar=='PGA'):
                 P = imt.PGA()
             else:
-                P = imt.SA(period=T1)
+                P = imt.SA(period=Tstar)
             S=[const.StdDev.TOTAL]
             mean_SaTcond,stddvs_SaTcond=bgmpe.get_mean_and_stddevs(sctx,rctx,dctx,P,S)
             stddvs_SaTcond=stddvs_SaTcond[0]
@@ -664,9 +665,9 @@ for ii in np.arange(len(site_code)):
                 rho.append(rho_per[0])
             if(selection_type==0):
                 if(corr_type=='baker_jayaram'):
-                    rho_per = baker_jayaram_correlation(per,T1)
+                    rho_per = baker_jayaram_correlation(per,Tstar)
                 if(corr_type=='akkar'):
-                    rho_per = akkar_correlation(per,T1)
+                    rho_per = akkar_correlation(per,Tstar)
                 rho.append(rho_per)
             spectrum=bMean_SA+rho_per*bStDev_SA[0]*epsilon
             # (Log) Response Spectrum Mean: TgtMean
