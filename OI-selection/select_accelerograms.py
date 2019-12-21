@@ -1,9 +1,9 @@
 from openquake.hazardlib.gsim.mgmpe import akkar_coeff_table as act
 from openquake.hazardlib import gsim, imt, const
-import numpy as np 
-import pandas as pd 
-import os, sys 
-import csv 
+import numpy as np
+import pandas as pd
+import os, sys
+import csv
 import matplotlib.pyplot as plt
 import matplotlib
 import time
@@ -15,24 +15,38 @@ import re
 import string
 
 
-site_code=[1]
+print("Need to clean this file up so that all of the functions created here can simply be loaded from other libraries")
+print("This would be same as what is done when using OpenQuake")
+print("This file then would essentiually become like the job.ini file OpenQuake uses: just has the basic parameters, and when it is launched, everything else is taken care of using other scripts")
+print("The correlation model needs to be handled a bit better")
+print("The akkar one could be interpolated in its python script definition (I think)")
+print("The outputs and printing of results need to be more detailed here")
 
-#0=T1 specify the period at which spectra should be scaled and matched
+
+#0=Tstar specify the period at which spectra should be scaled and matched
 #1=AvgSA
 selection_type=1
-T1=0 #conditioning period. Used only if selection_type=0, for PGA uses T1=0
+#Tstar="PGA" #conditioning period. Used only if selection_type=0, for PGA uses Tstar=0
+#T1=0.01 # pick the closest T in TgtPer (need to fix this)
+site_code=[0]
+rlz_code=[2]
 
-#PSHA and disaggregation parameters
+# PSHA and disaggregation parameters
 path_results='out'
 num_disagg=87
 num_classical=87
 probability_of_exceedance=0.1
 investigation_time=50
 
-#parameters for conditional spectrum computation
+# parameters for conditional spectrum computation
 TgtPer=[0,0.01,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.75,0.8,0.9,1,2,3,4]
+#TgtPer.append(float(Tstar))
+#TgtPer.sort()
+print("Need to update to allow for the above lines to work. Right now we cannot chose a Tstar outside of this list. Should ideally just append the value and sort")
+
 corr_type='akkar'   #baker_jayaram or akkar
-GMPE='Akkar_Bommer_2010' #for now only available Akkar_Bommer_2010 Chiou_Youngs_2014 Boore_et_al_2014
+# corr_type='baker_jayaram'   #baker_jayaram or akkar
+GMPE='Akkar_Bommer_2010' #for now only available Akkar_Bommer_2010 Chiou_Youngs_2014 Boore_et_al_2014, BooreAtkinson2008
 avg_periods=[0.2,0.3,0.4,0.5,0.75,1.0]
 rake=0.
 hypo_depth=10.
@@ -40,11 +54,11 @@ AR=1
 Vs30=300
 
 #database
-database_path='database_flatfile.csv'
+database_path='Flatfile-NGA-West2-Reduced.csv'
 #screen for suitable ground motions
-allowedRecs_Vs30=[0,10000]     # upper and lower bound of allowable Vs30 values
-allowedEC8code='None'
-maxsf=3.0 #The maximum allowable scale factor
+allowedRecs_Vs30=[180,360]     # upper and lower bound of allowable Vs30 values
+allowedEC8code='C'
+maxsf=5.0 #The maximum allowable scale factor
 radius_dist=50 #km
 radius_mag=0.25
 maximum_depth=30
@@ -55,13 +69,13 @@ np.random.seed(333)
 weights=[1.0,2.0,0.3] #[Weights for error in mean, standard deviation and skewness] Used to find the simulated spectra that best match the target from the statistically simulated response spectra
 nGM=30 #number of records to select ==> number of records to select since the code search the database spectra most similar to each simulated spectrum
 
-#otimization parameters. Execution of incremental changes to the initially selected ground motion set to further optimise its fit to the target spectrum distribution. 
+#otimization parameters. Execution of incremental changes to the initially selected ground motion set to further optimise its fit to the target spectrum distribution.
 nLoop=2 #Number of loops of optimization to perform
 penalty=10 #>0 to penalize selected spectra moire than 3 sigma from the target at any period, =0 otherwise.
 
-path_NGA_folder='../../NGA2records' #NGA recordings have to be stored
+path_NGA_folder='../GM-Records-Database' #NGA recordings have to be stored
 output_ESM='../../ESM/'
-#If not, found in the folder, ESM recording are authomatically downloaded from internet, need to generate the file token.txt
+# If not, found in the folder, ESM recording are authomatically downloaded from internet, need to generate the file token.txt
 #At first you need to register at: http://tex.mi.ingv.it/
 #curl -X POST -F 'message={"user_email": "elisa.zuccolo@eucentre.it","user_password": "password"}' "http://tex.mi.ingv.it/esmws/generate-signed-message/1/query" > token.txt
 
@@ -70,7 +84,7 @@ output_ESM='../../ESM/'
 
 def akkar_correlation(t1, t2):
     """
-    Read the period-dependent correlation coefficient matrix rho_H(T0,T) given in 
+    Read the period-dependent correlation coefficient matrix rho_H(T0,T) given in
     Akkar S, Sandikkaya MA, Ay BO (2014) Compatible ground-motion prediction equations
     for damping scaling factors and vertical-to-horizontal spectral amplitude ratios
     for the broader Europe region, Bull Earthquake Eng 12:517-547
@@ -157,6 +171,7 @@ def strtoint(sf):
 
 def create_ESM_acc(folder):
     for l in range(1,3):
+        print(folder)
         if(folder.find('ESM/GR') >-1):
             file_EW=folder+'/*2.D.*'
             file_NS=folder+'/*3.D.*'
@@ -167,6 +182,7 @@ def create_ESM_acc(folder):
             filename_in=glob.glob(file_EW)[0]
         if(l==2):
             filename_in=glob.glob(file_NS)[0]
+        print(filename_in)
 
         acc_data=[]
         time=[]
@@ -175,7 +191,7 @@ def create_ESM_acc(folder):
 
         # read file
         fh = open(filename_in, 'rt')
-        for i in range(64): 
+        for i in range(64):
             key, value = fh.readline().strip().split(':', 1)
             headers[key.strip()] = value.strip()
 
@@ -364,17 +380,17 @@ def screen_database(database_path,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D
     epi_lon=dbacc['epi_lon']
     epi_lat=dbacc['epi_lat']
 
-    # Match periods (known periods and target periods for error computations) 
+    # Match periods (known periods and target periods for error computations)
     # save the indicies of the matched periods in knownPer
     indPer = np.zeros((len(TgtPer),1), dtype=int);
     for i in np.arange(len(TgtPer)):
         indPer[i]=np.argmin(np.absolute(knownPer-TgtPer[i]))
 
-    # Remove any repeated values from TgtPer and redefine TgtPer as periods 
+    # Remove any repeated values from TgtPer and redefine TgtPer as periods
     # provided in databases
     indPer = np.unique(indPer);
     recPer = knownPer[indPer];
-    
+
     SA_list=[]
     allowedIndex=[]
     for i in np.arange(len(event_id)):
@@ -383,10 +399,10 @@ def screen_database(database_path,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D
             SA_geo=rotD50/981 #in g
         if(source[i]=='NGA-West2'):
             SA_geo=rotD50 #already in g
-        SA_list.append(SA_geo) 
+        SA_list.append(SA_geo)
         if(all(v > 0 for v in SA_geo)):
             if(source[i]=='ESM'):
-                if(event_depth[i]<=maximum_depth): 
+                if(event_depth[i]<=maximum_depth):
                     if(is_free_field_ESM[i]==0):
                         if(event_mw[i]>=allowedRecs_Mag[0] and event_mw[i]<=allowedRecs_Mag[1]):
                             if(acc_distance[i]>=allowedRecs_D[0] and acc_distance[i]<=allowedRecs_D[1]):
@@ -400,17 +416,17 @@ def screen_database(database_path,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D
 
             if(source[i]=='NGA-West2'):
                 if(epi_lon[i]<-31 or epi_lon[i]>70):
-                    if(event_depth[i]<=maximum_depth): 
+                    if(event_depth[i]<=maximum_depth):
                         if(is_free_field_NGA[i]=="I"):
                             if(event_mag[i]>=allowedRecs_Mag[0] and event_mag[i]<=allowedRecs_Mag[1]):
                                 if(acc_distance[i]>=allowedRecs_D[0] and acc_distance[i]<=allowedRecs_D[1]):
                                     if(station_vs30[i]>=allowedRecs_Vs30[0] and station_vs30[i]<allowedRecs_Vs30[1]):
                                         allowedIndex.append(i)
-    SA=np.vstack(SA_list)         
+    SA=np.vstack(SA_list)
     SaKnown=SA[allowedIndex]
 
     # count number of allowed spectra
-    nBig = len(allowedIndex);  
+    nBig = len(allowedIndex);
     print(['Number of allowed ground motions = ', nBig])
     assert (nBig >= nGM), 'Warning: there are not enough allowable ground motions'
 
@@ -459,7 +475,7 @@ def compute_rho_avgSA(per,avg_periods,sctx,rctx,dctx,stddvs_avgsa):
 
     denominatore=len(avg_periods)*stddvs_avgsa
     rho_avgSA=sum_numeratore/denominatore
-    return rho_avgSA 
+    return rho_avgSA
 
 def simulate_spectra(nTrials,meanReq,covReq,stdevs,nGM):
 # simulate response spectra from the target mean and covariance matrix
@@ -474,7 +490,7 @@ def simulate_spectra(nTrials,meanReq,covReq,stdevs,nGM):
         sampleSkewnessErr=skew(np.log(SpectraSample),axis=0,bias=True)
         devTotalSim.append(weights[0]*sum(sampleMeanErr**2)+weights[1]**sum(sampleStdErr**2)+weights[2]*sum(sampleSkewnessErr**2))
 
-    bestSample=devTotalSim.index(min(devTotalSim)) # find the simulated spectra that best match the target 
+    bestSample=devTotalSim.index(min(devTotalSim)) # find the simulated spectra that best match the target
     simulated_spectra = spettri[bestSample] #return the best set of simulations
 
     return simulated_spectra
@@ -482,13 +498,23 @@ def simulate_spectra(nTrials,meanReq,covReq,stdevs,nGM):
 
 #****************************************************************************************************************
 
-for site in site_code:
+for ii in np.arange(len(site_code)):
+
+    site = site_code[ii]
+    rlz = rlz_code[ii]
 
     for poe in [probability_of_exceedance]:
-        name='site_'+str(site)+'-poe-'+str(poe)
-        print(name)
         if(selection_type==1):
-            disagg_results='rlz-0-AvgSA-sid-0-poe-0_Mag_Dist_'+str(num_disagg)+'.csv'
+            disagg_results='rlz-'+str(rlz)+'-AvgSA-sid-'+str(site)+'-poe-0_Mag_Dist_'+str(num_disagg)+'.csv'
+            name='AvgSA-'+str(num_disagg)+'-site_'+str(site)+'-poe-'+str(poe)
+        elif(selection_type==0):
+            if Tstar == 'PGA':
+                disagg_results='rlz-'+str(rlz)+'-PGA-sid-'+str(site)+'-poe-0_Mag_Dist_'+str(num_disagg)+'.csv'
+                name='PGA-site_'+str(site)+'-poe-'+str(poe)
+            else:
+                disagg_results='rlz-'+str(rlz)+'-SA('+Tstar+')-sid-'+str(site)+'-poe-0_Mag_Dist_'+str(num_disagg)+'.csv'
+                name='SA('+Tstar+')-site_'+str(site)+'-poe-'+str(poe)
+            print('This needs to be fixed, dont know why. maybe to automate the filename inputs?')
         else: #TODO
             print('TODO')
 
@@ -496,6 +522,12 @@ for site in site_code:
 
         if(selection_type==1):
             selected_column='AvgSA-'+str(probability_of_exceedance)
+        elif(selection_type==0):
+            if Tstar == 'PGA':
+                selected_column='PGA-'+str(probability_of_exceedance)
+            else:
+                selected_column='SA('+Tstar+')-'+str(probability_of_exceedance)
+            print('This needs to be fixed')
         else: #TODO
             print('TODO')
 
@@ -503,14 +535,14 @@ for site in site_code:
 
         #Retrieve disaggregation results
 
-        meanLst = [],[] 
-        df=pd.read_csv(''.join([path_results,'/',disagg_results]),skiprows=1) 
-        df['rate'] = -np.log(1-df['poe'])/investigation_time 
-        df['rate_norm'] = df['rate']/ df['rate'].sum() 
-        mode=df.sort_values(by='rate_norm',ascending=False)[0:1] 
-        meanMag=np.sum(df['mag']*df['rate_norm']) 
-        meanDist=np.sum(df['dist']*df['rate_norm']) 
-        print(meanMag,meanDist)
+        meanLst = [],[]
+        df=pd.read_csv(''.join([path_results,'/',disagg_results]),skiprows=1)
+        df['rate'] = -np.log(1-df['poe'])/investigation_time
+        df['rate_norm'] = df['rate']/ df['rate'].sum()
+        mode=df.sort_values(by='rate_norm',ascending=False)[0:1]
+        meanMag=np.sum(df['mag']*df['rate_norm'])
+        meanDist=np.sum(df['dist']*df['rate_norm'])
+#        print(meanMag,meanDist)
         allowedRecs_D=[meanDist-radius_dist,meanDist+radius_dist]
         allowedRecs_Mag=[meanMag-radius_mag,meanMag+radius_mag]
 
@@ -530,6 +562,8 @@ for site in site_code:
             bgmpe = gsim.chiou_youngs_2014.ChiouYoungs2014()
         if(GMPE=='Boore_et_al_2014'):
             bgmpe = gsim.boore_2014.BooreEtAl2014()
+        if(GMPE=='BooreAtkinson2008'):
+            bgmpe = gsim.boore_atkinson_2008.BooreAtkinson2008()
         sctx = gsim.base.SitesContext()
         rctx = gsim.base.RuptureContext()
         dctx = gsim.base.DistancesContext()
@@ -596,7 +630,8 @@ for site in site_code:
         setattr(dctx, 'rjb', Dist)
         setattr(sctx, 'vs30', Vs30)
 
-        [SaKnown,indPer,TgtPer,nBig,allowedIndex,event_id,station_code,source,record_sequence_number_NGA,source,event_mw,event_mag,acc_distance]=screen_database(database_path,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D,allowedEC8code,TgtPer,nGM,maximum_depth)
+        [SaKnown,indPer,_,nBig,allowedIndex,event_id,station_code,source,record_sequence_number_NGA,source,event_mw,event_mag,acc_distance]=screen_database(database_path,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D,allowedEC8code,TgtPer,nGM,maximum_depth)
+        print("Need to check this above, redefining the variable TgtPer inside this function. Put return value as _ for now to continue using the user defined one")
 
         TgtMean=[]
         rho=[]
@@ -651,7 +686,7 @@ for site in site_code:
                 var1=var1[0]
                 var2 = sigma[j]**2
                 var2=var2[0]
-        
+
                 if(corr_type=='baker_jayaram'):
                     sigmaCorr=baker_jayaram_correlation(Ti, Tj)*np.sqrt(var1*var2)
                 if(corr_type=='akkar'):
@@ -675,7 +710,7 @@ for site in site_code:
 
         if(selection_type==1):
             id_avgSA=[]
-            id_avgSA_bool=np.isin(TgtPer,avg_periods) 
+            id_avgSA_bool=np.isin(TgtPer,avg_periods)
             for i in np.arange(len(TgtPer)):
                 if(id_avgSA_bool[i] == True):
                     id_avgSA.append(i)
@@ -683,7 +718,10 @@ for site in site_code:
             lnSa1=np.mean(meanReq[id_avgSA])
         if(selection_type==0):
             id_T1=[]
-            id_T1=np.where(TgtPer==T1)
+#            id_T1=np.where(TgtPer==T1)
+            id_T1=TgtPer.index(T1)
+#            print(id_T1)
+            print("changed this line because -where- wasnt finding the index")
             lnSa1=np.mean(meanReq[id_T1])
 
         recID = np.zeros(nGM,dtype=int)
@@ -722,7 +760,7 @@ for site in site_code:
 
         print('Please wait...This algorithm takes a few minutes depending on the number of records to be selected')
 
-        for k in np.arange(nLoop): 
+        for k in np.arange(nLoop):
             for i in np.arange(nGM): # consider replacing each ground motion in the selected set
                 minDev=100000
 
@@ -762,7 +800,7 @@ for site in site_code:
                         minDev = devTotal
                     end=len(sampleSmall)
                     sampleSmall = sampleSmall[0:end-1,:]
-        
+
                 # Add new element in the right slot
                 IMScaleFac[i] = scaleFac[minID]
                 end=len(sampleSmall)
@@ -795,8 +833,9 @@ for site in site_code:
 
         if not os.path.exists(name):
             os.makedirs(name)
+#        os.makedirs(name)
 
-        name_fig=name+'/'+name+'_UHS_selection.png'
+        name_fig=name+'/'+name+'_selection.png'
         plt.savefig(name_fig, bbox_inches='tight')
 
         plt.close()
@@ -813,12 +852,17 @@ for site in site_code:
                 elemento=recIdx[i]
                 if(source[elemento]=='ESM'):
                     f.write("{} {} {} {} {} {} {} {:6.2f} \n".format(i+1,source[elemento],event_id[elemento],station_code[elemento],blank,event_mw[elemento],acc_distance[elemento],finalScaleFactors[i]))
-                if(source[elemento]=='NGA-West2'): 
+                if(source[elemento]=='NGA-West2'):
                     val=int(record_sequence_number_NGA[elemento])
                     f.write("{} {} {} {} {} {} {} {:6.2f} \n".format(i+1,source[elemento],blank,blank,val,event_mag[elemento],acc_distance[elemento],finalScaleFactors[i]))
         f.close()
 
         #Read accelegrams, save them and apply scaling factor
+        dts = []
+        durs =[]
+        names1 =[]
+        names2 =[]
+
         for i in np.arange(nGM):
             time1=[]
             time2=[]
@@ -841,23 +885,68 @@ for site in site_code:
                 if (os.path.isdir(folder_output)==False):
                     zip_output='output_'+str(i)+'.zip'
                     command='curl -X POST -F "message=@token.txt" "http://tex.mi.ingv.it/esmws/eventdata/1/query?eventid='+event_id[elemento]+'&data-type=ACC&station='+station_code[elemento]+'&format=ascii" -o '+zip_output
+                    print(command)
                     os.system(command)
                     command='unzip -o '+zip_output+' -d '+folder_output
                     os.system(command)
                     command='rm '+zip_output
                     os.system(command)
+                    print(folder_output)
                 [time1,time2,inp_acc1,inp_acc2,npts1,npts2,comp1,comp2]=create_ESM_acc(folder_output)
                 desc1='%'+event_id[elemento]+' '+station_code[elemento]+' '+comp1
                 desc2='%'+event_id[elemento]+' '+station_code[elemento]+' '+comp2
-            file_acc_out_1=name+'/scaled_acc_'+str(i+1)+'_1.txt'
-            file_acc_out_2=name+'/scaled_acc_'+str(i+1)+'_2.txt'
-            with open(file_acc_out_1, "w",newline='') as f1:
-                f1.write("{} \n".format(desc1))
+
+            # Get the time steps and durations
+            dts.append(time1[1]-time1[0])
+            durs.append(time1[-1])
+
+            # Create the filenames
+            file_time_scaled_acc_out_1=name+'/GMR_time_scaled_acc_'+str(i+1)+'_1.txt'
+            file_time_scaled_acc_out_2=name+'/GMR_time_scaled_acc_'+str(i+1)+'_2.txt'
+
+            with open(file_time_scaled_acc_out_1, "w",newline='') as f1:
                 for j in np.arange(npts1):
                     f1.write("{:10.3f} {:15.10f}\n".format(time1[j],inp_acc1[j]*finalScaleFactors[i]))
             f1.close()
-            with open(file_acc_out_2, "w",newline='') as f2:
-                f2.write("{} \n".format(desc2))
+            with open(file_time_scaled_acc_out_2, "w",newline='') as f2:
                 for j in np.arange(npts2):
                     f2.write("{:10.3f} {:15.10f}\n".format(time2[j],inp_acc2[j]*finalScaleFactors[i]))
             f2.close()
+
+            file_scaled_acc_out_1=name+'/GMR_scaled_acc_'+str(i+1)+'_1.txt'
+            file_scaled_acc_out_2=name+'/GMR_scaled_acc_'+str(i+1)+'_2.txt'
+            names1.append('GMR_scaled_acc_'+str(i+1)+'_1.txt')
+            names2.append('GMR_scaled_acc_'+str(i+1)+'_2.txt')
+
+            with open(file_scaled_acc_out_1, "w",newline='') as f1:
+                for j in np.arange(npts1):
+                    f1.write("{:15.10f}\n".format(inp_acc1[j]*finalScaleFactors[i]))
+            f1.close()
+            with open(file_scaled_acc_out_2, "w",newline='') as f2:
+                for j in np.arange(npts2):
+                    f2.write("{:15.10f}\n".format(inp_acc2[j]*finalScaleFactors[i]))
+            f2.close()
+
+
+        # Print the time steps and the durations also
+        file_dts=name+'/GMR_dts.txt'
+        file_durs=name+'/GMR_durs.txt'
+        file_names1=name+'/GMR_names1.txt'
+        file_names2=name+'/GMR_names2.txt'
+
+        with open(file_dts, "w",newline='') as f1:
+                for j in np.arange(len(dts)):
+                    f1.write("{:15.10f}\n".format(dts[j]))
+        f1.close()
+        with open(file_durs, "w",newline='') as f2:
+                for j in np.arange(len(durs)):
+                    f2.write("{:15.10f}\n".format(durs[j]))
+        f2.close()
+        with open(file_names1, "w",newline='') as f1:
+                for j in np.arange(len(names1)):
+                    f1.write("{:s}\n".format(names1[j]))
+        f1.close()
+        with open(file_names2, "w",newline='') as f2:
+                for j in np.arange(len(names2)):
+                    f2.write("{:s}\n".format(names2[j]))
+        f2.close()
