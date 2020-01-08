@@ -14,6 +14,8 @@ from obspy.core import Stream, Trace, UTCDateTime, Stats
 import re
 import string
 
+print('Usage: python select_accelerograms.py $filename')
+
 print("Need to clean this file up so that all of the functions created here can simply be loaded from other libraries")
 print("This would be same as what is done when using OpenQuake")
 print("This file then would essentiually become like the job.ini file OpenQuake uses: just has the basic parameters, and when it is launched, everything else is taken care of using other scripts")
@@ -21,7 +23,8 @@ print("The correlation model needs to be handled a bit better")
 print("The akkar one could be interpolated in its python script definition (I think)")
 print("The outputs and printing of results need to be more detailed here")
 
-filepath = 'job_selection.ini'
+filepath = sys.argv[1]
+print(filepath)
 input={}
 with open(filepath) as fp:
    line = fp.readline()
