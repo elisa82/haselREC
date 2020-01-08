@@ -67,15 +67,16 @@ Vs30=float(input['Vs30']) #maybe an array of Vs30 according with sites?
 
 #screen for suitable ground motions
 database_path=input['database_path']
-allowedRecs_Vs30 = [ x.strip() for x in input['allowedRecs_Vs30'].strip('{}').split(',') ]# upper and lower bound of allowable Vs30 values
+allowed_database = [ x.strip() for x in input['allowed_database'].strip('{}').split(',') ]
+allowedRecs_Vs30 = [ x.strip() for x in input['allowedRecs_Vs30'].strip('[]').split(',') ]# upper and lower bound of allowable Vs30 values
 allowedRecs_Vs30= np.array(allowedRecs_Vs30,dtype=float)
-allowedEC8code = input['allowedEC8code']
+allowedEC8code = [ x.strip() for x in input['allowedEC8code'].strip('{}').split(',') ]
 maxsf=float(input['maxsf']) #The maximum allowable scale factor
 #Maybe we can give the possibility to give different SF for different IM, sites, ecc.. and also for radius_dist and mag
 radius_dist= float(input['radius_dist']) # km
 radius_mag = float(input['radius_mag'])
-maximum_depth=float(input['maximum_depth'])
-#maybe we can give a range as for Vs, mag, and dist
+allowed_depth=[ x.strip() for x in input['allowed_depth'].strip('[]').split(',') ] # upper and lower bound of allowable Vs30 values
+allowed_depth= np.array(allowed_depth,dtype=float)
 
 #parameters for statistically simulation of response spectra
 nGM=int(input['nGM']) #number of records to select ==> number of records to select since the code search the database spectra most similar to each simulated spectrum
@@ -372,7 +373,7 @@ def create_NGA_acc(num_rec,path_NGA_folder):
             counter = counter + 1
     return desc1,desc2,time1,time2,inp_acc1,inp_acc2,npts1,npts2
 
-def screen_database(database_path,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D,allowedEC8code,TgtPer,nGM,maximum_depth):
+def screen_database(database_path,allowed_database,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D,allowedEC8code,TgtPer,nGM,allowed_depth):
     dbacc=pd.read_csv(database_path,sep=';',engine='python')
     knownPer=np.array([0,0.01,0.025,0.04,0.05,0.07,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.6,0.7,0.75,0.8,0.9,1.0,1.2,1.4,1.6,1.8,2,2.5,3,3.5,4,5,6,7,8,9,10])
 
@@ -413,29 +414,30 @@ def screen_database(database_path,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D
             SA_geo=rotD50 #already in g
         SA_list.append(SA_geo)
         if(all(v > 0 for v in SA_geo)):
-            if(source[i]=='ESM'):
-                if(event_depth[i]<=maximum_depth):
-                    if(is_free_field_ESM[i]==0):
-                        if(event_mw[i]>=allowedRecs_Mag[0] and event_mw[i]<=allowedRecs_Mag[1]):
+            #print('Need to test if the screening of database is ok')
+            if(source[i] in allowed_database):
+                if((source[i]=='ESM' and is_free_field_ESM[i]==0) or (source[i]=='NGA-West2' and is_free_field_NGA[i]=="I")):
+                    if(event_mw[i]>=allowedRecs_Mag[0] and event_mw[i]<=allowedRecs_Mag[1]):
+                        if(event_depth[i]>=allowed_depth[0] and event_depth[i]<=allowed_depth[1]):
                             if(acc_distance[i]>=allowedRecs_D[0] and acc_distance[i]<=allowedRecs_D[1]):
-                                if(allowedEC8code=='None'):
-                                    allowedIndex.append(i)
+                                if(np.isnan(station_vs30[i])):
+                                    if not pd.isnull(station_ec8[i]):
+                                        if(station_ec8[i][0] in allowedEC8code or allowedEC8code=='All'):
+                                            if(source[i]=='ESM'):
+                                                allowedIndex.append(i)
+                                            if(source[i]=='NGA-West2'):
+                                                if(epi_lon[i]<-31 or epi_lon[i]>70):
+                                                    allowedIndex.append(i)
                                 else:
-                                    if(station_ec8[i]==allowedEC8code or station_ec8[i]==allowedEC8code+"*"):
-                                        allowedIndex.append(i)
-                                    elif(station_vs30[i]>=allowedRecs_Vs30[0] and station_vs30[i]<allowedRecs_Vs30[1]):
-                                            allowedIndex.append(i)
-
-            if(source[i]=='NGA-West2'):
-                if(epi_lon[i]<-31 or epi_lon[i]>70):
-                    if(event_depth[i]<=maximum_depth):
-                        if(is_free_field_NGA[i]=="I"):
-                            if(event_mag[i]>=allowedRecs_Mag[0] and event_mag[i]<=allowedRecs_Mag[1]):
-                                if(acc_distance[i]>=allowedRecs_D[0] and acc_distance[i]<=allowedRecs_D[1]):
                                     if(station_vs30[i]>=allowedRecs_Vs30[0] and station_vs30[i]<allowedRecs_Vs30[1]):
-                                        allowedIndex.append(i)
+                                        if(source[i]=='ESM'):
+                                            allowedIndex.append(i)
+                                        if(source[i]=='NGA-West2'):
+                                            if(epi_lon[i]<-31 or epi_lon[i]>70):
+                                                allowedIndex.append(i)
     SA=np.vstack(SA_list)
     SaKnown=SA[allowedIndex]
+    print(allowedIndex)
 
     # count number of allowed spectra
     nBig = len(allowedIndex)
@@ -623,7 +625,7 @@ for ii in np.arange(len(site_code)):
                 setattr(dctx, 'rjb', Dist)
                 setattr(sctx, 'vs30', Vs30)
 
-                [SaKnown,indPer,_,nBig,allowedIndex,event_id,station_code,source,record_sequence_number_NGA,source,event_mw,event_mag,acc_distance]=screen_database(database_path,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D,allowedEC8code,TgtPer,nGM,maximum_depth)
+                [SaKnown,indPer,_,nBig,allowedIndex,event_id,station_code,source,record_sequence_number_NGA,source,event_mw,event_mag,acc_distance]=screen_database(database_path,allowed_database,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D,allowedEC8code,TgtPer,nGM,allowed_depth)
                 print("Need to check this above, redefining the variable TgtPer inside this function. Put return value as _ for now to continue using the user defined one")
 
                 TgtMean=[]
