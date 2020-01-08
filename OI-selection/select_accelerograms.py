@@ -23,10 +23,10 @@ print("The correlation model needs to be handled a bit better")
 print("The akkar one could be interpolated in its python script definition (I think)")
 print("The outputs and printing of results need to be more detailed here")
 
-filepath = sys.argv[1]
-print(filepath)
+fileini = sys.argv[1]
+
 input={}
-with open(filepath) as fp:
+with open(fileini) as fp:
    line = fp.readline()
    while line:
        if line.strip().find('=')>=0:
@@ -37,10 +37,19 @@ with open(filepath) as fp:
 download_and_scale_acc=int(input['download_and_scale_acc']) #1=yes, 0=no
 
 intensity_measures = [ x.strip() for x in input['intensity_measures'].strip('{}').split(',') ]
+TgtPer = [ x.strip() for x in input['TgtPer'].strip('{}').split(',') ]
+TgtPer= np.array(TgtPer,dtype=float)
 Tstar=np.zeros(len(intensity_measures))
+#Tstar is defined as 0 for PGA
 for i in np.arange(len(intensity_measures)):
     if(intensity_measures[i][0:2]=='SA'):
         Tstar[i]=intensity_measures[i].strip('(,),SA')
+        Tstar[i]=float(Tstar[i])
+for i in np.arange(len(intensity_measures)):
+    if not np.isin(Tstar[i],TgtPer):
+        TgtPer=np.append(TgtPer,Tstar[i])
+TgtPer.sort()
+#This is done in order to allow to chose a Tstar outside the identified list
 site_code = [ x.strip() for x in input['site_code'].strip('{}').split(',') ]
 rlz_code = [ x.strip() for x in input['rlz_code'].strip('{}').split(',') ]
 path_hazard_results=input['path_hazard_results']
@@ -50,12 +59,6 @@ probability_of_exceedance_num = [ x.strip() for x in input['probability_of_excee
 probability_of_exceedance = [ x.strip() for x in input['probability_of_exceedance'].strip('{}').split(',') ]
 investigation_time=float(input['investigation_time'])
 
-#T1=0.01 # pick the closest T in TgtPer (need to fix this)
-TgtPer = [ x.strip() for x in input['TgtPer'].strip('{}').split(',') ]
-TgtPer= np.array(TgtPer,dtype=float)
-#TgtPer.append(float(Tstar))
-#TgtPer.sort()
-print("Need to update to allow for the above lines to work. Right now we cannot chose a Tstar outside of this list. Should ideally just append the value and sort")
 corr_type=input['corr_type']  #baker_jayaram or akkar
 GMPE=input['GMPE'] #for now only available Akkar_Bommer_2010 Chiou_Youngs_2014 Boore_et_al_2014, BooreAtkinson2008 maybe and array of GMPE according with sites?
 avg_periods = [ x.strip() for x in input['avg_periods'].strip('{}').split(',') ]
@@ -373,7 +376,7 @@ def create_NGA_acc(num_rec,path_NGA_folder):
             counter = counter + 1
     return desc1,desc2,time1,time2,inp_acc1,inp_acc2,npts1,npts2
 
-def screen_database(database_path,allowed_database,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D,allowedEC8code,TgtPer,nGM,allowed_depth):
+def screen_database(database_path,allowed_database,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D,allowedEC8code,target_periods,nGM,allowed_depth):
     dbacc=pd.read_csv(database_path,sep=';',engine='python')
     knownPer=np.array([0,0.01,0.025,0.04,0.05,0.07,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.6,0.7,0.75,0.8,0.9,1.0,1.2,1.4,1.6,1.8,2,2.5,3,3.5,4,5,6,7,8,9,10])
 
@@ -395,11 +398,11 @@ def screen_database(database_path,allowed_database,allowedRecs_Vs30,allowedRecs_
 
     # Match periods (known periods and target periods for error computations)
     # save the indicies of the matched periods in knownPer
-    indPer = np.zeros((len(TgtPer),1), dtype=int);
-    for i in np.arange(len(TgtPer)):
-        indPer[i]=np.argmin(np.absolute(knownPer-TgtPer[i]))
+    indPer = np.zeros((len(target_periods),1), dtype=int);
+    for i in np.arange(len(target_periods)):
+        indPer[i]=np.argmin(np.absolute(knownPer-target_periods[i]))
 
-    # Remove any repeated values from TgtPer and redefine TgtPer as periods
+    # Remove any repeated values from target_periods and redefine target_periods as periods
     # provided in databases
     indPer = np.unique(indPer);
     recPer = knownPer[indPer];
@@ -437,7 +440,6 @@ def screen_database(database_path,allowed_database,allowedRecs_Vs30,allowedRecs_
                                                 allowedIndex.append(i)
     SA=np.vstack(SA_list)
     SaKnown=SA[allowedIndex]
-    print(allowedIndex)
 
     # count number of allowed spectra
     nBig = len(allowedIndex)
@@ -625,8 +627,10 @@ for ii in np.arange(len(site_code)):
                 setattr(dctx, 'rjb', Dist)
                 setattr(sctx, 'vs30', Vs30)
 
+                print(TgtPer)
                 [SaKnown,indPer,_,nBig,allowedIndex,event_id,station_code,source,record_sequence_number_NGA,source,event_mw,event_mag,acc_distance]=screen_database(database_path,allowed_database,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D,allowedEC8code,TgtPer,nGM,allowed_depth)
-                print("Need to check this above, redefining the variable TgtPer inside this function. Put return value as _ for now to continue using the user defined one")
+                print("Need to check this above, redefining the variable TgtPer inside this function. Put return value as _ for now to continue using the user defined one. Elisa: Yes there is the need to check the above")
+                print(TgtPer)
 
                 TgtMean=[]
                 rho=[]
@@ -872,7 +876,6 @@ for ii in np.arange(len(site_code)):
                             if (os.path.isdir(folder_output)==False):
                                 zip_output='output_'+str(i)+'.zip'
                                 command='curl -X POST -F "message=@token.txt" "http://tex.mi.ingv.it/esmws/eventdata/1/query?eventid='+event_id[elemento]+'&data-type=ACC&station='+station_code[elemento]+'&format=ascii" -o '+zip_output
-                                print(command)
                                 os.system(command)
                                 command='unzip -o '+zip_output+' -d '+folder_output
                                 os.system(command)
