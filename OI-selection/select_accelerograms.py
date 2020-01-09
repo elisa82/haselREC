@@ -1,3 +1,4 @@
+#%% Import functions and libraries
 from openquake.hazardlib.gsim.mgmpe import akkar_coeff_table as act
 from openquake.hazardlib import gsim, imt, const
 import numpy as np
@@ -14,16 +15,32 @@ from obspy.core import Stream, Trace, UTCDateTime, Stats
 import re
 import string
 
+#%% Import functions from other files in bin
+sys.path.append("bin")
+from im_correlation import akkar_correlation
+from im_correlation import baker_jayaram_correlation
+
+from screen_database import screen_database
+
+from create_acc import create_ESM_acc
+from create_acc import create_NGA_acc
+
+from compute_avgSA import compute_avgSA
+from compute_avgSA import compute_rho_avgSA
+
+from simulate_spectra import simulate_spectra
+
+
+#%% General notes
 print('Usage: python select_accelerograms.py $filename')
 
-print("Need to clean this file up so that all of the functions created here can simply be loaded from other libraries")
-print("This would be same as what is done when using OpenQuake")
-print("This file then would essentiually become like the job.ini file OpenQuake uses: just has the basic parameters, and when it is launched, everything else is taken care of using other scripts")
 print("The correlation model needs to be handled a bit better")
 print("The akkar one could be interpolated in its python script definition (I think)")
 print("The outputs and printing of results need to be more detailed here")
 
-fileini = sys.argv[1]
+#%% Initial setup
+#fileini = sys.argv[1]
+fileini = 'job_selection.ini'
 
 input={}
 with open(fileini) as fp:
@@ -34,6 +51,7 @@ with open(fileini) as fp:
             input[key.strip()] = value.strip()
        line = fp.readline()
 
+#%% Extract input parameters
 download_and_scale_acc=int(input['download_and_scale_acc']) #1=yes, 0=no
 
 intensity_measures = [ x.strip() for x in input['intensity_measures'].strip('{}').split(',') ]
@@ -97,422 +115,7 @@ path_ESM_folder=input['path_NGA_folder']
 #At first you need to register at: http://tex.mi.ingv.it/
 #curl -X POST -F 'message={"user_email": "elisa.zuccolo@eucentre.it","user_password": "password"}' "http://tex.mi.ingv.it/esmws/generate-signed-message/1/query" > token.txt
 
-
-def akkar_correlation(t1, t2):
-    """
-    Read the period-dependent correlation coefficient matrix rho_H(T0,T) given in
-    Akkar S, Sandikkaya MA, Ay BO (2014) Compatible ground-motion prediction equations
-    for damping scaling factors and vertical-to-horizontal spectral amplitude ratios
-    for the broader Europe region, Bull Earthquake Eng 12:517-547
-    """
-
-    return act.coeff_table[act.periods.index(t1)][act.periods.index(t2)]
-
-
-def baker_jayaram_correlation(t1, t2):
-    """
-    NOTE: subroutine taken from: https://usgs.github.io/shakemap/shakelib
-
-    Produce inter-period correlation for any two spectral periods.
-
-    Based upon:
-    Baker, J.W. and Jayaram, N., "Correlation of spectral acceleration
-    values from NGA ground motion models," Earthquake Spectra, (2007).
-
-    Args:
-        t1, t2 (float):
-            The two periods of interest.
-
-    Returns:
-        rho (float): The predicted correlation coefficient
-
-    """
-    t_min = min(t1, t2)
-    t_max = max(t1, t2)
-
-    c1 = 1.0 - np.cos(np.pi / 2.0 - np.log(t_max / max(t_min, 0.109)) * 0.366)
-
-    if t_max < 0.2:
-        c2 = 1.0 - 0.105 * (1.0 - 1.0 / (1.0 + np.exp(100.0 * t_max - 5.0)))*(t_max - t_min) / (t_max - 0.0099)
-    else:
-        c2 = 0
-
-    if t_max < 0.109:
-        c3 = c2
-    else:
-        c3 = c1
-
-    c4 = c1 + 0.5 * (np.sqrt(c3) - c3) * (1.0 + np.cos(np.pi * t_min / 0.109))
-
-    if t_max <= 0.109:
-        rho = c2
-    elif t_min > 0.109:
-        rho = c1
-    elif t_max < 0.2:
-        rho = min(c2, c4)
-    else:
-        rho = c4
-
-    return rho
-
-def toUTCDateTime(value):
-    try:
-        date, time = value.split('_')
-    except ValueError:
-        date = value
-
-    year = int(date[0:4])
-    month = int(date[4:6])
-    day = int(date[6:8])
-
-    hour = int(time[0:2])
-    mins = int(time[2:4])
-    secs = float(time[4:])
-
-    return UTCDateTime(year, month, day, hour, mins) + secs
-
-def strtofloat(sf):
-    try:
-        x = float(sf)
-    except:
-        return None
-    return x
-
-def strtoint(sf):
-    try:
-        x = int(sf)
-    except:
-        return None
-    return x
-
-def create_ESM_acc(folder):
-    for l in range(1,3):
-        print(folder)
-        if(folder.find('ESM/GR') >-1):
-            file_EW=folder+'/*2.D.*'
-            file_NS=folder+'/*3.D.*'
-        else:
-            file_EW=folder+'/*E.D.*'
-            file_NS=folder+'/*N.D.*'
-        if(l==1):
-            filename_in=glob.glob(file_EW)[0]
-        if(l==2):
-            filename_in=glob.glob(file_NS)[0]
-        print(filename_in)
-
-        acc_data=[]
-        time=[]
-
-        headers = {}
-
-        # read file
-        fh = open(filename_in, 'rt')
-        for i in range(64):
-            key, value = fh.readline().strip().split(':', 1)
-            headers[key.strip()] = value.strip()
-
-        header = Stats()
-
-        header['dyna'] = {}
-
-        header['network'] = headers['NETWORK']
-        header['station'] = headers['STATION_CODE']
-        header['location'] = headers['LOCATION']
-        header['channel'] = headers['STREAM']
-        try:
-            header['starttime'] = toUTCDateTime(headers['DATE_TIME_FIRST_SAMPLE_YYYYMMDD_HHMMSS']) # use toUTCDateTime to convert from DYNA format
-        except:
-            header['starttime'] = toUTCDateTime('19700101_000000')
-        header['sampling_rate'] = 1/float(headers['SAMPLING_INTERVAL_S'])
-        header['delta'] = float(headers['SAMPLING_INTERVAL_S'])
-        header['npts'] = int(headers['NDATA'])
-        header['calib'] = 1 # not in file header
-
-        ##DYNA dict float data
-        header['dyna']['EVENT_LATITUDE_DEGREE'] = strtofloat(headers['EVENT_LATITUDE_DEGREE'])
-        header['dyna']['EVENT_LONGITUDE_DEGREE'] = strtofloat(headers['EVENT_LONGITUDE_DEGREE'])
-        header['dyna']['EVENT_DEPTH_KM'] = strtofloat(headers['EVENT_DEPTH_KM'])
-        header['dyna']['HYPOCENTER_REFERENCE'] = headers['HYPOCENTER_REFERENCE']
-        header['dyna']['MAGNITUDE_W'] = strtofloat(headers['MAGNITUDE_W'])
-        header['dyna']['MAGNITUDE_L'] = strtofloat(headers['MAGNITUDE_L'])
-        header['dyna']['STATION_LATITUDE_DEGREE'] = strtofloat(headers['STATION_LATITUDE_DEGREE'])
-        header['dyna']['STATION_LONGITUDE_DEGREE'] = strtofloat(headers['STATION_LONGITUDE_DEGREE'])
-        header['dyna']['VS30_M_S'] = strtofloat(headers['VS30_M/S'])
-        header['dyna']['EPICENTRAL_DISTANCE_KM'] = strtofloat(headers['EPICENTRAL_DISTANCE_KM'])
-        header['dyna']['EARTHQUAKE_BACKAZIMUTH_DEGREE'] = strtofloat(headers['EARTHQUAKE_BACKAZIMUTH_DEGREE'])
-        header['dyna']['DURATION_S'] = strtofloat(headers['DURATION_S'])
-        header['dyna']['INSTRUMENTAL_FREQUENCY_HZ'] = strtofloat(headers['INSTRUMENTAL_FREQUENCY_HZ'])
-        header['dyna']['INSTRUMENTAL_DAMPING'] = strtofloat(headers['INSTRUMENTAL_DAMPING'])
-        header['dyna']['FULL_SCALE_G'] = strtofloat(headers['FULL_SCALE_G'])
-
-        # data type is acceleration
-        if headers['DATA_TYPE'] == "ACCELERATION" \
-        or headers['DATA_TYPE'] == "ACCELERATION RESPONSE SPECTRUM":
-            header['dyna']['PGA_CM_S_2'] = strtofloat(headers['PGA_CM/S^2'])
-            header['dyna']['TIME_PGA_S'] = strtofloat(headers['TIME_PGA_S'])
-        # data type is velocity
-        if headers['DATA_TYPE'] == "VELOCITY" \
-        or headers['DATA_TYPE'] == "PSEUDO-VELOCITY RESPONSE SPECTRUM":
-            header['dyna']['PGV_CM_S'] = strtofloat(headers['PGV_CM/S'])
-            header['dyna']['TIME_PGV_S'] = strtofloat(headers['TIME_PGV_S'])
-        # data type is displacement
-        if headers['DATA_TYPE'] == "DISPLACEMENT" \
-        or headers['DATA_TYPE'] == "DISPLACEMENT RESPONSE SPECTRUM":
-            header['dyna']['PGD_CM'] = strtofloat(headers['PGD_CM'])
-            header['dyna']['TIME_PGD_S'] = strtofloat(headers['TIME_PGD_S'])
-
-        header['dyna']['LOW_CUT_FREQUENCY_HZ'] = strtofloat(headers['LOW_CUT_FREQUENCY_HZ'])
-        header['dyna']['HIGH_CUT_FREQUENCY_HZ'] = strtofloat(headers['HIGH_CUT_FREQUENCY_HZ'])
-
-        ##DYNA dict int data
-        header['dyna']['STATION_ELEVATION_M'] = strtoint(headers['STATION_ELEVATION_M'])
-        header['dyna']['SENSOR_DEPTH_M'] = strtoint(headers['SENSOR_DEPTH_M'])
-        header['dyna']['N_BIT_DIGITAL_CONVERTER'] =  strtoint(headers['N_BIT_DIGITAL_CONVERTER'])
-        header['dyna']['FILTER_ORDER'] = strtoint(headers['FILTER_ORDER'])
-
-        ##DYNA dict string data
-        header['dyna']['EVENT_NAME'] = headers['EVENT_NAME']
-        header['dyna']['EVENT_ID'] = headers['EVENT_ID']
-        header['dyna']['EVENT_DATE_YYYYMMDD'] = headers['EVENT_DATE_YYYYMMDD']
-        header['dyna']['EVENT_TIME_HHMMSS'] = headers['EVENT_TIME_HHMMSS']
-        header['dyna']['MAGNITUDE_W_REFERENCE'] = headers['MAGNITUDE_W_REFERENCE']
-        header['dyna']['MAGNITUDE_L_REFERENCE'] = headers['MAGNITUDE_L_REFERENCE']
-        header['dyna']['FOCAL_MECHANISM'] = headers['FOCAL_MECHANISM']
-        header['dyna']['STATION_NAME'] = headers['STATION_NAME']
-        header['dyna']['SITE_CLASSIFICATION_EC8'] = headers['SITE_CLASSIFICATION_EC8']
-        header['dyna']['MORPHOLOGIC_CLASSIFICATION'] = headers['MORPHOLOGIC_CLASSIFICATION']
-        header['dyna']['DATE_TIME_FIRST_SAMPLE_PRECISION'] = headers['DATE_TIME_FIRST_SAMPLE_PRECISION']
-        header['dyna']['UNITS'] = headers['UNITS']
-        header['dyna']['INSTRUMENT'] = headers['INSTRUMENT']
-        header['dyna']['INSTRUMENT_ANALOG_DIGITAL'] = headers['INSTRUMENT_ANALOG/DIGITAL']
-        header['dyna']['BASELINE_CORRECTION'] = headers['BASELINE_CORRECTION']
-        header['dyna']['FILTER_TYPE'] = headers['FILTER_TYPE']
-        header['dyna']['LATE_NORMAL_TRIGGERED'] = headers['LATE/NORMAL_TRIGGERED']
-        header['dyna']['HEADER_FORMAT'] = headers['HEADER_FORMAT']
-        header['dyna']['DATABASE_VERSION'] = headers['DATABASE_VERSION']
-        header['dyna']['DATA_TYPE'] = headers['DATA_TYPE']
-        header['dyna']['PROCESSING'] = headers['PROCESSING']
-        header['dyna']['DATA_LICENSE'] = headers['DATA_LICENSE']
-        header['dyna']['DATA_TIMESTAMP_YYYYMMDD_HHMMSS'] = headers['DATA_TIMESTAMP_YYYYMMDD_HHMMSS']
-        header['dyna']['DATA_CITATION'] = headers['DATA_CITATION']
-        header['dyna']['DATA_CREATOR'] = headers['DATA_CREATOR']
-        header['dyna']['ORIGINAL_DATA_MEDIATOR_CITATION'] = headers['ORIGINAL_DATA_MEDIATOR_CITATION']
-        header['dyna']['ORIGINAL_DATA_MEDIATOR'] = headers['ORIGINAL_DATA_MEDIATOR']
-        header['dyna']['ORIGINAL_DATA_CREATOR_CITATION'] = headers['ORIGINAL_DATA_CREATOR_CITATION']
-        header['dyna']['ORIGINAL_DATA_CREATOR'] = headers['ORIGINAL_DATA_CREATOR']
-        header['dyna']['USER1'] = headers['USER1']
-        header['dyna']['USER2'] = headers['USER2']
-        header['dyna']['USER3'] = headers['USER3']
-        header['dyna']['USER4'] = headers['USER4']
-        header['dyna']['USER5'] = headers['USER5']
-
-        # read data
-        acc_data = np.loadtxt(fh, dtype='float32')
-        fh.close()
-
-        for j in range (0,header['npts']):
-            t = j * header['delta']
-            time.append(t)
-
-        if(l==1):
-            inp_acc1=np.asarray(acc_data)/981 #in g
-            comp1=header['channel']
-            npts1=header['npts']
-            time1=time
-        if(l==2):
-            inp_acc2=np.asarray(acc_data)/981 #in g
-            comp2=header['channel']
-            npts2=header['npts']
-            time2=time
-
-    return time1,time2,inp_acc1,inp_acc2,npts1,npts2,comp1,comp2
-
-
-def create_NGA_acc(num_rec,path_NGA_folder):
-    desc1=""
-    desc2=""
-    for i in range(1,3):
-        file_acc=path_NGA_folder+'/RSN'+str(num_rec)+'_'+str(i)+'.AT2'
-        acc_data=[]
-        time=[]
-        with open(file_acc,'r') as f:
-            content = f.readlines()
-        counter = 0
-        row4Val=""
-        for x in content:
-            if counter == 1:
-                if(i==1):
-                    desc1 = x
-                    desc1 = desc1[0:(len(x)-1)]
-                if(i==2):
-                    desc2 = x
-                    desc2 = desc2[0:(len(x)-1)]
-            elif counter == 3:
-                row4Val = x
-                val = row4Val.split()
-                npts_comma =val[1]
-                npts=int(npts_comma[0:len(npts_comma)-1])
-                if(i==1):
-                    npts1=npts
-                if(i==2):
-                    npts2=npts
-                dt = float(val[3])
-                for j in range (0,npts):
-                    t = j * dt
-                    time.append(t)
-                if(i==1):
-                    time1=time
-                if(i==2):
-                    time2=time
-            elif counter > 3:
-                data = str(x).split()
-                for value in data:
-                    a = float(value)
-                    acc_data.append(a)
-                    if(i==1):
-                        inp_acc1=np.asarray(acc_data)
-                    if(i==2):
-                        inp_acc2=np.asarray(acc_data)
-            counter = counter + 1
-    return desc1,desc2,time1,time2,inp_acc1,inp_acc2,npts1,npts2
-
-def screen_database(database_path,allowed_database,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D,allowedEC8code,target_periods,nGM,allowed_depth):
-    dbacc=pd.read_csv(database_path,sep=';',engine='python')
-    knownPer=np.array([0,0.01,0.025,0.04,0.05,0.07,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.6,0.7,0.75,0.8,0.9,1.0,1.2,1.4,1.6,1.8,2,2.5,3,3.5,4,5,6,7,8,9,10])
-
-    event_id=dbacc['event_id']
-    event_mw=dbacc['Mw']
-    event_mag=dbacc['M']
-    record_sequence_number_NGA=dbacc['record_sequence_number_NGA']
-    station_ec8=dbacc['ec8_code']
-    station_vs30=dbacc['vs30_m_sec']
-    acc_distance=dbacc['epi_dist']
-    station_code=dbacc['station_code']
-    event_depth=dbacc['ev_depth_km']
-    sensor_depth=dbacc['sensor_depth_m']
-    is_free_field_ESM=dbacc['proximity_code']
-    is_free_field_NGA=dbacc['GMX_first']
-    source=dbacc['source']
-    epi_lon=dbacc['epi_lon']
-    epi_lat=dbacc['epi_lat']
-
-    # Match periods (known periods and target periods for error computations)
-    # save the indicies of the matched periods in knownPer
-    indPer = np.zeros((len(target_periods),1), dtype=int);
-    for i in np.arange(len(target_periods)):
-        indPer[i]=np.argmin(np.absolute(knownPer-target_periods[i]))
-
-    # Remove any repeated values from target_periods and redefine target_periods as periods
-    # provided in databases
-    indPer = np.unique(indPer);
-    recPer = knownPer[indPer];
-
-    SA_list=[]
-    allowedIndex=[]
-    for i in np.arange(len(event_id)):
-        rotD50=np.array([dbacc['rotD50_pga'][i],dbacc['rotD50_T0_010'][i],dbacc['rotD50_T0_025'][i],dbacc['rotD50_T0_040'][i],dbacc['rotD50_T0_050'][i],dbacc['rotD50_T0_070'][i],dbacc['rotD50_T0_100'][i],dbacc['rotD50_T0_150'][i],dbacc['rotD50_T0_200'][i],dbacc['rotD50_T0_250'][i],dbacc['rotD50_T0_300'][i],dbacc['rotD50_T0_350'][i],dbacc['rotD50_T0_400'][i],dbacc['rotD50_T0_450'][i],dbacc['rotD50_T0_500'][i],dbacc['rotD50_T0_600'][i],dbacc['rotD50_T0_700'][i],dbacc['rotD50_T0_750'][i],dbacc['rotD50_T0_800'][i],dbacc['rotD50_T0_900'][i],dbacc['rotD50_T1_000'][i],dbacc['rotD50_T1_200'][i],dbacc['rotD50_T1_400'][i],dbacc['rotD50_T1_600'][i],dbacc['rotD50_T1_800'][i],dbacc['rotD50_T2_000'][i],dbacc['rotD50_T2_500'][i],dbacc['rotD50_T3_000'][i],dbacc['rotD50_T3_500'][i],dbacc['rotD50_T4_000'][i],dbacc['rotD50_T5_000'][i],dbacc['rotD50_T6_000'][i],dbacc['rotD50_T7_000'][i],dbacc['rotD50_T8_000'][i],dbacc['rotD50_T9_000'][i],dbacc['rotD50_T10_000'][i]])
-        if(source[i]=='ESM'):
-            SA_geo=rotD50/981 #in g
-        if(source[i]=='NGA-West2'):
-            SA_geo=rotD50 #already in g
-        SA_list.append(SA_geo)
-        if(all(v > 0 for v in SA_geo)):
-            #print('Need to test if the screening of database is ok')
-            if(source[i] in allowed_database):
-                if((source[i]=='ESM' and is_free_field_ESM[i]==0) or (source[i]=='NGA-West2' and is_free_field_NGA[i]=="I")):
-                    if(event_mw[i]>=allowedRecs_Mag[0] and event_mw[i]<=allowedRecs_Mag[1]):
-                        if(event_depth[i]>=allowed_depth[0] and event_depth[i]<=allowed_depth[1]):
-                            if(acc_distance[i]>=allowedRecs_D[0] and acc_distance[i]<=allowedRecs_D[1]):
-                                if(np.isnan(station_vs30[i])):
-                                    if not pd.isnull(station_ec8[i]):
-                                        if(station_ec8[i][0] in allowedEC8code or allowedEC8code=='All'):
-                                            if(source[i]=='ESM'):
-                                                allowedIndex.append(i)
-                                            if(source[i]=='NGA-West2'):
-                                                if(epi_lon[i]<-31 or epi_lon[i]>70):
-                                                    allowedIndex.append(i)
-                                else:
-                                    if(station_vs30[i]>=allowedRecs_Vs30[0] and station_vs30[i]<allowedRecs_Vs30[1]):
-                                        if(source[i]=='ESM'):
-                                            allowedIndex.append(i)
-                                        if(source[i]=='NGA-West2'):
-                                            if(epi_lon[i]<-31 or epi_lon[i]>70):
-                                                allowedIndex.append(i)
-    SA=np.vstack(SA_list)
-    SaKnown=SA[allowedIndex]
-
-    # count number of allowed spectra
-    nBig = len(allowedIndex)
-    print(['Number of allowed ground motions = ', nBig])
-    assert (nBig >= nGM), 'Warning: there are not enough allowable ground motions'
-
-    return SaKnown,indPer,recPer,nBig,allowedIndex,event_id,station_code,source,record_sequence_number_NGA,source,event_mw,event_mag,acc_distance
-
-def compute_avgSA(avg_periods,sctx, rctx, dctx):
-    mean_list = []
-    stddvs_list = []
-    # Loop over averaging periods
-    for period in avg_periods:
-        # compute mean and standard deviation
-        P=imt.SA(period=period)
-        S=[const.StdDev.TOTAL]
-        mean,std = bgmpe.get_mean_and_stddevs(sctx, rctx, dctx,P,S)
-        mean_list.append(mean)
-        stddvs_list.append(std[0]) # Support only for total!
-
-    mean_avgsa = 0.
-    stddvs_avgsa = 0.
-
-    for i1 in np.arange(len(avg_periods)):
-        mean_avgsa += mean_list[i1]
-        for i2 in np.arange(len(avg_periods)):
-            if(corr_type=='baker_jayaram'):
-                rho = baker_jayaram_correlation(avg_periods[i1],avg_periods[i2])
-            if(corr_type=='akkar'):
-                rho = akkar_correlation(avg_periods[i1],avg_periods[i2])
-
-            stddvs_avgsa += rho*stddvs_list[i1] * stddvs_list[i2]
-
-    mean_avgsa *= (1./len(avg_periods))
-    stddvs_avgsa *= (1./len(avg_periods))**2
-    stddvs_avgsa=np.sqrt(stddvs_avgsa)
-    return [np.exp(mean_avgsa),stddvs_avgsa]
-
-def compute_rho_avgSA(per,avg_periods,sctx,rctx,dctx,stddvs_avgsa):
-    sum_numeratore=0
-    for i1 in avg_periods:
-        if(corr_type=='baker_jayaram'):
-            rho=baker_jayaram_correlation(per,i1)
-        if(corr_type=='akkar'):
-            rho=akkar_correlation(per,i1)
-        S=[const.StdDev.TOTAL]
-        mean1,std1 = bgmpe.get_mean_and_stddevs(sctx, rctx, dctx, imt.SA(period=i1),S)
-        sum_numeratore=sum_numeratore+rho*std1[0]
-
-    denominatore=len(avg_periods)*stddvs_avgsa
-    rho_avgSA=sum_numeratore/denominatore
-    return rho_avgSA
-
-def simulate_spectra(nTrials,meanReq,covReq,stdevs,nGM):
-# simulate response spectra from the target mean and covariance matrix
-    devTotalSim =[]
-    spettri=[]
-    for j in np.arange(nTrials):
-        SpectraSample=np.exp(np.random.multivariate_normal(meanReq,covReq,nGM))
-        spettri.append(SpectraSample)
-        # evaluate simulation
-        sampleMeanErr=np.mean(np.log(SpectraSample),axis=0)-meanReq
-        sampleStdErr=np.std(np.log(SpectraSample),axis=0)-stdevs
-        sampleSkewnessErr=skew(np.log(SpectraSample),axis=0,bias=True)
-        devTotalSim.append(weights[0]*sum(sampleMeanErr**2)+weights[1]**sum(sampleStdErr**2)+weights[2]*sum(sampleSkewnessErr**2))
-
-    bestSample=devTotalSim.index(min(devTotalSim)) # find the simulated spectra that best match the target
-    simulated_spectra = spettri[bestSample] #return the best set of simulations
-
-    return simulated_spectra
-
-
-#****************************************************************************************************************
+#%% Start the routine
 
 for ii in np.arange(len(site_code)):
 
