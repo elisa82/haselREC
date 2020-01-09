@@ -1,5 +1,5 @@
 def screen_database(database_path,allowed_database,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D,allowedEC8code,target_periods,nGM,allowed_depth):
-    #%% Import libraries
+    # Import libraries
     import numpy as np
     import pandas as pd
     
