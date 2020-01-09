@@ -1,5 +1,9 @@
-def simulate_spectra(nTrials,meanReq,covReq,stdevs,nGM):
-# simulate response spectra from the target mean and covariance matrix
+def simulate_spectra(nTrials,meanReq,covReq,stdevs,nGM,weights):
+    # Import libraries
+    import numpy as np
+    from scipy.stats import skew
+    
+    # simulate response spectra from the target mean and covariance matrix
     devTotalSim =[]
     spettri=[]
     for j in np.arange(nTrials):
