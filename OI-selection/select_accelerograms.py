@@ -1,46 +1,36 @@
-#%% Import functions and libraries
-from openquake.hazardlib.gsim.mgmpe import akkar_coeff_table as act
-from openquake.hazardlib import gsim, imt, const
+#%% Import libraries
+# Standard built-in libraries
+import os, sys
 import numpy as np
 import pandas as pd
-import os, sys
-import csv
-import matplotlib.pyplot as plt
-import matplotlib
-import time
 from scipy.stats import skew
-import requests
-import glob
-from obspy.core import Stream, Trace, UTCDateTime, Stats
-import re
-import string
 
-#%% Import functions from other files in bin
+# Libraries from other files in bin
 sys.path.append("bin")
+from openquake.hazardlib import gsim, imt, const
 from im_correlation import akkar_correlation
 from im_correlation import baker_jayaram_correlation
-
 from screen_database import screen_database
-
 from create_acc import create_ESM_acc
 from create_acc import create_NGA_acc
-
 from compute_avgSA import compute_avgSA
 from compute_avgSA import compute_rho_avgSA
-
 from simulate_spectra import simulate_spectra
 
 
 #%% General notes
 print('Usage: python select_accelerograms.py $filename')
 
-print("The correlation model needs to be handled a bit better")
-print("The akkar one could be interpolated in its python script definition (I think)")
-print("The outputs and printing of results need to be more detailed here")
+print("### The correlation model needs to be handled a bit better")
+print("### The akkar one could be interpolated in its python script definition (I think)")
+
+import matplotlib.pyplot as plt
+print("### The outputs and printing of results need to be more detailed here")
 
 #%% Initial setup
 #fileini = sys.argv[1]
 fileini = 'job_selection.ini'
+print("### Define directly for now")
 
 input={}
 with open(fileini) as fp:
@@ -52,22 +42,12 @@ with open(fileini) as fp:
        line = fp.readline()
 
 #%% Extract input parameters
+# Calculation mode
 download_and_scale_acc=int(input['download_and_scale_acc']) #1=yes, 0=no
 
+
+# Hazard parameters
 intensity_measures = [ x.strip() for x in input['intensity_measures'].strip('{}').split(',') ]
-TgtPer = [ x.strip() for x in input['TgtPer'].strip('{}').split(',') ]
-TgtPer= np.array(TgtPer,dtype=float)
-Tstar=np.zeros(len(intensity_measures))
-#Tstar is defined as 0 for PGA
-for i in np.arange(len(intensity_measures)):
-    if(intensity_measures[i][0:2]=='SA'):
-        Tstar[i]=intensity_measures[i].strip('(,),SA')
-        Tstar[i]=float(Tstar[i])
-for i in np.arange(len(intensity_measures)):
-    if not np.isin(Tstar[i],TgtPer):
-        TgtPer=np.append(TgtPer,Tstar[i])
-TgtPer.sort()
-#This is done in order to allow to chose a Tstar outside the identified list
 site_code = [ x.strip() for x in input['site_code'].strip('{}').split(',') ]
 rlz_code = [ x.strip() for x in input['rlz_code'].strip('{}').split(',') ]
 path_hazard_results=input['path_hazard_results']
@@ -76,6 +56,25 @@ num_classical=int(input['num_classical'])
 probability_of_exceedance_num = [ x.strip() for x in input['probability_of_exceedance_num'].strip('{}').split(',') ]
 probability_of_exceedance = [ x.strip() for x in input['probability_of_exceedance'].strip('{}').split(',') ]
 investigation_time=float(input['investigation_time'])
+
+
+# Conditional spectrum parameters
+TgtPer = [ x.strip() for x in input['TgtPer'].strip('{}').split(',') ]
+TgtPer= np.array(TgtPer,dtype=float)
+Tstar=np.zeros(len(intensity_measures))
+
+for i in np.arange(len(intensity_measures)):
+    if(intensity_measures[i][0:2]=='SA'):
+        Tstar[i]=intensity_measures[i].strip('(,),SA')
+        Tstar[i]=float(Tstar[i])
+    if(intensity_measures[i][0:3]=='PGA'):
+	    Tstar[i]=0.0
+
+# Allow a Tstar outside the identified list to be chosen
+for i in np.arange(len(intensity_measures)):
+    if not np.isin(Tstar[i],TgtPer):
+        TgtPer=np.append(TgtPer,Tstar[i])
+TgtPer.sort()
 
 corr_type=input['corr_type']  #baker_jayaram or akkar
 GMPE=input['GMPE'] #for now only available Akkar_Bommer_2010 Chiou_Youngs_2014 Boore_et_al_2014, BooreAtkinson2008 maybe and array of GMPE according with sites?
@@ -86,7 +85,8 @@ hypo_depth=float(input['hypo_depth'])
 AR=float(input['AR'])
 Vs30=float(input['Vs30']) #maybe an array of Vs30 according with sites?
 
-#screen for suitable ground motions
+
+# Database parameters for screening recordings
 database_path=input['database_path']
 allowed_database = [ x.strip() for x in input['allowed_database'].strip('{}').split(',') ]
 allowedRecs_Vs30 = [ x.strip() for x in input['allowedRecs_Vs30'].strip('[]').split(',') ]# upper and lower bound of allowable Vs30 values
@@ -99,7 +99,8 @@ radius_mag = float(input['radius_mag'])
 allowed_depth=[ x.strip() for x in input['allowed_depth'].strip('[]').split(',') ] # upper and lower bound of allowable Vs30 values
 allowed_depth= np.array(allowed_depth,dtype=float)
 
-#parameters for statistically simulation of response spectra
+
+# Selection parameters
 nGM=int(input['nGM']) #number of records to select ==> number of records to select since the code search the database spectra most similar to each simulated spectrum
 random_seed=int(input['random_seed']) 
 nTrials=int(input['nTrials']) #number of iterations of the initial spectral simulation step to perform
@@ -109,6 +110,8 @@ weights= np.array(weights,dtype=float)
 nLoop=int(input['nLoop']) #Number of loops of optimization to perform
 penalty=float(input['penalty']) #>0 to penalize selected spectra moire than 3 sigma from the target at any period, =0 otherwise.
 
+
+# Accelerogram folders
 path_NGA_folder=input['path_NGA_folder'] #NGA recordings have to be stored
 path_ESM_folder=input['path_NGA_folder']
 # If not, found in the folder, ESM recording are authomatically downloaded from internet, need to generate the file token.txt
@@ -116,14 +119,17 @@ path_ESM_folder=input['path_NGA_folder']
 #curl -X POST -F 'message={"user_email": "elisa.zuccolo@eucentre.it","user_password": "password"}' "http://tex.mi.ingv.it/esmws/generate-signed-message/1/query" > token.txt
 
 #%% Start the routine
-
+# For each site investigated
 for ii in np.arange(len(site_code)):
-
+    
+    # Get the current site and realisation indices
     site = site_code[ii]
     rlz = rlz_code[ii]
-
+    
+    # For each hazard of poe level investigated
     for poe in np.arange(len(probability_of_exceedance_num)):
-
+        
+        # For each intensity measure investigated
         for im in np.arange(len(intensity_measures)):
     
                 disagg_results='rlz-'+str(rlz)+'-'+intensity_measures[im]+'-sid-'+str(site)+'-poe-0_Mag_Dist_'+str(num_disagg)+'.csv'
@@ -240,7 +246,7 @@ for ii in np.arange(len(site_code)):
                 mean=[]
                 sigma=[]
                 if(intensity_measures[im]=='AvgSA'):
-                    [mean_SaTcond,stddvs_SaTcond]=compute_avgSA(avg_periods,sctx, rctx, dctx)
+                    [mean_SaTcond,stddvs_SaTcond]=compute_avgSA(avg_periods,sctx, rctx, dctx, bgmpe, corr_type)
                     mean_SaTcond=np.log(mean_SaTcond)
                 else:
                     if(intensity_measures[im]=='PGA'):
@@ -262,7 +268,7 @@ for ii in np.arange(len(site_code)):
                     mean.append(bMean_SA)
                     sigma.append(bStDev_SA[0])
                     if(intensity_measures[im]=='AvgSA'):
-                        rho_per=compute_rho_avgSA(per,avg_periods,sctx,rctx,dctx,stddvs_SaTcond)
+                        rho_per=compute_rho_avgSA(per,avg_periods,sctx,rctx,dctx,stddvs_SaTcond, bgmpe, corr_type)
                         rho.append(rho_per[0])
                     else:
                         if(corr_type=='baker_jayaram'):
@@ -306,7 +312,7 @@ for ii in np.arange(len(site_code)):
                 covReq=TgtCovs
                 stdevs=np.sqrt(np.diagonal(covReq))
 
-                simulated_spectra=simulate_spectra(nTrials,meanReq,covReq,stdevs,nGM)
+                simulated_spectra=simulate_spectra(nTrials,meanReq,covReq,stdevs,nGM,weights)
 
                 sampleBig =np.log(SaKnown[:,indPer])
 
