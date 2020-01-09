@@ -24,7 +24,7 @@ print('Usage: python select_accelerograms.py $filename')
 print("### The correlation model needs to be handled a bit better")
 print("### The akkar one could be interpolated in its python script definition (I think)")
 
-import matplotlib.pyplot as plt
+
 print("### The outputs and printing of results need to be more detailed here")
 
 #%% Initial setup
@@ -423,27 +423,8 @@ for ii in np.arange(len(site_code)):
                 finalScaleFactors = IMScaleFac
                 meanrecorded=np.mean(np.exp(sampleSmall),axis=0)
 
-                for i in np.arange(nGM):
-                    plt.loglog(TgtPer,np.exp(sampleSmall[i,:]),'g')
-                plt.loglog(TgtPer,np.exp(meanReq),'r',label='target')
-                plt.loglog(TgtPer,np.exp(meanReq+2*stdevs),'--r',label='target+2*sigma')
-                plt.loglog(TgtPer,np.exp(meanReq-2*stdevs),'--r',label='target-2*sigma')
-                plt.loglog(TgtPer,meanrecorded,'b',label='mean recorded')
-                plt.xlabel('Period (s)')
-                plt.ylabel('Spectral acceleration (g)')
-                plt.xlim((0.01, np.max(TgtPer)))
-                plt.legend()
-
-                plt.grid(True)
-
-                if not os.path.exists(name):
-                    os.makedirs(name)
-#               os.makedirs(name)
-
-                name_fig=name+'/'+name+'_selection.png'
-                plt.savefig(name_fig, bbox_inches='tight')
-
-                plt.close()
+                # Plot the figure
+                plot_final_selection(name,nGM,TgtPer,sampleSmall,meanReq,stdevs,meanrecorded)
 
                 # Output results to a text file
                 blank='-'
