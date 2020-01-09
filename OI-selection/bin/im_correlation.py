@@ -5,6 +5,8 @@ def akkar_correlation(t1, t2):
     for damping scaling factors and vertical-to-horizontal spectral amplitude ratios
     for the broader Europe region, Bull Earthquake Eng 12:517-547
     """
+    # Import libraries
+    from openquake.hazardlib.gsim.mgmpe import akkar_coeff_table as act
 
     return act.coeff_table[act.periods.index(t1)][act.periods.index(t2)]
 
@@ -27,6 +29,9 @@ def baker_jayaram_correlation(t1, t2):
         rho (float): The predicted correlation coefficient
 
     """
+    # Import libraries
+    import numpy as np
+    
     t_min = min(t1, t2)
     t_max = max(t1, t2)
 
