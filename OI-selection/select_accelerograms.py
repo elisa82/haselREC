@@ -67,8 +67,9 @@ for i in np.arange(len(intensity_measures)):
     if(intensity_measures[i][0:2]=='SA'):
         Tstar[i]=intensity_measures[i].strip('(,),SA')
         Tstar[i]=float(Tstar[i])
-    if(intensity_measures[i][0:3]=='PGA'):
-	    Tstar[i]=0.0
+#    if(intensity_measures[i][0:3]=='PGA'):
+#	    Tstar[i]=0.0
+print('### Should we add Tstar = 0 for PGA? If we do, the akkar_correlation function gives an error because it does not support T=0')
 
 # Allow a Tstar outside the identified list to be chosen
 for i in np.arange(len(intensity_measures)):
@@ -119,6 +120,9 @@ path_ESM_folder=input['path_NGA_folder']
 #curl -X POST -F 'message={"user_email": "elisa.zuccolo@eucentre.it","user_password": "password"}' "http://tex.mi.ingv.it/esmws/generate-signed-message/1/query" > token.txt
 
 #%% Start the routine
+print('Inputs loaded, starting selection....')
+ind = 1
+
 # For each site investigated
 for ii in np.arange(len(site_code)):
     
@@ -131,14 +135,16 @@ for ii in np.arange(len(site_code)):
         
         # For each intensity measure investigated
         for im in np.arange(len(intensity_measures)):
-    
+                
+                # Get the name of the disaggregation file to look in
                 disagg_results='rlz-'+str(rlz)+'-'+intensity_measures[im]+'-sid-'+str(site)+'-poe-0_Mag_Dist_'+str(num_disagg)+'.csv'
                 name=intensity_measures[im]+'-site_'+str(site)+'-poe-'+str(poe)
                 selected_column=intensity_measures[im]+'-'+str(probability_of_exceedance[poe])
                 file_with_OQ_acc_value='hazard_map-mean_'+str(num_classical)+'.csv'
-
-                print(name)
-                print(selected_column)
+                
+                # Print some on screen feedback
+                print('Processing '+name+' Case: '+str(ind)+'/'+str(len(site_code)*len(probability_of_exceedance_num)*len(intensity_measures)))
+                ind += 1
 
                 #Retrieve disaggregation results
                 meanLst = [],[]
