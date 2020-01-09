@@ -1,4 +1,9 @@
 def create_ESM_acc(folder):
+    # Import libraries
+    import glob
+    from obspy.core import Stats
+    import numpy as np
+    
     for l in range(1,3):
         print(folder)
         if(folder.find('ESM/GR') >-1):
@@ -156,6 +161,9 @@ def strtoint(sf):
     return x
 
 def toUTCDateTime(value):
+    # Import libraries
+    from obspy.core import UTCDateTime
+    
     try:
         date, time = value.split('_')
     except ValueError:
@@ -173,6 +181,9 @@ def toUTCDateTime(value):
 
 
 def create_NGA_acc(num_rec,path_NGA_folder):
+    # Import libraries
+    import numpy as np
+    
     desc1=""
     desc2=""
     for i in range(1,3):
