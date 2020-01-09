@@ -71,6 +71,7 @@ for i in np.arange(len(intensity_measures)):
 #	    Tstar[i]=0.0
 print('### Should we add Tstar = 0 for PGA? If we do, the akkar_correlation function gives an error because it does not support T=0')
 
+	 
 # Allow a Tstar outside the identified list to be chosen
 for i in np.arange(len(intensity_measures)):
     if not np.isin(Tstar[i],TgtPer):
@@ -244,7 +245,7 @@ for ii in np.arange(len(site_code)):
 
                 print(TgtPer)
                 [SaKnown,indPer,_,nBig,allowedIndex,event_id,station_code,source,record_sequence_number_NGA,source,event_mw,event_mag,acc_distance]=screen_database(database_path,allowed_database,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D,allowedEC8code,TgtPer,nGM,allowed_depth)
-                print("Need to check this above, redefining the variable TgtPer inside this function. Put return value as _ for now to continue using the user defined one. Elisa: Yes there is the need to check the above")
+                print("Need to check this above, redefining the variable TgtPer inside this function. Put return value as _ for now to continue using the user defined one. Elisa: Yes there is the need to check the above Gerard: So we should redefine the TgtPer? If yes, we should undo this change and remove the prints")
                 print(TgtPer)
 
                 TgtMean=[]
