@@ -1,4 +1,10 @@
-def compute_avgSA(avg_periods,sctx, rctx, dctx):
+def compute_avgSA(avg_periods,sctx, rctx, dctx, bgmpe, corr_type):
+    # Import libraries
+    from openquake.hazardlib import imt, const
+    import numpy as np
+    from im_correlation import baker_jayaram_correlation
+    from im_correlation import akkar_correlation
+    
     mean_list = []
     stddvs_list = []
     # Loop over averaging periods
@@ -28,7 +34,12 @@ def compute_avgSA(avg_periods,sctx, rctx, dctx):
     stddvs_avgsa=np.sqrt(stddvs_avgsa)
     return [np.exp(mean_avgsa),stddvs_avgsa]
 
-def compute_rho_avgSA(per,avg_periods,sctx,rctx,dctx,stddvs_avgsa):
+def compute_rho_avgSA(per,avg_periods,sctx,rctx,dctx,stddvs_avgsa, bgmpe, corr_type):
+    # Import libraries
+    from openquake.hazardlib import imt, const
+    from im_correlation import baker_jayaram_correlation
+    from im_correlation import akkar_correlation
+    
     sum_numeratore=0
     for i1 in avg_periods:
         if(corr_type=='baker_jayaram'):
