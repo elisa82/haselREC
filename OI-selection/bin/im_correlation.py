@@ -7,8 +7,15 @@ def akkar_correlation(t1, t2):
     """
     # Import libraries
     from openquake.hazardlib.gsim.mgmpe import akkar_coeff_table as act
+    from scipy import interpolate
 
-    return act.coeff_table[act.periods.index(t1)][act.periods.index(t2)]
+    x=act.periods
+    y=act.periods
+    z=act.coeff_table
+    f=interpolate.interp2d(x, y, z, kind='linear')
+    interpolated_value=t1,t2,f(t1,t2)
+
+    return interpolated_value[2][0]
 
 
 def baker_jayaram_correlation(t1, t2):

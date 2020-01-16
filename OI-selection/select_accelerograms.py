@@ -23,8 +23,6 @@ from plot_final_selection import plot_final_selection
 print('Usage: python select_accelerograms.py $filename')
 print("### The correlation model needs to be handled a bit better")
 print("### The akkar one could be interpolated in its python script definition (I think)")
-
-
 print("### The outputs and printing of results need to be more detailed here")
 
 #%% Initial setup
@@ -224,8 +222,6 @@ for ii in np.arange(len(site_code)):
                             ry=np.abs(rx*1./np.tan(np.radians(azimuth)))
                         rrup=np.sqrt(np.square(rrup1)+np.square(ry))
 
-#            print(rjb,rx,rrup)
-
                 Dist = np.arange(meanDist,meanDist+1,1.)
                 if(GMPE=='Chiou_Youngs_2014'):
                     rx=np.arange(rx,rx+1,1.)
@@ -341,7 +337,6 @@ for ii in np.arange(len(site_code)):
                     #compute scale factors and errors for each candidate ground motion
                     for j in np.arange(nBig):
                         rec_value=np.exp(sum(sampleBig[j,id_sel])/len(id_sel))
-                        print(rec_value,id_sel)
                         rec_value=rec_value[0]
                         if (rec_value == 0):
                             scaleFac[j] = 1000000
