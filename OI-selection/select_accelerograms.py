@@ -11,8 +11,6 @@ from openquake.hazardlib import gsim, imt, const
 from im_correlation import akkar_correlation
 from im_correlation import baker_jayaram_correlation
 from screen_database import screen_database
-from create_acc import create_ESM_acc
-from create_acc import create_NGA_acc
 from compute_avgSA import compute_avgSA
 from compute_avgSA import compute_rho_avgSA
 from simulate_spectra import simulate_spectra
@@ -22,7 +20,6 @@ from plot_final_selection import plot_final_selection
 #%% General notes
 print('Usage: python select_accelerograms.py $filename')
 print("### The correlation model needs to be handled a bit better")
-print("### The akkar one could be interpolated in its python script definition (I think)")
 print("### The outputs and printing of results need to be more detailed here")
 
 #%% Initial setup
@@ -112,8 +109,8 @@ penalty=float(input['penalty']) #>0 to penalize selected spectra moire than 3 si
 path_NGA_folder=input['path_NGA_folder'] #NGA recordings have to be stored
 path_ESM_folder=input['path_NGA_folder']
 # If not, found in the folder, ESM recording are authomatically downloaded from internet, need to generate the file token.txt
-#At first you need to register at: http://tex.mi.ingv.it/
-#curl -X POST -F 'message={"user_email": "elisa.zuccolo@eucentre.it","user_password": "password"}' "http://tex.mi.ingv.it/esmws/generate-signed-message/1/query" > token.txt
+#At first you need to register at: https://tex.mi.ingv.it/
+#curl -X POST -F 'message={"user_email": "email","user_password": "password"}' "https://tex.mi.ingv.it/esmws/generate-signed-message/1/query" > token.txt
 
 # Output folder
 output_folder=input['output_folder']
@@ -153,7 +150,6 @@ for ii in np.arange(len(site_code)):
                 mode=df.sort_values(by='rate_norm',ascending=False)[0:1]
                 meanMag=np.sum(df['mag']*df['rate_norm'])
                 meanDist=np.sum(df['dist']*df['rate_norm'])
-#               print(meanMag,meanDist)
                 allowedRecs_D=[meanDist-radius_dist,meanDist+radius_dist]
                 allowedRecs_Mag=[meanMag-radius_mag,meanMag+radius_mag]
 
@@ -442,4 +438,4 @@ for ii in np.arange(len(site_code)):
 
                 if(download_and_scale_acc==1):
 
-                    scale_acc(nGM,recIdx,record_sequence_number_NGA,path_NGA_folder,path_ESM_folder,event_id,station_code,name,output_folder)
+                    scale_acc(nGM,recIdx,record_sequence_number_NGA,path_NGA_folder,path_ESM_folder,source,event_id,station_code,name,output_folder,finalScaleFactors)
