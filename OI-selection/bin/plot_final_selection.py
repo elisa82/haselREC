@@ -1,10 +1,7 @@
-def plot_final_selection(name,nGM,TgtPer,sampleSmall,meanReq,stdevs,meanrecorded):
+def plot_final_selection(name,nGM,TgtPer,sampleSmall,meanReq,stdevs,meanrecorded,output_folder):
 	# Import libraries
-	import os
 	import numpy as np
 	import matplotlib.pyplot as plt
-	
-
 	
 	plt.figure()
 	for i in np.arange(nGM):
@@ -20,9 +17,6 @@ def plot_final_selection(name,nGM,TgtPer,sampleSmall,meanReq,stdevs,meanrecorded
 
 	plt.grid(True)
 
-	if not os.path.exists(name):
-		os.makedirs(name)
-
-	plt.savefig(name+'/'+name+'_selection.png', bbox_inches='tight')
+	plt.savefig(output_folder+'/'+name+'/'+name+'_selection.png', bbox_inches='tight')
 
 	plt.close()

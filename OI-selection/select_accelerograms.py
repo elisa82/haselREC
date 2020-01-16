@@ -1,6 +1,6 @@
 #%% Import libraries
 # Standard built-in libraries
-import os, sys
+import os,sys
 import numpy as np
 import pandas as pd
 from scipy.stats import skew
@@ -16,11 +16,11 @@ from create_acc import create_NGA_acc
 from compute_avgSA import compute_avgSA
 from compute_avgSA import compute_rho_avgSA
 from simulate_spectra import simulate_spectra
-
+from scale_acc import scale_acc
+from plot_final_selection import plot_final_selection
 
 #%% General notes
 print('Usage: python select_accelerograms.py $filename')
-
 print("### The correlation model needs to be handled a bit better")
 print("### The akkar one could be interpolated in its python script definition (I think)")
 
@@ -119,6 +119,9 @@ path_ESM_folder=input['path_NGA_folder']
 # If not, found in the folder, ESM recording are authomatically downloaded from internet, need to generate the file token.txt
 #At first you need to register at: http://tex.mi.ingv.it/
 #curl -X POST -F 'message={"user_email": "elisa.zuccolo@eucentre.it","user_password": "password"}' "http://tex.mi.ingv.it/esmws/generate-signed-message/1/query" > token.txt
+
+# Output folder
+output_folder=input['output_folder']
 
 #%% Start the routine
 print('Inputs loaded, starting selection....')
@@ -423,12 +426,17 @@ for ii in np.arange(len(site_code)):
                 finalScaleFactors = IMScaleFac
                 meanrecorded=np.mean(np.exp(sampleSmall),axis=0)
 
+
+                folder=output_folder+'/'+name 
+                if not os.path.exists(folder):
+                    os.makedirs(folder)
+
                 # Plot the figure
-                plot_final_selection(name,nGM,TgtPer,sampleSmall,meanReq,stdevs,meanrecorded)
+                plot_final_selection(name,nGM,TgtPer,sampleSmall,meanReq,stdevs,meanrecorded,output_folder)
 
                 # Output results to a text file
                 blank='-'
-                name_summary=name+'/'+name+"_summary_selection.txt"
+                name_summary=output_folder+'/'+name+'/'+name+"_summary_selection.txt"
                 with open(name_summary, "w") as f:
                     f.write("{} {}\n".format('reference hazard value = ',output_oq))
                     f.write("{} {}\n".format('mean_mag_disag = ',meanMag))
@@ -445,95 +453,4 @@ for ii in np.arange(len(site_code)):
 
                 if(download_and_scale_acc==1):
 
-                    #Read accelegrams, save them and apply scaling factor
-                    dts = []
-                    durs =[]
-                    names1 =[]
-                    names2 =[]
-
-                    for i in np.arange(nGM):
-                        time1=[]
-                        time2=[]
-                        inp_acc1=[]
-                        inp_acc2=[]
-                        npts1=0
-                        npts2=0
-                        comp1=''
-                        comp2=''
-                        desc1=''
-                        desc2=''
-                        elemento=recIdx[i]
-                        if(source[elemento]=='NGA-West2'):
-                            val=int(record_sequence_number_NGA[elemento])
-                            [desc1,desc2,time1,time2,inp_acc1, inp_acc2,npts1,npts2]=create_NGA_acc(val,path_NGA_folder)
-                            desc1='%'+desc1
-                            desc2='%'+desc2
-                        if(source[elemento]=='ESM'):
-                            folder_output=path_ESM_folder+event_id[elemento]+station_code[elemento]
-                            if (os.path.isdir(folder_output)==False):
-                                zip_output='output_'+str(i)+'.zip'
-                                command='curl -X POST -F "message=@token.txt" "http://tex.mi.ingv.it/esmws/eventdata/1/query?eventid='+event_id[elemento]+'&data-type=ACC&station='+station_code[elemento]+'&format=ascii" -o '+zip_output
-                                os.system(command)
-                                command='unzip -o '+zip_output+' -d '+folder_output
-                                os.system(command)
-                                command='rm '+zip_output
-                                os.system(command)
-                                print(folder_output)
-                            [time1,time2,inp_acc1,inp_acc2,npts1,npts2,comp1,comp2]=create_ESM_acc(folder_output)
-                            desc1='%'+event_id[elemento]+' '+station_code[elemento]+' '+comp1
-                            desc2='%'+event_id[elemento]+' '+station_code[elemento]+' '+comp2
-
-                        # Get the time steps and durations
-                        dts.append(time1[1]-time1[0])
-                        durs.append(time1[-1])
-
-                        # Create the filenames
-                        file_time_scaled_acc_out_1=name+'/GMR_time_scaled_acc_'+str(i+1)+'_1.txt'
-                        file_time_scaled_acc_out_2=name+'/GMR_time_scaled_acc_'+str(i+1)+'_2.txt'
-
-                        with open(file_time_scaled_acc_out_1, "w",newline='') as f1:
-                            for j in np.arange(npts1):
-                                f1.write("{:10.3f} {:15.10f}\n".format(time1[j],inp_acc1[j]*finalScaleFactors[i]))
-                        f1.close()
-                        with open(file_time_scaled_acc_out_2, "w",newline='') as f2:
-                            for j in np.arange(npts2):
-                                f2.write("{:10.3f} {:15.10f}\n".format(time2[j],inp_acc2[j]*finalScaleFactors[i]))
-                        f2.close()
-
-                        file_scaled_acc_out_1=name+'/GMR_scaled_acc_'+str(i+1)+'_1.txt'
-                        file_scaled_acc_out_2=name+'/GMR_scaled_acc_'+str(i+1)+'_2.txt'
-                        names1.append('GMR_scaled_acc_'+str(i+1)+'_1.txt')
-                        names2.append('GMR_scaled_acc_'+str(i+1)+'_2.txt')
-
-                        with open(file_scaled_acc_out_1, "w",newline='') as f1:
-                            for j in np.arange(npts1):
-                                f1.write("{:15.10f}\n".format(inp_acc1[j]*finalScaleFactors[i]))
-                        f1.close()
-                        with open(file_scaled_acc_out_2, "w",newline='') as f2:
-                            for j in np.arange(npts2):
-                                f2.write("{:15.10f}\n".format(inp_acc2[j]*finalScaleFactors[i]))
-                        f2.close()
-
-
-                    # Print the time steps and the durations also
-                    file_dts=name+'/GMR_dts.txt'
-                    file_durs=name+'/GMR_durs.txt'
-                    file_names1=name+'/GMR_names1.txt'
-                    file_names2=name+'/GMR_names2.txt'
-
-                    with open(file_dts, "w",newline='') as f1:
-                        for j in np.arange(len(dts)):
-                            f1.write("{:15.10f}\n".format(dts[j]))
-                    f1.close()
-                    with open(file_durs, "w",newline='') as f2:
-                        for j in np.arange(len(durs)):
-                            f2.write("{:15.10f}\n".format(durs[j]))
-                    f2.close()
-                    with open(file_names1, "w",newline='') as f1:
-                        for j in np.arange(len(names1)):
-                            f1.write("{:s}\n".format(names1[j]))
-                    f1.close()
-                    with open(file_names2, "w",newline='') as f2:
-                        for j in np.arange(len(names2)):
-                            f2.write("{:s}\n".format(names2[j]))
-                    f2.close()
+                    scale_acc(nGM,recIdx,record_sequence_number_NGA,path_NGA_folder,path_ESM_folder,event_id,station_code,name,output_folder)
