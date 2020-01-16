@@ -1,10 +1,11 @@
-def screen_database(database_path,allowed_database,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D,allowedEC8code,target_periods,nGM,allowed_depth):
+def screen_database(database_path,allowed_database,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D,allowedEC8code,minT,maxT,nGM,allowed_depth):
     # Import libraries
     import numpy as np
     import pandas as pd
+
+    knownPer=np.array([0,0.01,0.025,0.04,0.05,0.07,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.6,0.7,0.75,0.8,0.9,1.0,1.2,1.4,1.6,1.8,2,2.5,3,3.5,4,5,6,7,8,9,10])
     
     dbacc=pd.read_csv(database_path,sep=';',engine='python')
-    knownPer=np.array([0,0.01,0.025,0.04,0.05,0.07,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.6,0.7,0.75,0.8,0.9,1.0,1.2,1.4,1.6,1.8,2,2.5,3,3.5,4,5,6,7,8,9,10])
 
     event_id=dbacc['event_id']
     event_mw=dbacc['Mw']
@@ -22,15 +23,12 @@ def screen_database(database_path,allowed_database,allowedRecs_Vs30,allowedRecs_
     epi_lon=dbacc['epi_lon']
     epi_lat=dbacc['epi_lat']
 
-    # Match periods (known periods and target periods for error computations)
-    # save the indicies of the matched periods in knownPer
-    indPer = np.zeros((len(target_periods),1), dtype=int);
-    for i in np.arange(len(target_periods)):
-        indPer[i]=np.argmin(np.absolute(knownPer-target_periods[i]))
+    # select periods in the range
+    indPer = []
+    for i in np.arange(len(knownPer)):
+        if(knownPer[i]>=minT and knownPer[i]<=maxT):
+            indPer.append(i)
 
-    # Remove any repeated values from target_periods and redefine target_periods as periods
-    # provided in databases
-    indPer = np.unique(indPer);
     recPer = knownPer[indPer];
 
     SA_list=[]

@@ -59,10 +59,12 @@ investigation_time=float(input['investigation_time'])
 
 
 # Conditional spectrum parameters
-TgtPer = [ x.strip() for x in input['TgtPer'].strip('{}').split(',') ]
-TgtPer= np.array(TgtPer,dtype=float)
-Tstar=np.zeros(len(intensity_measures))
+period_range = [ x.strip() for x in input['period_range'].strip('{}').split(',') ]
+minT=float(period_range[0])
+maxT=float(period_range[1])
 
+
+Tstar=np.zeros(len(intensity_measures))
 for i in np.arange(len(intensity_measures)):
     if(intensity_measures[i][0:2]=='SA'):
         Tstar[i]=intensity_measures[i].strip('(,),SA')
@@ -71,14 +73,9 @@ for i in np.arange(len(intensity_measures)):
 #	    Tstar[i]=0.0
 print('### Should we add Tstar = 0 for PGA? If we do, the akkar_correlation function gives an error because it does not support T=0')
 
-	 
-# Allow a Tstar outside the identified list to be chosen
-for i in np.arange(len(intensity_measures)):
-    if not np.isin(Tstar[i],TgtPer):
-        TgtPer=np.append(TgtPer,Tstar[i])
-TgtPer.sort()
-
 corr_type=input['corr_type']  #baker_jayaram or akkar
+if(maxT>4.0 and corr_type=='akkar'):
+    sys.exit('Error: akkar correlation model is defined only for T<4s')
 GMPE=input['GMPE'] #for now only available Akkar_Bommer_2010 Chiou_Youngs_2014 Boore_et_al_2014, BooreAtkinson2008 maybe and array of GMPE according with sites?
 avg_periods = [ x.strip() for x in input['avg_periods'].strip('{}').split(',') ]
 avg_periods= np.array(avg_periods,dtype=float)
@@ -246,10 +243,7 @@ for ii in np.arange(len(site_code)):
                 setattr(dctx, 'rjb', Dist)
                 setattr(sctx, 'vs30', Vs30)
 
-                print(TgtPer)
-                [SaKnown,indPer,_,nBig,allowedIndex,event_id,station_code,source,record_sequence_number_NGA,source,event_mw,event_mag,acc_distance]=screen_database(database_path,allowed_database,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D,allowedEC8code,TgtPer,nGM,allowed_depth)
-                print("Need to check this above, redefining the variable TgtPer inside this function. Put return value as _ for now to continue using the user defined one. Elisa: Yes there is the need to check the above Gerard: So we should redefine the TgtPer? If yes, we should undo this change and remove the prints")
-                print(TgtPer)
+                [SaKnown,indPer,TgtPer,nBig,allowedIndex,event_id,station_code,source,record_sequence_number_NGA,source,event_mw,event_mag,acc_distance]=screen_database(database_path,allowed_database,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D,allowedEC8code,minT,maxT,nGM,allowed_depth)
 
                 TgtMean=[]
                 rho=[]
@@ -347,6 +341,7 @@ for ii in np.arange(len(site_code)):
                     #compute scale factors and errors for each candidate ground motion
                     for j in np.arange(nBig):
                         rec_value=np.exp(sum(sampleBig[j,id_sel])/len(id_sel))
+                        print(rec_value,id_sel)
                         rec_value=rec_value[0]
                         if (rec_value == 0):
                             scaleFac[j] = 1000000
@@ -425,7 +420,6 @@ for ii in np.arange(len(site_code)):
                 recIdx = [allowedIndex[i] for i in finalRecords]
                 finalScaleFactors = IMScaleFac
                 meanrecorded=np.mean(np.exp(sampleSmall),axis=0)
-
 
                 folder=output_folder+'/'+name 
                 if not os.path.exists(folder):

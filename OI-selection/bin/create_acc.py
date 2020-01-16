@@ -47,46 +47,46 @@ def create_ESM_acc(folder):
         header['calib'] = 1 # not in file header
 
         ##DYNA dict float data
-        header['dyna']['EVENT_LATITUDE_DEGREE'] = strtofloat(headers['EVENT_LATITUDE_DEGREE'])
-        header['dyna']['EVENT_LONGITUDE_DEGREE'] = strtofloat(headers['EVENT_LONGITUDE_DEGREE'])
-        header['dyna']['EVENT_DEPTH_KM'] = strtofloat(headers['EVENT_DEPTH_KM'])
+        header['dyna']['EVENT_LATITUDE_DEGREE'] = float(headers['EVENT_LATITUDE_DEGREE'])
+        header['dyna']['EVENT_LONGITUDE_DEGREE'] = float(headers['EVENT_LONGITUDE_DEGREE'])
+        header['dyna']['EVENT_DEPTH_KM'] = float(headers['EVENT_DEPTH_KM'])
         header['dyna']['HYPOCENTER_REFERENCE'] = headers['HYPOCENTER_REFERENCE']
-        header['dyna']['MAGNITUDE_W'] = strtofloat(headers['MAGNITUDE_W'])
-        header['dyna']['MAGNITUDE_L'] = strtofloat(headers['MAGNITUDE_L'])
-        header['dyna']['STATION_LATITUDE_DEGREE'] = strtofloat(headers['STATION_LATITUDE_DEGREE'])
-        header['dyna']['STATION_LONGITUDE_DEGREE'] = strtofloat(headers['STATION_LONGITUDE_DEGREE'])
-        header['dyna']['VS30_M_S'] = strtofloat(headers['VS30_M/S'])
-        header['dyna']['EPICENTRAL_DISTANCE_KM'] = strtofloat(headers['EPICENTRAL_DISTANCE_KM'])
-        header['dyna']['EARTHQUAKE_BACKAZIMUTH_DEGREE'] = strtofloat(headers['EARTHQUAKE_BACKAZIMUTH_DEGREE'])
-        header['dyna']['DURATION_S'] = strtofloat(headers['DURATION_S'])
-        header['dyna']['INSTRUMENTAL_FREQUENCY_HZ'] = strtofloat(headers['INSTRUMENTAL_FREQUENCY_HZ'])
-        header['dyna']['INSTRUMENTAL_DAMPING'] = strtofloat(headers['INSTRUMENTAL_DAMPING'])
-        header['dyna']['FULL_SCALE_G'] = strtofloat(headers['FULL_SCALE_G'])
+        header['dyna']['MAGNITUDE_W'] = float(headers['MAGNITUDE_W'])
+        header['dyna']['MAGNITUDE_L'] = float(headers['MAGNITUDE_L'])
+        header['dyna']['STATION_LATITUDE_DEGREE'] = float(headers['STATION_LATITUDE_DEGREE'])
+        header['dyna']['STATION_LONGITUDE_DEGREE'] = float(headers['STATION_LONGITUDE_DEGREE'])
+        header['dyna']['VS30_M_S'] = float(headers['VS30_M/S'])
+        header['dyna']['EPICENTRAL_DISTANCE_KM'] = float(headers['EPICENTRAL_DISTANCE_KM'])
+        header['dyna']['EARTHQUAKE_BACKAZIMUTH_DEGREE'] = float(headers['EARTHQUAKE_BACKAZIMUTH_DEGREE'])
+        header['dyna']['DURATION_S'] = float(headers['DURATION_S'])
+        header['dyna']['INSTRUMENTAL_FREQUENCY_HZ'] = float(headers['INSTRUMENTAL_FREQUENCY_HZ'])
+        header['dyna']['INSTRUMENTAL_DAMPING'] = float(headers['INSTRUMENTAL_DAMPING'])
+        header['dyna']['FULL_SCALE_G'] = float(headers['FULL_SCALE_G'])
 
         # data type is acceleration
         if headers['DATA_TYPE'] == "ACCELERATION" \
         or headers['DATA_TYPE'] == "ACCELERATION RESPONSE SPECTRUM":
-            header['dyna']['PGA_CM_S_2'] = strtofloat(headers['PGA_CM/S^2'])
-            header['dyna']['TIME_PGA_S'] = strtofloat(headers['TIME_PGA_S'])
+            header['dyna']['PGA_CM_S_2'] = float(headers['PGA_CM/S^2'])
+            header['dyna']['TIME_PGA_S'] = float(headers['TIME_PGA_S'])
         # data type is velocity
         if headers['DATA_TYPE'] == "VELOCITY" \
         or headers['DATA_TYPE'] == "PSEUDO-VELOCITY RESPONSE SPECTRUM":
-            header['dyna']['PGV_CM_S'] = strtofloat(headers['PGV_CM/S'])
-            header['dyna']['TIME_PGV_S'] = strtofloat(headers['TIME_PGV_S'])
+            header['dyna']['PGV_CM_S'] = float(headers['PGV_CM/S'])
+            header['dyna']['TIME_PGV_S'] = float(headers['TIME_PGV_S'])
         # data type is displacement
         if headers['DATA_TYPE'] == "DISPLACEMENT" \
         or headers['DATA_TYPE'] == "DISPLACEMENT RESPONSE SPECTRUM":
-            header['dyna']['PGD_CM'] = strtofloat(headers['PGD_CM'])
-            header['dyna']['TIME_PGD_S'] = strtofloat(headers['TIME_PGD_S'])
+            header['dyna']['PGD_CM'] = float(headers['PGD_CM'])
+            header['dyna']['TIME_PGD_S'] = float(headers['TIME_PGD_S'])
 
-        header['dyna']['LOW_CUT_FREQUENCY_HZ'] = strtofloat(headers['LOW_CUT_FREQUENCY_HZ'])
-        header['dyna']['HIGH_CUT_FREQUENCY_HZ'] = strtofloat(headers['HIGH_CUT_FREQUENCY_HZ'])
+        header['dyna']['LOW_CUT_FREQUENCY_HZ'] = float(headers['LOW_CUT_FREQUENCY_HZ'])
+        header['dyna']['HIGH_CUT_FREQUENCY_HZ'] = float(headers['HIGH_CUT_FREQUENCY_HZ'])
 
         ##DYNA dict int data
-        header['dyna']['STATION_ELEVATION_M'] = strtoint(headers['STATION_ELEVATION_M'])
-        header['dyna']['SENSOR_DEPTH_M'] = strtoint(headers['SENSOR_DEPTH_M'])
-        header['dyna']['N_BIT_DIGITAL_CONVERTER'] =  strtoint(headers['N_BIT_DIGITAL_CONVERTER'])
-        header['dyna']['FILTER_ORDER'] = strtoint(headers['FILTER_ORDER'])
+        header['dyna']['STATION_ELEVATION_M'] = int(headers['STATION_ELEVATION_M'])
+        header['dyna']['SENSOR_DEPTH_M'] = int(headers['SENSOR_DEPTH_M'])
+        header['dyna']['N_BIT_DIGITAL_CONVERTER'] =  int(headers['N_BIT_DIGITAL_CONVERTER'])
+        header['dyna']['FILTER_ORDER'] = int(headers['FILTER_ORDER'])
 
         ##DYNA dict string data
         header['dyna']['EVENT_NAME'] = headers['EVENT_NAME']
@@ -144,21 +144,6 @@ def create_ESM_acc(folder):
             time2=time
 
     return time1,time2,inp_acc1,inp_acc2,npts1,npts2,comp1,comp2
-
-print("Why do we need these functions? Can just use float() and int() no?")
-def strtofloat(sf):
-    try:
-        x = float(sf)
-    except:
-        return None
-    return x
-
-def strtoint(sf):
-    try:
-        x = int(sf)
-    except:
-        return None
-    return x
 
 def toUTCDateTime(value):
     # Import libraries
