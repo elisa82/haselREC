@@ -5,8 +5,8 @@ import numpy as np
 import pandas as pd
 from scipy.stats import skew
 
-# Libraries from other files in bin
-sys.path.append("bin")
+# Libraries from other files in lib
+sys.path.append("lib")
 from openquake.hazardlib import gsim, imt, const
 from im_correlation import akkar_correlation
 from im_correlation import baker_jayaram_correlation
