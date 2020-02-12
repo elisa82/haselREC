@@ -113,13 +113,13 @@ def get_RotDxx(acc1, acc2, dt, damp, xx, num_theta=100, num_T=100):
 RotD50_1 = np.zeros((ngms,100))
 RotD50_2 = np.zeros((ngms,100))
 for i in range(ngms):
-	RotD50_1[i], Trange_RotD50 = get_RotDxx(a1[i], a2[i], dts[i], 0.01, 50)
+	RotD50_1[i], Trange_RotD50 = get_RotDxx(a1[i], a2[i], dts[i], 0.005, 50)
 	RotD50_2[i], Trange_RotD50 = get_RotDxx(a1[i], a2[i], dts[i], 0.05, 50)
 
 
 #%% Plot the computed RotD50
 for i in range(ngms):
-	plt.plot(Trange_RotD50,RotD50_1[i],color=clr[i],linestyle='--',linewidth=1,label='RotD50 1% (Computed)')
+	plt.plot(Trange_RotD50,RotD50_1[i],color=clr[i],linestyle='--',linewidth=1,label='RotD50 0.5% (Computed)')
 	plt.plot(Trange_RotD50,RotD50_2[i],color=clr[i],linestyle='-.',linewidth=1,label='RotD50 5% (Computed)')
 plt.legend()
 plt.savefig('Spectra.pdf', bbox_inches='tight')
