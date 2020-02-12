@@ -44,7 +44,7 @@ def screen_database(database_path,allowed_database,allowedRecs_Vs30,allowedRecs_
             #print('Need to test if the screening of database is ok')
             if(source[i] in allowed_database):
                 if((source[i]=='ESM' and is_free_field_ESM[i]==0) or (source[i]=='NGA-West2' and is_free_field_NGA[i]=="I")):
-                    if(event_mw[i]>=allowedRecs_Mag[0] and event_mw[i]<=allowedRecs_Mag[1]):
+                    if((source[i]=='ESM' and event_mw[i]>=allowedRecs_Mag[0] and event_mw[i]<=allowedRecs_Mag[1]) or (source[i]=='NGA-West2' and event_mag[i]>=allowedRecs_Mag[0] and event_mag[i]<=allowedRecs_Mag[1])):
                         if(event_depth[i]>=allowed_depth[0] and event_depth[i]<=allowed_depth[1]):
                             if(acc_distance[i]>=allowedRecs_D[0] and acc_distance[i]<=allowedRecs_D[1]):
                                 if(np.isnan(station_vs30[i])):
