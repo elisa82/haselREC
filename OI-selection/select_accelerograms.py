@@ -70,39 +70,7 @@ print('### Should we add Tstar = 0 for PGA? If we do, the akkar_correlation func
 corr_type=input['corr_type']  #baker_jayaram or akkar
 if(maxT>4.0 and corr_type=='akkar'):
     sys.exit('Error: akkar correlation model is defined only for T<4s')
-GMPE=input['GMPE'] #array of GMPE according with sites?
-print(GMPE)
-
-if(GMPE=='AbrahamsonEtAl2014'):
-    bgmpe = gsim.abrahamson_2014.AbrahamsonEtAl2014()
-    GMPE_with_fault_geometry=1
-if(GMPE=='AkkarEtAlRjb2014'):
-    bgmpe = gsim.akkar_2014.AkkarEtAlRjb2014()
-    GMPE_with_fault_geometry=0
-if(GMPE=='AkkarBommer2010'):
-    bgmpe = gsim.akkar_bommer_2010.AkkarBommer2010()
-    GMPE_with_fault_geometry=0
-if(GMPE=='AmeriEtAl2017Rjb'):
-    bgmpe = gsim.ameri_2017.AmeriEtAl2017Rjb()
-    GMPE_with_fault_geometry=0
-if(GMPE=='BindiEtAl2011'):
-    bgmpe = gsim.bindi_2011.BindiEtAl2011()
-    GMPE_with_fault_geometry=0
-if(GMPE=='BooreAtkinson2008'):
-    bgmpe = gsim.boore_atkinson_2008.BooreAtkinson2008()
-    GMPE_with_fault_geometry=0
-if(GMPE=='BooreEtAl2014'):
-    bgmpe = gsim.boore_2014.BooreEtAl2014()
-    GMPE_with_fault_geometry=0
-if(GMPE=='CampbellBozorgnia2008'):
-    bgmpe = gsim.campbell_bozorgnia_2008.CampbellBozorgnia2008()
-    GMPE_with_fault_geometry=1
-if(GMPE=='CampbellBozorgnia2014'):
-    bgmpe = gsim.campbell_bozorgnia_2014.CampbellBozorgnia2014()
-    GMPE_with_fault_geometry=1
-if(GMPE=='ChiouYoungs2014'):
-    bgmpe = gsim.chiou_youngs_2014.ChiouYoungs2014()
-    GMPE_with_fault_geometry=1
+GMPE_input=input['GMPE'] #array of GMPE according with sites?
 
 avg_periods = [ x.strip() for x in input['avg_periods'].strip('{}').split(',') ]
 avg_periods= np.array(avg_periods,dtype=float)
@@ -125,11 +93,10 @@ except KeyError:
     dip_defined=0
 print(hypo_defined)
 
-if(GMPE_with_fault_geometry==1):
-    azimuth=float(input['azimuth'])
-if(GMPE=='CampbellBozorgnia2008' or GMPE=='CampbellBozorgnia2014'):
+azimuth=float(input['azimuth'])
+if(GMPE_input=='CampbellBozorgnia2008' or GMPE_input=='CampbellBozorgnia2014'):
     z2pt5=float(input['z2pt5'])
-if(GMPE=='AbrahamsonEtAl2014' or GMPE=='ChiouYoungs2014'):
+if(GMPE_input=='AbrahamsonEtAl2014' or GMPE_input=='ChiouYoungs2014'):
     z1pt0=float(input['z1pt0'])
 
 # Database parameters for screening recordings
@@ -213,7 +180,11 @@ for ii in np.arange(len(site_code)):
 # -----------------------------------------------------------------------------
                 # Initialise GSIMs
 
-                _ = gsim.get_available_gsims()
+                #GSIM = gsim.get_available_gsims()
+
+                for name, gmpes in gsim.get_available_gsims().items():
+                    if name==GMPE_input:
+                        bgmpe=gmpes
 
                 sctx = gsim.base.SitesContext()
                 rctx = gsim.base.RuptureContext()
@@ -231,70 +202,69 @@ for ii in np.arange(len(site_code)):
                     else:
                         Z_hyp=11.24-0.2*mag
 
-                if(GMPE_with_fault_geometry==1):
-                    if(dip_defined==1):
-                        dip=dip_input
-                    else:
-                        if (-45 <= rake <= 45) or (rake >= 135) or (rake <= -135):
-                            dip=90
-                        elif RakeAverage > 0:
-                            dip=40
-                        else:
-                            dip=50
-
+                if(dip_defined==1):
+                    dip=dip_input
+                else:
                     if (-45 <= rake <= 45) or (rake >= 135) or (rake <= -135):
-                     # strike slip
-                        width= 10.0 ** (-0.76 + 0.27 *mag)
+                        dip=90
                     elif RakeAverage > 0:
-                        # thrust/reverse
-                        width= 10.0 ** (-1.61 + 0.41 *mag)
+                        dip=40
                     else:
-                        # normal
-                        width= 10.0 ** (-1.14 + 0.35 *mag)
+                        dip=50
 
-                    ztor=max(Z_hyp-0.6*width*np.sin(np.radians(dip)),0)
+                if (-45 <= rake <= 45) or (rake >= 135) or (rake <= -135):
+                     # strike slip
+                    width= 10.0 ** (-0.76 + 0.27 *mag)
+                elif RakeAverage > 0:
+                    # thrust/reverse
+                    width= 10.0 ** (-1.61 + 0.41 *mag)
+                else:
+                    # normal
+                    width= 10.0 ** (-1.14 + 0.35 *mag)
 
-                    if(rjb==0):
-                        rx=0.5*width*np.cos(np.radians(dip))
-                    else:
-                        if(dip==90):
-                            rx=rjb*np.sin(np.radians(azimuth))
-                        else:
-                            if(azimuth>=0 and azimuth<90):
-                                if(rjb*np.abs(np.tan(np.radians(azimuth)))<=width*np.cos(np.radians(dip))):
-                                    rx=rjb*np.abs(np.tan(np.radians(azimuth)))
-                                else:
-                                    rx=rjb*np.tan(np.radians(azimuth))*np.cos(np.radians(azimuth)-np.arcsin(width*np.cos(np.radians(dip))*np.cos(np.radians(azimuth))/rjb))
+                ztor=max(Z_hyp-0.6*width*np.sin(np.radians(dip)),0)
 
-                    if(azimuth==90 or azimuth==-90):
-                        ry=0
-                    elif(azimuth==0 or azimuth==180 or azimuth==-180):
-                        ry=rjb
-                    else:
-                        ry=np.abs(rx*1./np.tan(np.radians(azimuth)))
-
+                if(rjb==0):
+                    rx=0.5*width*np.cos(np.radians(dip))
+                else:
                     if(dip==90):
-                        rrup=np.sqrt(np.square(rjb)+np.square(ztor))
+                        rx=rjb*np.sin(np.radians(azimuth))
                     else:
-                        if(rx<ztor*np.tan(np.radians(dip))):
-                            rrup1=np.sqrt(np.square(rx)+np.square(ztor))
-                        if(rx>=ztor*np.tan(np.radians(dip)) and rx<=ztor*np.tan(np.radians(dip))+width*1./np.cos(np.radians(dip))):
-                            rrup1=rx*np.sin(np.radians(dip))+ztor*np.cos(np.radians(dip))
-                        if(rx>ztor*np.tan(np.radians(dip))+width*1./np.cos(np.radians(dip))):
-                            rrup1=np.sqrt(np.square(rx-width*np.cos(np.radians(dip)))+np.square(ztor+width*np.sin(np.radians(dip))))
-                        rrup=np.sqrt(np.square(rrup1)+np.square(ry))
+                        if(azimuth>=0 and azimuth<90):
+                            if(rjb*np.abs(np.tan(np.radians(azimuth)))<=width*np.cos(np.radians(dip))):
+                                rx=rjb*np.abs(np.tan(np.radians(azimuth)))
+                            else:
+                                rx=rjb*np.tan(np.radians(azimuth))*np.cos(np.radians(azimuth)-np.arcsin(width*np.cos(np.radians(dip))*np.cos(np.radians(azimuth))/rjb))
 
-                    setattr(rctx, 'width', width)
-                    setattr(rctx, 'ztor', ztor)
-                    setattr(rctx, 'dip', dip)
-                    setattr(dctx, 'rx', rx)
-                    setattr(dctx, 'rrup', rrup)
-                    setattr(dctx, 'ry0', ry)
-                    z1pt0=z1pt0+np.zeros(rjb.shape)
-                    setattr(sctx, 'z1pt0', z1pt0)
-                    z2pt5=z2pt5+np.zeros(rjb.shape)
-                    setattr(sctx, 'z2pt5', z2pt5)
-                    setattr(sctx, 'vs30measured',0)
+                if(azimuth==90 or azimuth==-90):
+                    ry=0
+                elif(azimuth==0 or azimuth==180 or azimuth==-180):
+                    ry=rjb
+                else:
+                    ry=np.abs(rx*1./np.tan(np.radians(azimuth)))
+
+                if(dip==90):
+                    rrup=np.sqrt(np.square(rjb)+np.square(ztor))
+                else:
+                    if(rx<ztor*np.tan(np.radians(dip))):
+                        rrup1=np.sqrt(np.square(rx)+np.square(ztor))
+                    if(rx>=ztor*np.tan(np.radians(dip)) and rx<=ztor*np.tan(np.radians(dip))+width*1./np.cos(np.radians(dip))):
+                        rrup1=rx*np.sin(np.radians(dip))+ztor*np.cos(np.radians(dip))
+                    if(rx>ztor*np.tan(np.radians(dip))+width*1./np.cos(np.radians(dip))):
+                        rrup1=np.sqrt(np.square(rx-width*np.cos(np.radians(dip)))+np.square(ztor+width*np.sin(np.radians(dip))))
+                    rrup=np.sqrt(np.square(rrup1)+np.square(ry))
+
+                setattr(rctx, 'width', width)
+                setattr(rctx, 'ztor', ztor)
+                setattr(rctx, 'dip', dip)
+                setattr(dctx, 'rx', rx)
+                setattr(dctx, 'rrup', rrup)
+                setattr(dctx, 'ry0', ry)
+                z1pt0=z1pt0+np.zeros(rjb.shape)
+                setattr(sctx, 'z1pt0', z1pt0)
+                z2pt5=z2pt5+np.zeros(rjb.shape)
+                setattr(sctx, 'z2pt5', z2pt5)
+                setattr(sctx, 'vs30measured',0)
                 setattr(rctx, 'mag', mag)
                 setattr(rctx, 'hypo_depth', Z_hyp)
                 setattr(rctx, 'rake', rake)
@@ -317,7 +287,7 @@ for ii in np.arange(len(site_code)):
                     else:
                         P = imt.SA(period=Tstar[im])
                     S=[const.StdDev.TOTAL]
-                    mean_SaTcond,stddvs_SaTcond=bgmpe.get_mean_and_stddevs(sctx,rctx,dctx,P,S)
+                    mean_SaTcond,stddvs_SaTcond=bgmpe().get_mean_and_stddevs(sctx,rctx,dctx,P,S)
                     stddvs_SaTcond=stddvs_SaTcond[0]
                 epsilon=(np.log(output_oq)-mean_SaTcond)/stddvs_SaTcond
 
@@ -329,7 +299,7 @@ for ii in np.arange(len(site_code)):
                     else:
                         P=imt.SA(period=per)
                     S=[const.StdDev.TOTAL]
-                    bMean_SA, bStDev_SA = bgmpe.get_mean_and_stddevs(sctx, rctx, dctx, P, S)
+                    bMean_SA, bStDev_SA = bgmpe().get_mean_and_stddevs(sctx, rctx, dctx, P, S)
                     mean.append(bMean_SA)
                     sigma.append(bStDev_SA[0])
                     if(intensity_measures[im]=='AvgSA'):
