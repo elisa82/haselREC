@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nrml xmlns:gml="http://www.opengis.net/gml" xmlns="http://openquake.org/xmlns/nrml/0.4">
+    <logicTree logicTreeID='lt1'>
+<!-- 1.0 Logic Tree for Active Shallow Crust -->
+        <logicTreeBranchingLevel branchingLevelID="bl1">
+            <logicTreeBranchSet uncertaintyType="gmpeModel" branchSetID="bs11" applyToTectonicRegionType="Active Shallow Crust">
+
+                <logicTreeBranch branchID="b1">
+                  <uncertaintyModel>
+                    <!-- BooreAtkinson2008 -->
+
+                    [GenericGmpeAvgSA]
+                    gmpe_name = "BooreAtkinson2008"
+                    avg_periods = [0.5, 0.55, 0.6, 0.65, 0.7, 0.8, 0.9]
+                    corr_func = "baker_jayaram"
+
+                  </uncertaintyModel>
+                  <uncertaintyWeight>1.0</uncertaintyWeight>
+                </logicTreeBranch>
+
+
+            </logicTreeBranchSet>
+        </logicTreeBranchingLevel>
+<!-- 2.0 Logic Tree for Stable Shallow Crust -->
+        <logicTreeBranchingLevel branchingLevelID="bl2">
+            <logicTreeBranchSet uncertaintyType="gmpeModel" branchSetID="bs21" applyToTectonicRegionType="Stable Shallow Crust">
+
+                <logicTreeBranch branchID="b21">
+                  <uncertaintyModel>
+                    <!-- BooreAtkinson2008 -->
+
+                    [GenericGmpeAvgSA]
+                    gmpe_name = "BooreAtkinson2008"
+                    avg_periods = [0.5, 0.55, 0.6, 0.65, 0.7, 0.8, 0.9]
+                    corr_func = "baker_jayaram"
+
+                  </uncertaintyModel>
+                    <uncertaintyWeight>1.0</uncertaintyWeight>
+                </logicTreeBranch>
+
+            </logicTreeBranchSet>
+        </logicTreeBranchingLevel>
+<!-- 3.0 Logic Tree for Shield -->
+        <logicTreeBranchingLevel branchingLevelID="bl3">
+        <logicTreeBranchSet uncertaintyType="gmpeModel" branchSetID="bs31" applyToTectonicRegionType="Shield">
+
+                <logicTreeBranch branchID="b31">
+                <uncertaintyModel>
+                  <!-- BooreAtkinson2008 -->
+
+                  [GenericGmpeAvgSA]
+                  gmpe_name = "BooreAtkinson2008"
+                  avg_periods = [0.5, 0.55, 0.6, 0.65, 0.7, 0.8, 0.9]
+                  corr_func = "baker_jayaram"
+
+                </uncertaintyModel>
+                    <uncertaintyWeight>1.0</uncertaintyWeight>
+                </logicTreeBranch>
+
+            </logicTreeBranchSet>
+        </logicTreeBranchingLevel>
+<!-- 4.0 Logic Tree for Subduction Interface -->
+        <logicTreeBranchingLevel branchingLevelID="bl4">
+            <logicTreeBranchSet uncertaintyType="gmpeModel" branchSetID="bs41" applyToTectonicRegionType="Subduction Interface">
+
+                <logicTreeBranch branchID="b41">
+                  <uncertaintyModel>
+                    <!-- BooreAtkinson2008 -->
+
+                    [GenericGmpeAvgSA]
+                    gmpe_name = "BooreAtkinson2008"
+                    avg_periods = [0.5, 0.55, 0.6, 0.65, 0.7, 0.8, 0.9]
+                    corr_func = "baker_jayaram"
+                  </uncertaintyModel>
+                   <uncertaintyWeight>1.0</uncertaintyWeight>
+                </logicTreeBranch>
+
+            </logicTreeBranchSet>
+        </logicTreeBranchingLevel>
+<!-- 5.0 Logic Tree for Subduction Inslab -->
+        <logicTreeBranchingLevel branchingLevelID="bl5">
+            <logicTreeBranchSet uncertaintyType="gmpeModel" branchSetID="bs51" applyToTectonicRegionType="Subduction Inslab">
+
+                <logicTreeBranch branchID="b51">
+                  <uncertaintyModel>
+                    <!-- BooreAtkinson2008 -->
+
+                    [GenericGmpeAvgSA]
+                    gmpe_name = "BooreAtkinson2008"
+                    avg_periods = [0.5, 0.55, 0.6, 0.65, 0.7, 0.8, 0.9]
+                    corr_func = "baker_jayaram"
+
+                  </uncertaintyModel>
+                    <uncertaintyWeight>1.0</uncertaintyWeight>
+                </logicTreeBranch>
+
+            </logicTreeBranchSet>
+        </logicTreeBranchingLevel>
+<!-- 6.0 Logic Tree for Volcanic -->
+        <logicTreeBranchingLevel branchingLevelID="bl6">
+            <logicTreeBranchSet uncertaintyType="gmpeModel" branchSetID="bs61" applyToTectonicRegionType="Volcanic">
+                <logicTreeBranch branchID="b61">
+                  <uncertaintyModel>
+                    <!-- BooreAtkinson2008 -->
+
+                    [GenericGmpeAvgSA]
+                    gmpe_name = "BooreAtkinson2008"
+                    avg_periods = [0.5, 0.55, 0.6, 0.65, 0.7, 0.8, 0.9]
+                    corr_func = "baker_jayaram"
+
+                  </uncertaintyModel>
+                    <uncertaintyWeight>1.0</uncertaintyWeight>
+                </logicTreeBranch>
+            </logicTreeBranchSet>
+        </logicTreeBranchingLevel>
+<!-- 7.0 Logic Tree for Vrancea -->
+        <logicTreeBranchingLevel branchingLevelID="bl7">
+            <logicTreeBranchSet uncertaintyType="gmpeModel" branchSetID="bs71" applyToTectonicRegionType="Subduction Deep">
+
+                <logicTreeBranch branchID="b71">
+                  <uncertaintyModel>
+                    <!-- BooreAtkinson2008 -->
+
+                    [GenericGmpeAvgSA]
+                    gmpe_name = "BooreAtkinson2008"
+                    avg_periods = [0.5, 0.55, 0.6, 0.65, 0.7, 0.8, 0.9]
+                    corr_func = "baker_jayaram"
+                  </uncertaintyModel>
+                    <uncertaintyWeight>1.0</uncertaintyWeight>
+                </logicTreeBranch>
+
+
+            </logicTreeBranchSet>
+        </logicTreeBranchingLevel>
+
+    </logicTree>
+</nrml>
