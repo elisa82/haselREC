@@ -91,9 +91,21 @@ try:
     dip_defined=1
 except KeyError:
     dip_defined=0
-print(hypo_defined)
 
-azimuth=float(input['azimuth'])
+try:
+    azimuth=float(input['azimuth'])
+except KeyError:
+    try:
+        FHW=int(input['hanging_wall_flag'])
+        if(FHW==1):
+            azimuth=50
+        elif(FHW==-1):
+            azimuth=-50
+        else:
+            sys.exit('Error: The hanging_wall_flag must be =1 or =-1')
+    except KeyError:
+        sys.exit('Error: The azimuth or the hanging_wall_flag must be defined')
+
 if(GMPE_input=='CampbellBozorgnia2008' or GMPE_input=='CampbellBozorgnia2014'):
     z2pt5=float(input['z2pt5'])
 if(GMPE_input=='AbrahamsonEtAl2014' or GMPE_input=='ChiouYoungs2014'):
@@ -290,8 +302,6 @@ for ii in np.arange(len(site_code)):
                     mean_SaTcond,stddvs_SaTcond=bgmpe().get_mean_and_stddevs(sctx,rctx,dctx,P,S)
                     stddvs_SaTcond=stddvs_SaTcond[0]
                 epsilon=(np.log(output_oq)-mean_SaTcond)/stddvs_SaTcond
-
-                print('OK')
 
                 for per in TgtPer:
                     if(per==0):
