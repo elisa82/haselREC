@@ -1,5 +1,5 @@
 # OpenINsel
-Open-source tool for INtegrated hazard analysis and ground motion record SELection (OpenInsel)
+Open-source tool for INtegrated hazard analysis and ground motion record SELection (OpenINsel)
 
 It perfoms a ground motion record selection following a target conditional spectrum, using the OpenQuake libraries and disaggregation results.
 
@@ -8,7 +8,7 @@ Main contributors:
 * Gerard J. O'Reilly - Scuola Universitaria Superiore IUSS Pavia, Italy
 
 # Dependencies
-OpenInsel requires the following dependencies:
+OpenINsel requires the following dependencies:
 NumPy
 Pandas
 Scipy
@@ -23,11 +23,11 @@ Openquake.hazardlib
 
 # License
 Copyright (c) 2020, OpenInsel Developers
-OpenInsel is a free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3.0 of the License, or (at your option) any later version.
+OpenINsel is a free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3.0 of the License, or (at your option) any later version.
 You should have received a copy of the GNU General Public License with this download. If not, see http://www.gnu.org/licenses/
 
 # Disclaimer
-OpenInsel is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+OpenINsel is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
 The authors of the software assume no liability for use of the software.
 
 # Known Issues
