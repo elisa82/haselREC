@@ -1,4 +1,4 @@
-# OpenInsel
+# OpenINsel
 Open-source tool for INtegrated hazard analysis and ground motion record SELection (OpenInsel)
 
 It perfoms a ground motion record selection following a target conditional spectrum, using the OpenQuake libraries and disaggregation results.
