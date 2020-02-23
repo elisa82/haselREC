@@ -18,8 +18,8 @@ Matplotlib
 Openquake.hazardlib
 
 # Usage
-cd OI-selection
-python select_accelerograms.py $filename.ini
+* cd OI-selection
+* python select_accelerograms.py $filename.ini
 
 # License
 Copyright (c) 2020, OpenInsel Developers
