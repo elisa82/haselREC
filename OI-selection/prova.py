@@ -12,11 +12,6 @@ Compare them with the spectra computed manually from record
 import pickle
 import matplotlib.pyplot as plt
 import numpy as np
-import sys
-sys.path.append("/Users/gor/GitHub/Python-Functions")
-from gm_tools import read_NGA
-from gm_tools import get_RotDxx
-import eqsig
 
 #%% Import the spectra used in selection from pickle file
 SaKnown,indPer,TgtPer,nBig,allowedIndex,event_id,station_code,source,record_sequence_number_NGA,source,event_mw,event_mag,acc_distance = pickle.load( open( 'provaSA(0.5)-site_1-poe-0.pkl' , 'rb'))
@@ -31,6 +26,38 @@ plt.xscale('log')
 plt.yscale('log')
 plt.xlabel('Period [s]')
 plt.ylabel('Spectral Acceleration [g]')
+
+#%% Define function to read the AT2 files directly
+def read_NGA(filepath):
+	with open(filepath,'r') as f:
+		content = f.readlines()
+	counter = 0
+	desc, row4Val, acc_data = "","",[]
+	for x in content:
+		if counter == 1:
+			desc = x
+		elif counter == 3:
+			row4Val = x
+			if row4Val[0][0] == 'N':
+				val = row4Val.split()
+				npts = float(val[(val.index('NPTS='))+1].rstrip(','))
+				dt = float(val[(val.index('DT='))+1])
+			else:
+				val = row4Val.split()
+				npts = float(val[0])
+				dt = float(val[1])
+		elif counter > 3:
+			data = str(x).split()
+			for value in data:
+				a = float(value)
+				acc_data.append(a)
+			inp_acc = np.asarray(acc_data)
+			time = []
+			for i in range (0,len(acc_data)):
+				t = i * dt
+				time.append(t)
+		counter = counter + 1
+	return desc, npts, dt, time, inp_acc
 
 
 #%% Load the actual time series
@@ -50,6 +77,7 @@ for i in range(ngms):
 	t2.append(time2[0:npts])
 
 #%% Compute the response spectra of the two orthogonal components
+import eqsig
 num_T = 50
 Trange = np.logspace(start=-2, stop=1, num=num_T)
 
@@ -64,6 +92,22 @@ for i in range(ngms):
 #for i in range(ngms):
 #	plt.plot(Trange,Sa1[i],color=clr[i],linestyle=':',label='Dir 1 (Computed)')
 #	plt.plot(Trange,Sa2[i],color=clr[i],linestyle='-.',label='Dir 2 (Computed)')
+
+#%% Define a function to compute RotDxx
+def get_RotDxx(acc1, acc2, dt, damp, xx, num_theta=100, num_T=100):
+	theta = np.linspace(start=0, stop=np.pi, num=num_theta)
+	Trange = np.logspace(start=-2, stop=1, num=num_T)
+	
+	Rot = np.zeros((num_theta,num_T))
+	RotDxx = np.zeros((num_T))
+	
+	# Just do for one ground motion for now
+	for j in range(num_theta):
+		a = acc1*np.cos(theta[j])+acc2*np.sin(theta[j])
+		_, _, Rot[j][:] = eqsig.sdof.pseudo_response_spectra(a, dt, Trange, xi=damp)
+	RotDxx = np.percentile(Rot,xx,axis=0)
+	
+	return RotDxx, Trange
 
 #%% Compute the RotD50 directly
 RotD50_1 = np.zeros((ngms,100))
