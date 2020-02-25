@@ -84,12 +84,14 @@ try:
     hypo_depth=float(input['hypo_depth'])
     hypo_defined=1
 except KeyError:
+    print('Warning: if used, the hypocentral depth will be defined inside the code')
     hypo_defined=0
 
 try:
     dip_input=float(input['dip'])
     dip_defined=1
 except KeyError:
+    print('Warning: if used, the dip angle will be defined inside the code')
     dip_defined=0
 
 try:
@@ -107,9 +109,19 @@ except KeyError:
         sys.exit('Error: The azimuth or the hanging_wall_flag must be defined')
 
 if(GMPE_input=='CampbellBozorgnia2008' or GMPE_input=='CampbellBozorgnia2014'):
-    z2pt5=float(input['z2pt5'])
+    try:
+        z2pt5=float(input['z2pt5'])
+        z2pt5_defined=1
+    except KeyError:
+        print('Warning: z2pt5 will be defined inside the code')
+        z2pt5_defined=0
 if(GMPE_input=='AbrahamsonEtAl2014' or GMPE_input=='ChiouYoungs2014'):
-    z1pt0=float(input['z1pt0'])
+    try:
+        z1pt0=float(input['z1pt0'])
+        z1pt0_defined=1
+    except KeyError:
+        print('Warning: z1pt0 will be defined inside the code')
+        z1pt0_defined=0
 
 # Database parameters for screening recordings
 database_path=input['database_path']
@@ -242,11 +254,15 @@ for ii in np.arange(len(site_code)):
                     if(dip==90):
                         rx=rjb*np.sin(np.radians(azimuth))
                     else:
-                        if(azimuth>=0 and azimuth<90):
+                        if (azimuth>=0 and azimuth<90) or (azimuth>90 and azimuth<=180):
                             if(rjb*np.abs(np.tan(np.radians(azimuth)))<=width*np.cos(np.radians(dip))):
                                 rx=rjb*np.abs(np.tan(np.radians(azimuth)))
                             else:
                                 rx=rjb*np.tan(np.radians(azimuth))*np.cos(np.radians(azimuth)-np.arcsin(width*np.cos(np.radians(dip))*np.cos(np.radians(azimuth))/rjb))
+                        elif (azimuth==90): #we assume that Rjb>0 
+                            rx=rjb+width*np.cos(np.radians(dip))
+                        else:
+                            rx=rjb*np.sin(np.radians(azimuth))
 
                 if(azimuth==90 or azimuth==-90):
                     ry=0
@@ -265,6 +281,20 @@ for ii in np.arange(len(site_code)):
                     if(rx>ztor*np.tan(np.radians(dip))+width*1./np.cos(np.radians(dip))):
                         rrup1=np.sqrt(np.square(rx-width*np.cos(np.radians(dip)))+np.square(ztor+width*np.sin(np.radians(dip))))
                     rrup=np.sqrt(np.square(rrup1)+np.square(ry))
+
+                if(z1pt0_defined==0 and GMPE_input=='AbrahamsonEtAl2014') or (z2pt5_defined==0):
+                    if(Vs30<180):
+                        z1pt0=np.exp(6.745)
+                    elif(Vs30>=180 and Vs30<=500):
+                        z1pt0=np.exp(6.745-1.35*np.log(Vs30/180))
+                    else:
+                        z1pt0=np.exp(5.394-4.48*np.log(Vs30/500))
+
+                if(z1pt0_defined==0 and GMPE_input=='ChiouYoungs2014'):
+                    z1pt0=np.exp(28.5-3.82/8*np.log(Vs30**8+378.7**8))
+
+                if(z2pt5_defined==0):
+                    z2pt5=519+3.595*z1pt0
 
                 setattr(rctx, 'width', width)
                 setattr(rctx, 'ztor', ztor)
