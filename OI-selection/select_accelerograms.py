@@ -75,7 +75,10 @@ GMPE_input=input['GMPE'] #array of GMPE according with sites?
 avg_periods = [ x.strip() for x in input['avg_periods'].strip('{}').split(',') ]
 avg_periods= np.array(avg_periods,dtype=float)
 rake=float(input['rake'])
-Vs30=float(input['Vs30']) #maybe an array of Vs30 according with sites?
+Vs30=[ x.strip() for x in input['Vs30'].strip('{}').split(',') ] 
+if(len(Vs30)!=len(site_code)):
+    sys.exit('Error: Vs30 must be an array of the same length of site_code')
+
 
 z2pt5=[]
 z1pt0=[]
@@ -298,6 +301,8 @@ for ii in np.arange(len(site_code)):
                     if(rx>ztor*np.tan(np.radians(dip))+width*1./np.cos(np.radians(dip))):
                         rrup1=np.sqrt(np.square(rx-width*np.cos(np.radians(dip)))+np.square(ztor+width*np.sin(np.radians(dip))))
                     rrup=np.sqrt(np.square(rrup1)+np.square(ry))
+
+                Vs30=float(Vs30[ii])
 
                 if(z1pt0_defined==0 and GMPE_input=='AbrahamsonEtAl2014') or (z2pt5_defined==0):
                     if(Vs30<180):
