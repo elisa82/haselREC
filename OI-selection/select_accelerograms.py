@@ -83,10 +83,6 @@ Vs30_input=[ x.strip() for x in input['Vs30'].strip('{}').split(',') ]
 if(len(Vs30_input)!=len(site_code)):
     sys.exit('Error: Vs30 must be an array of the same length of site_code')
 
-
-z2pt5=[]
-z1pt0=[]
-
 try:
     hypo_depth=float(input['hypo_depth'])
     hypo_defined=1
@@ -117,18 +113,24 @@ except KeyError:
 
 z1pt0_defined=-1
 z2pt5_defined=-1
+z2pt5=[]
+z1pt0=[]
 
 if(GMPE_input=='CampbellBozorgnia2008' or GMPE_input=='CampbellBozorgnia2014'):
     try:
-        z2pt5=float(input['z2pt5'])
+        z2pt5_input=[ x.strip() for x in input['z2pt5'].strip('{}').split(',') ]
         z2pt5_defined=1
+        if(len(z2pt5_input)!=len(site_code)):
+            sys.exit('Error: z2pt5 must be an array of the same length of site_code')
     except KeyError:
         print('Warning: z2pt5 will be defined inside the code')
         z2pt5_defined=0
 if(GMPE_input=='AbrahamsonEtAl2014' or GMPE_input=='ChiouYoungs2014'):
     try:
-        z1pt0=float(input['z1pt0'])
+        z1pt0_input=[ x.strip() for x in input['z1pt0'].strip('{}').split(',') ]
         z1pt0_defined=1
+        if(len(z1pt0_input)!=len(site_code)):
+            sys.exit('Error: z2pt5 must be an array of the same length of site_code')
     except KeyError:
         print('Warning: z1pt0 will be defined inside the code')
         z1pt0_defined=0
@@ -365,8 +367,14 @@ for ii in np.arange(len(site_code)):
                 if(z1pt0_defined==0 and GMPE_input=='ChiouYoungs2014'):
                     z1pt0=np.exp(28.5-3.82/8*np.log(Vs30**8+378.7**8))
 
+                if(z1pt0_defined==1):
+                    z1pt0=float(z1pt0_input[ii])
+
                 if(z2pt5_defined==0):
                     z2pt5=519+3.595*z1pt0
+
+                if(z2pt5_defined==1):
+                    z2pt5=float(z2pt5_input[ii])
 
                 setattr(rctx, 'width', width)
                 setattr(rctx, 'ztor', ztor)
