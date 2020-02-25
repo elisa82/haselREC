@@ -24,11 +24,24 @@ def screen_database(database_path,allowed_database,allowedRecs_Vs30,allowedRecs_
     epi_lat=dbacc['epi_lat']
 
     if(allowedRecs_Vs30_defined==0):
-        print('')
+        if(Vs30>=800.0):
+            allowedRecs_Vs30=[800.0,3000.0]
+        elif(Vs30>=360. and Vs30<800.):
+            allowedRecs_Vs30=[360.0,800.0]
+        elif(Vs30>=180. and Vs30<360.):
+            allowedRecs_Vs30=[180.0,360.0]
+        else:
+            allowedRecs_Vs30=[0.0,180.0]
 
     if(allowedEC8code_defined==0):
-        print('')
-
+        if(Vs30>=800.0):
+            allowedEC8code='A'
+        elif(Vs30>=360. and Vs30<800.):
+            allowedEC8code='B'
+        elif(Vs30>=180. and Vs30<360.):
+            allowedEC8code='C'
+        else:
+            allowedEC8code='D'
 
     # select periods in the range
     indPer = []
@@ -78,4 +91,4 @@ def screen_database(database_path,allowed_database,allowedRecs_Vs30,allowedRecs_
     print(['Number of allowed ground motions = ', nBig])
     assert (nBig >= nGM), 'Warning: there are not enough allowable ground motions'
 
-    return SaKnown,indPer,recPer,nBig,allowedIndex,event_id,station_code,source,record_sequence_number_NGA,source,event_mw,event_mag,acc_distance
+    return SaKnown,indPer,recPer,nBig,allowedIndex,event_id,station_code,source,record_sequence_number_NGA,source,event_mw,event_mag,acc_distance,station_vs30,station_ec8

@@ -45,6 +45,8 @@ download_and_scale_acc=int(input['download_and_scale_acc']) #1=yes, 0=no
 intensity_measures = [ x.strip() for x in input['intensity_measures'].strip('{}').split(',') ]
 site_code = [ x.strip() for x in input['site_code'].strip('{}').split(',') ]
 rlz_code = [ x.strip() for x in input['rlz_code'].strip('{}').split(',') ]
+if(len(rlz_code)!=len(site_code)):
+    sys.exit('Error: rlz_code must be an array of the same length of site_code')
 path_hazard_results=input['path_hazard_results']
 num_disagg=int(input['num_disagg'])
 num_classical=int(input['num_classical'])
@@ -263,7 +265,7 @@ for ii in np.arange(len(site_code)):
                 #Retrieve conditioning value
                 df=pd.read_csv(''.join([path_hazard_results,'/',file_with_OQ_acc_value]),skiprows=1)
                 output_oq=df[selected_column]
-                output_oq=output_oq[0]
+                output_oq=output_oq[site]
 
 # -----------------------------------------------------------------------------
                 # Initialise GSIMs
@@ -384,7 +386,7 @@ for ii in np.arange(len(site_code)):
                 Vs30=Vs30+np.zeros(rjb.shape)
                 setattr(sctx, 'vs30', Vs30)
 
-                [SaKnown,indPer,TgtPer,nBig,allowedIndex,event_id,station_code,source,record_sequence_number_NGA,source,event_mw,event_mag,acc_distance]=screen_database(database_path,allowed_database,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D,allowedEC8code,minT,maxT,nGM,allowed_depth,allowedRecs_Vs30_defined,allowedEC8code_defined,Vs30)
+                [SaKnown,indPer,TgtPer,nBig,allowedIndex,event_id,station_code,source,record_sequence_number_NGA,source,event_mw,event_mag,acc_distance,station_vs30,station_ec8]=screen_database(database_path,allowed_database,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D,allowedEC8code,minT,maxT,nGM,allowed_depth,allowedRecs_Vs30_defined,allowedEC8code_defined,Vs30)
 
                 TgtMean=[]
                 rho=[]
@@ -579,10 +581,10 @@ for ii in np.arange(len(site_code)):
                     for i in np.arange(nGM):
                         elemento=recIdx[i]
                         if(source[elemento]=='ESM'):
-                            f.write("{} {} {} {} {} {} {} {:6.2f} \n".format(i+1,source[elemento],event_id[elemento],station_code[elemento],blank,event_mw[elemento],acc_distance[elemento],finalScaleFactors[i]))
+                            f.write("{} {} {} {} {} {} {} {} {} {:6.2f} \n".format(i+1,source[elemento],event_id[elemento],station_code[elemento],blank,event_mw[elemento],acc_distance[elemento],station_vs30[elemento],station_ec8[elemento][0],finalScaleFactors[i]))
                         if(source[elemento]=='NGA-West2'):
                             val=int(record_sequence_number_NGA[elemento])
-                            f.write("{} {} {} {} {} {} {} {:6.2f} \n".format(i+1,source[elemento],blank,blank,val,event_mag[elemento],acc_distance[elemento],finalScaleFactors[i]))
+                            f.write("{} {} {} {} {} {} {} {} {} {:6.2f} \n".format(i+1,source[elemento],blank,blank,val,event_mag[elemento],acc_distance[elemento],station_vs30[elemento],station_ec8[elemento][0],finalScaleFactors[i]))
                 f.close()
 
                 # Output conditional spectrum to a text file
