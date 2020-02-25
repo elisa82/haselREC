@@ -44,13 +44,16 @@ download_and_scale_acc=int(input['download_and_scale_acc']) #1=yes, 0=no
 # Hazard parameters
 intensity_measures = [ x.strip() for x in input['intensity_measures'].strip('{}').split(',') ]
 site_code = [ x.strip() for x in input['site_code'].strip('{}').split(',') ]
+site_code= np.array(site_code,dtype=int)
 rlz_code = [ x.strip() for x in input['rlz_code'].strip('{}').split(',') ]
+rlz_code= np.array(rlz_code,dtype=int)
 if(len(rlz_code)!=len(site_code)):
     sys.exit('Error: rlz_code must be an array of the same length of site_code')
 path_hazard_results=input['path_hazard_results']
 num_disagg=int(input['num_disagg'])
 num_classical=int(input['num_classical'])
 probability_of_exceedance_num = [ x.strip() for x in input['probability_of_exceedance_num'].strip('{}').split(',') ]
+probability_of_exceedance_num= np.array(probability_of_exceedance_num,dtype=int)
 probability_of_exceedance = [ x.strip() for x in input['probability_of_exceedance'].strip('{}').split(',') ]
 if(len(probability_of_exceedance_num)!=len(probability_of_exceedance_num)):
     sys.exit('Error: probability_of_exceedance_num must be of the same size of probability_of_exceedance')
@@ -217,7 +220,7 @@ print('Inputs loaded, starting selection....')
 ind = 1
 
 # For each site investigated
-for ii in np.arange(len(site_code)):
+for ii in site_code:
     
     # Get the current site and realisation indices
     site = site_code[ii]
@@ -225,7 +228,7 @@ for ii in np.arange(len(site_code)):
     
     # For each hazard of poe level investigated
     count_poe=-1
-    for poe in np.arange(len(probability_of_exceedance_num)):
+    for poe in probability_of_exceedance_num:
         count_poe=count_poe+1
         if hasattr(maxsf_input, '__len__'):
             maxsf=maxsf_input[count_poe]
@@ -244,9 +247,9 @@ for ii in np.arange(len(site_code)):
         for im in np.arange(len(intensity_measures)):
                 
                 # Get the name of the disaggregation file to look in
-                disagg_results='rlz-'+str(rlz)+'-'+intensity_measures[im]+'-sid-'+str(site)+'-poe-0_Mag_Dist_'+str(num_disagg)+'.csv'
+                disagg_results='rlz-'+str(rlz)+'-'+intensity_measures[im]+'-sid-'+str(site)+'-poe-'+str(poe)+'_Mag_Dist_'+str(num_disagg)+'.csv'
                 name=intensity_measures[im]+'-site_'+str(site)+'-poe-'+str(poe)
-                selected_column=intensity_measures[im]+'-'+str(probability_of_exceedance[poe])
+                selected_column=intensity_measures[im]+'-'+str(probability_of_exceedance[count_poe])
                 file_with_OQ_acc_value='hazard_map-mean_'+str(num_classical)+'.csv'
                 
                 # Print some on screen feedback
