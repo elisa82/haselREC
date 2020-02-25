@@ -50,6 +50,8 @@ num_disagg=int(input['num_disagg'])
 num_classical=int(input['num_classical'])
 probability_of_exceedance_num = [ x.strip() for x in input['probability_of_exceedance_num'].strip('{}').split(',') ]
 probability_of_exceedance = [ x.strip() for x in input['probability_of_exceedance'].strip('{}').split(',') ]
+if(len(probability_of_exceedance_num)!=len(probability_of_exceedance_num)):
+    sys.exit('Error: probability_of_exceedance_num must be of the same size of probability_of_exceedance')
 investigation_time=float(input['investigation_time'])
 
 
@@ -75,8 +77,8 @@ GMPE_input=input['GMPE'] #array of GMPE according with sites?
 avg_periods = [ x.strip() for x in input['avg_periods'].strip('{}').split(',') ]
 avg_periods= np.array(avg_periods,dtype=float)
 rake=float(input['rake'])
-Vs30=[ x.strip() for x in input['Vs30'].strip('{}').split(',') ] 
-if(len(Vs30)!=len(site_code)):
+Vs30_input=[ x.strip() for x in input['Vs30'].strip('{}').split(',') ] 
+if(len(Vs30_input)!=len(site_code)):
     sys.exit('Error: Vs30 must be an array of the same length of site_code')
 
 
@@ -145,10 +147,29 @@ allowed_database = [ x.strip() for x in input['allowed_database'].strip('{}').sp
 allowedRecs_Vs30 = [ x.strip() for x in input['allowedRecs_Vs30'].strip('[]').split(',') ]# upper and lower bound of allowable Vs30 values
 allowedRecs_Vs30= np.array(allowedRecs_Vs30,dtype=float)
 allowedEC8code = [ x.strip() for x in input['allowedEC8code'].strip('{}').split(',') ]
-maxsf=float(input['maxsf']) #The maximum allowable scale factor
+try:
+    maxsf_input=float(input['maxsf'])
+except ValueError:
+    maxsf_input=[ x.strip() for x in input['maxsf'].strip('{}').split(',') ] #The maximum allowable scale factor. They must be specified as a function of probability_of_exceedance
+    maxsf_input= np.array(maxsf_input,dtype=float)
+    if(len(probability_of_exceedance_num)!=len(maxsf_input)):
+        sys.exit('Error: maxsf must be of the same size of probability_of_exceedance')
 #Maybe we can give the possibility to give different SF for different IM, sites, ecc.. and also for radius_dist and mag
-radius_dist= float(input['radius_dist']) # km
-radius_mag = float(input['radius_mag'])
+try:
+    radius_dist_input=float(input['radius_dist'])
+except ValueError:
+    radius_dist_input=[ x.strip() for x in input['radius_dist'].strip('{}').split(',') ] #km
+    radius_dist_input= np.array(radius_dist_input,dtype=float)
+    if(len(probability_of_exceedance_num)!=len(radius_dist_input)):
+        sys.exit('Error: radius_dist must be of the same size of probability_of_exceedance')
+try:
+    radius_mag_input=float(input['radius_mag'])
+except ValueError:
+    radius_mag_input=[ x.strip() for x in input['radius_mag'].strip('{}').split(',') ] 
+    radius_mag_input= np.array(radius_mag_input,dtype=float)
+    if(len(probability_of_exceedance_num)!=len(radius_mag_input)):
+        sys.exit('Error: radius_mag must be of the same size of probability_of_exceedance')
+
 allowed_depth=[ x.strip() for x in input['allowed_depth'].strip('[]').split(',') ] # upper and lower bound of allowable Vs30 values
 allowed_depth= np.array(allowed_depth,dtype=float)
 
@@ -186,8 +207,22 @@ for ii in np.arange(len(site_code)):
     rlz = rlz_code[ii]
     
     # For each hazard of poe level investigated
+    count_poe=-1
     for poe in np.arange(len(probability_of_exceedance_num)):
-        
+        count_poe=count_poe+1
+        if hasattr(maxsf_input, '__len__'):
+            maxsf=maxsf_input[count_poe]
+        else:
+            maxsf=maxsf_input
+        if hasattr(radius_dist_input, '__len__'):
+            radius_dist=radius_dist_input[count_poe]
+        else:
+            radius_dist=radius_dist_input
+        if hasattr(radius_mag_input, '__len__'):
+            radius_mag=radius_mag_input[count_poe]
+        else:
+            radius_mag=radius_mag_input
+
         # For each intensity measure investigated
         for im in np.arange(len(intensity_measures)):
                 
@@ -302,7 +337,7 @@ for ii in np.arange(len(site_code)):
                         rrup1=np.sqrt(np.square(rx-width*np.cos(np.radians(dip)))+np.square(ztor+width*np.sin(np.radians(dip))))
                     rrup=np.sqrt(np.square(rrup1)+np.square(ry))
 
-                Vs30=float(Vs30[ii])
+                Vs30=float(Vs30_input[ii])
 
                 if(z1pt0_defined==0 and GMPE_input=='AbrahamsonEtAl2014') or (z2pt5_defined==0):
                     if(Vs30<180):
