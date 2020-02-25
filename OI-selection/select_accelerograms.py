@@ -108,6 +108,9 @@ except KeyError:
     except KeyError:
         sys.exit('Error: The azimuth or the hanging_wall_flag must be defined')
 
+z1pt0_defined=-1
+z2pt5_defined=-1
+
 if(GMPE_input=='CampbellBozorgnia2008' or GMPE_input=='CampbellBozorgnia2014'):
     try:
         z2pt5=float(input['z2pt5'])
@@ -216,8 +219,8 @@ for ii in np.arange(len(site_code)):
 
                 #GSIM = gsim.get_available_gsims()
 
-                for name, gmpes in gsim.get_available_gsims().items():
-                    if name==GMPE_input:
+                for name_gmpe, gmpes in gsim.get_available_gsims().items():
+                    if name_gmpe==GMPE_input:
                         bgmpe=gmpes
 
                 sctx = gsim.base.SitesContext()
@@ -527,6 +530,14 @@ for ii in np.arange(len(site_code)):
                         if(source[elemento]=='NGA-West2'):
                             val=int(record_sequence_number_NGA[elemento])
                             f.write("{} {} {} {} {} {} {} {:6.2f} \n".format(i+1,source[elemento],blank,blank,val,event_mag[elemento],acc_distance[elemento],finalScaleFactors[i]))
+                f.close()
+
+                # Output conditional spectrum to a text file
+                name_CS=output_folder+'/'+name+'/'+name+"_CS.txt"
+                with open(name_CS, "w") as f:
+                    f.write("Period(s) lnCS(g) standard_deviation\n")
+                    for i in np.arange(len(TgtPer)):
+                        f.write("{:6.2f}{:6.2f}{:6.2f} \n".format(TgtPer[i],meanReq[i],stdevs[i]))
                 f.close()
 
                 if(download_and_scale_acc==1):
