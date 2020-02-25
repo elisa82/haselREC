@@ -145,6 +145,8 @@ except KeyError:
 database_path=input['database_path']
 allowed_database = [ x.strip() for x in input['allowed_database'].strip('{}').split(',') ]
 
+allowedRecs_Vs30=''
+allowedEC8code=''
 try:
     allowedRecs_Vs30 = [ x.strip() for x in input['allowedRecs_Vs30'].strip('[]').split(',') ]# upper and lower bound of allowable Vs30 values
     allowedRecs_Vs30= np.array(allowedRecs_Vs30,dtype=float)
