@@ -144,9 +144,20 @@ except KeyError:
 # Database parameters for screening recordings
 database_path=input['database_path']
 allowed_database = [ x.strip() for x in input['allowed_database'].strip('{}').split(',') ]
-allowedRecs_Vs30 = [ x.strip() for x in input['allowedRecs_Vs30'].strip('[]').split(',') ]# upper and lower bound of allowable Vs30 values
-allowedRecs_Vs30= np.array(allowedRecs_Vs30,dtype=float)
-allowedEC8code = [ x.strip() for x in input['allowedEC8code'].strip('{}').split(',') ]
+
+try:
+    allowedRecs_Vs30 = [ x.strip() for x in input['allowedRecs_Vs30'].strip('[]').split(',') ]# upper and lower bound of allowable Vs30 values
+    allowedRecs_Vs30= np.array(allowedRecs_Vs30,dtype=float)
+    allowedRecs_Vs30_defined=1
+except KeyError:
+    allowedRecs_Vs30_defined=0
+
+try:
+    allowedEC8code = [ x.strip() for x in input['allowedEC8code'].strip('{}').split(',') ]
+    allowedEC8code_defined=1
+except KeyError:
+    allowedEC8code_defined=0
+
 try:
     maxsf_input=float(input['maxsf'])
 except ValueError:
@@ -371,7 +382,7 @@ for ii in np.arange(len(site_code)):
                 Vs30=Vs30+np.zeros(rjb.shape)
                 setattr(sctx, 'vs30', Vs30)
 
-                [SaKnown,indPer,TgtPer,nBig,allowedIndex,event_id,station_code,source,record_sequence_number_NGA,source,event_mw,event_mag,acc_distance]=screen_database(database_path,allowed_database,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D,allowedEC8code,minT,maxT,nGM,allowed_depth)
+                [SaKnown,indPer,TgtPer,nBig,allowedIndex,event_id,station_code,source,record_sequence_number_NGA,source,event_mw,event_mag,acc_distance]=screen_database(database_path,allowed_database,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D,allowedEC8code,minT,maxT,nGM,allowed_depth,allowedRecs_Vs30_defined,allowedEC8code_defined,Vs30)
 
                 TgtMean=[]
                 rho=[]

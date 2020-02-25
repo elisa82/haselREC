@@ -1,4 +1,4 @@
-def screen_database(database_path,allowed_database,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D,allowedEC8code,minT,maxT,nGM,allowed_depth):
+def screen_database(database_path,allowed_database,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D,allowedEC8code,minT,maxT,nGM,allowed_depth,allowedRecs_Vs30_defined,allowedEC8code_defined,Vs30):
     # Import libraries
     import numpy as np
     import pandas as pd
@@ -22,6 +22,13 @@ def screen_database(database_path,allowed_database,allowedRecs_Vs30,allowedRecs_
     source=dbacc['source']
     epi_lon=dbacc['epi_lon']
     epi_lat=dbacc['epi_lat']
+
+    if(allowedRecs_Vs30_defined==0):
+        print('')
+
+    if(allowedEC8code_defined==0):
+        print('')
+
 
     # select periods in the range
     indPer = []
@@ -62,6 +69,7 @@ def screen_database(database_path,allowed_database,allowedRecs_Vs30,allowedRecs_
                                         if(source[i]=='NGA-West2'):
                                             if(epi_lon[i]<-31 or epi_lon[i]>70):
                                                 allowedIndex.append(i)
+
     SA=np.vstack(SA_list)
     SaKnown=SA[allowedIndex]
 
