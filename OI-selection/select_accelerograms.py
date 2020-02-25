@@ -123,6 +123,16 @@ if(GMPE_input=='AbrahamsonEtAl2014' or GMPE_input=='ChiouYoungs2014'):
         print('Warning: z1pt0 will be defined inside the code')
         z1pt0_defined=0
 
+try:
+    upper_sd=float(input['upper_sd'])
+except KeyError:
+    upper_sd=0
+
+try:
+    lower_sd=float(input['lower_sd'])
+except KeyError:
+    lower_sd=500
+
 # Database parameters for screening recordings
 database_path=input['database_path']
 allowed_database = [ x.strip() for x in input['allowed_database'].strip('{}').split(',') ]
@@ -246,7 +256,11 @@ for ii in np.arange(len(site_code)):
                     # normal
                     width= 10.0 ** (-1.14 + 0.35 *mag)
 
-                ztor=max(Z_hyp-0.6*width*np.sin(np.radians(dip)),0)
+                source_vertical_width=width*np.sin(np.radians(dip))
+                ztor=max(Z_hyp-0.6*source_vertical_width,upper_sd)
+                if((ztor+source_vertical_width)>lower_sd):
+                    source_vertical_width=lower_sd-ztor
+                    width=source_vertical_width/np.sin(np.radians(dip))
 
                 if(rjb==0):
                     rx=0.5*width*np.cos(np.radians(dip))
