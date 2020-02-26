@@ -6,9 +6,6 @@ import pandas as pd
 from scipy.stats import skew
 
 # Libraries from other files in lib
-current_dir=os.getcwd()
-lib_dir=current_dir+'/lib'
-sys.path.append(lib_dir)
 from openquake.hazardlib import gsim, imt, const
 from im_correlation import akkar_correlation
 from im_correlation import baker_jayaram_correlation

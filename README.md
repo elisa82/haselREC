@@ -17,6 +17,13 @@ ObsPy
 Matplotlib
 Openquake.hazardlib
 
+# Installation
+
+- Add the lib folder to PYTHONPATH (see for example https://bic-berkeley.github.io/psych-214-fall-2016/using_pythonpath.html)
+- All NGA-West2 recordings have to be stored in a folder
+- ESM recordings can be stored in advance or automatically downloaded from internet using a token file. To obtain the token file you need at first to register at: https://tex.mi.ingv.it/ and then run the command:
+curl -X POST -F 'message={"user_email": "email","user_password": "password"}' "https://tex.mi.ingv.it/esmws/generate-signed-message/1/query" > token.txt
+
 # Usage
 * cd OI-selection
 * python select_accelerograms.py $filename.ini
