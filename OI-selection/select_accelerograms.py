@@ -86,6 +86,10 @@ Vs30_input=[ x.strip() for x in input['Vs30'].strip('{}').split(',') ]
 if(len(Vs30_input)!=len(site_code)):
     sys.exit('Error: Vs30 must be an array of the same length of site_code')
 
+vs30Type=[ x.strip() for x in input['vs30Type'].strip('{}').split(',') ] 
+if(len(vs30Type)!=len(site_code)):
+    sys.exit('Error: Vs30 must be an array of the same length of site_code')
+
 try:
     hypo_depth=float(input['hypo_depth'])
     hypo_defined=1
@@ -358,6 +362,10 @@ for ii in site_code:
                     rrup=np.sqrt(np.square(rrup1)+np.square(ry))
 
                 Vs30=float(Vs30_input[ii])
+                if(vs30Type[ii]=='inferred'):
+                    vs30measured=1
+                if(vs30Type[ii]=='measured'):
+                    vs30measured=0
 
                 if(z1pt0_defined==0 and GMPE_input=='AbrahamsonEtAl2014') or (z2pt5_defined==0):
                     if(Vs30<180):
@@ -389,7 +397,7 @@ for ii in site_code:
                 setattr(sctx, 'z1pt0', z1pt0)
                 z2pt5=z2pt5+np.zeros(rjb.shape)
                 setattr(sctx, 'z2pt5', z2pt5)
-                setattr(sctx, 'vs30measured',0)
+                setattr(sctx, 'vs30measured',vs30measured)
                 setattr(rctx, 'mag', mag)
                 setattr(rctx, 'hypo_depth', Z_hyp)
                 setattr(rctx, 'rake', rake)
