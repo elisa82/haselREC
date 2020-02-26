@@ -49,7 +49,8 @@ rlz_code = [ x.strip() for x in input['rlz_code'].strip('{}').split(',') ]
 rlz_code= np.array(rlz_code,dtype=int)
 if(len(rlz_code)!=len(site_code)):
     sys.exit('Error: rlz_code must be an array of the same length of site_code')
-path_hazard_results=input['path_hazard_results']
+path_results_classical=input['path_results_classical']
+path_results_disagg=input['path_results_disagg']
 num_disagg=int(input['num_disagg'])
 num_classical=int(input['num_classical'])
 probability_of_exceedance_num = [ x.strip() for x in input['probability_of_exceedance_num'].strip('{}').split(',') ]
@@ -262,7 +263,7 @@ for ii in site_code:
 
                 #Retrieve disaggregation results
                 meanLst = [],[]
-                df=pd.read_csv(''.join([path_hazard_results,'/',disagg_results]),skiprows=1)
+                df=pd.read_csv(''.join([path_results_disagg,'/',disagg_results]),skiprows=1)
                 df['rate'] = -np.log(1-df['poe'])/investigation_time
                 df['rate_norm'] = df['rate']/ df['rate'].sum()
                 mode=df.sort_values(by='rate_norm',ascending=False)[0:1]
@@ -272,7 +273,7 @@ for ii in site_code:
                 allowedRecs_Mag=[meanMag-radius_mag,meanMag+radius_mag]
 
                 #Retrieve conditioning value
-                df=pd.read_csv(''.join([path_hazard_results,'/',file_with_OQ_acc_value]),skiprows=1)
+                df=pd.read_csv(''.join([path_results_classical,'/',file_with_OQ_acc_value]),skiprows=1)
                 output_oq=df[selected_column]
                 output_oq=output_oq[site]
 
