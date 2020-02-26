@@ -80,7 +80,7 @@ if(maxT>4.0 and corr_type=='akkar'):
     sys.exit('Error: akkar correlation model is defined only for T<4s')
 GMPE_input=input['GMPE'] #array of GMPE according with sites?
 
-avg_periods = [ x.strip() for x in input['avg_periods'].strip('{}').split(',') ]
+avg_periods = [ x.strip() for x in input['avg_periods'].strip('[]').split(',') ]
 avg_periods= np.array(avg_periods,dtype=float)
 rake=float(input['rake'])
 Vs30_input=[ x.strip() for x in input['Vs30'].strip('{}').split(',') ] 
