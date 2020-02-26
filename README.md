@@ -19,10 +19,15 @@ Openquake.hazardlib
 
 # Installation
 
-- Add the lib folder to PYTHONPATH (see for example https://bic-berkeley.github.io/psych-214-fall-2016/using_pythonpath.html)
-- All NGA-West2 recordings have to be stored in a folder
+- Add the lib folder to PYTHONPATH. For Linux open the file ~/.bashrc in your text editor and add the following line at the end:
+	export PYTHONPATH=/path/to/OpenInsel/lib
+Save the file, Close your terminal application; and Start your terminal application again to see the changes.
+- All NGA-West2 recordings have to be stored in a folder and renamed as:
+RSN#NUM_1.AT2
+RSN#NUM_2.AT2
+RSN#NUM_3.AT2
 - ESM recordings can be stored in advance or automatically downloaded from internet using a token file. To obtain the token file you need at first to register at: https://tex.mi.ingv.it/ and then run the command:
-curl -X POST -F 'message={"user_email": "email","user_password": "password"}' "https://tex.mi.ingv.it/esmws/generate-signed-message/1/query" > token.txt
+	curl -X POST -F 'message={"user_email": "email","user_password": "password"}' "https://tex.mi.ingv.it/esmws/generate-signed-message/1/query" > token.txt
 
 # Usage
 * cd OI-selection

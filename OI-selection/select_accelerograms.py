@@ -599,11 +599,12 @@ for ii in site_code:
                     f.write("num source event_id_ESM station_code_ESM recID_NGA magnitude distance scale_factor\n")
                     for i in np.arange(nGM):
                         elemento=recIdx[i]
+                        print(station_ec8[elemento])
                         if(source[elemento]=='ESM'):
-                            f.write("{} {} {} {} {} {} {} {} {} {:6.2f} \n".format(i+1,source[elemento],event_id[elemento],station_code[elemento],blank,event_mw[elemento],acc_distance[elemento],station_vs30[elemento],station_ec8[elemento][0],finalScaleFactors[i]))
+                            f.write("{} {} {} {} {} {} {} {} {} {:6.2f} \n".format(i+1,source[elemento],event_id[elemento],station_code[elemento],blank,event_mw[elemento],acc_distance[elemento],station_vs30[elemento],station_ec8[elemento],finalScaleFactors[i]))
                         if(source[elemento]=='NGA-West2'):
                             val=int(record_sequence_number_NGA[elemento])
-                            f.write("{} {} {} {} {} {} {} {} {} {:6.2f} \n".format(i+1,source[elemento],blank,blank,val,event_mag[elemento],acc_distance[elemento],station_vs30[elemento],station_ec8[elemento][0],finalScaleFactors[i]))
+                            f.write("{} {} {} {} {} {} {} {} {} {:6.2f} \n".format(i+1,source[elemento],blank,blank,val,event_mag[elemento],acc_distance[elemento],station_vs30[elemento],station_ec8[elemento],finalScaleFactors[i]))
                 f.close()
 
                 # Output conditional spectrum to a text file
