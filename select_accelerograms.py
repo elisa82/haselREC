@@ -608,10 +608,10 @@ for ii in np.arange(len(site_code)):
                 blank='-'
                 name_summary=output_folder+'/'+name+'/'+name+"_summary_selection.txt"
                 with open(name_summary, "w") as f:
-                    f.write("{} {}\n".format('reference hazard value = ',output_oq))
+                    f.write("{} {}\n".format('reference hazard value = ',im_star))
                     f.write("{} {}\n".format('mean_mag_disag = ',meanMag))
                     f.write("{} {}\n".format('mean_dist_disag = ',meanDist))
-                    f.write("num source event_id_ESM station_code_ESM recID_NGA magnitude distance scale_factor\n")
+                    f.write("num source event_id_ESM station_code_ESM recID_NGA magnitude distance vs30 EC8 scale_factor\n")
                     for i in np.arange(nGM):
                         elemento=recIdx[i]
                         if(source[elemento]=='ESM'):

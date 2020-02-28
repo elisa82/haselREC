@@ -1,16 +1,14 @@
-reference hazard value =  0    0.400405
-1    0.587978
-Name: PGA-0.05, dtype: float64
+reference hazard value =  0.5879783000000001
 mean_mag_disag =  6.347683361014376
 mean_dist_disag =  15.909873748773544
-num source event_id_ESM station_code_ESM recID_NGA magnitude distance scale_factor
+num source event_id_ESM station_code_ESM recID_NGA magnitude distance vs30 EC8 scale_factor
 1 NGA-West2 - - 266 6.33 36.67 242.05 nan   4.86 
 2 NGA-West2 - - 171 6.53 19.44 264.57 nan   1.88 
-3 NGA-West2 - - 165 6.53 18.88 242.05 nan   2.22 
-4 NGA-West2 - - 175 6.53 31.99 196.88 nan   4.17 
-5 NGA-West2 - - 179 6.53 27.13 208.91 nan   1.54 
+3 NGA-West2 - - 179 6.53 27.13 208.91 nan   1.54 
+4 NGA-West2 - - 30 6.19 32.56 289.56 nan   1.55 
+5 NGA-West2 - - 175 6.53 31.99 196.88 nan   4.17 
 6 NGA-West2 - - 183 6.53 28.09 206.08 nan   1.12 
-7 NGA-West2 - - 167 6.53 22.43 259.86 nan   3.92 
-8 NGA-West2 - - 30 6.19 32.56 289.56 nan   1.55 
+7 NGA-West2 - - 170 6.53 29.07 192.05 nan   2.62 
+8 NGA-West2 - - 167 6.53 22.43 259.86 nan   3.92 
 9 NGA-West2 - - 184 6.53 27.23 202.26 nan   1.35 
-10 NGA-West2 - - 170 6.53 29.07 192.05 nan   2.62 
+10 NGA-West2 - - 165 6.53 18.88 242.05 nan   2.22 
