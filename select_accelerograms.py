@@ -213,7 +213,8 @@ allowed_depth= np.array(allowed_depth,dtype=float)
 
 # Selection parameters
 nGM=int(input['nGM']) #number of records to select ==> number of records to select since the code search the database spectra most similar to each simulated spectrum
-random_seed=int(input['random_seed']) 
+random_seed=int(input['random_seed'])
+random = np.random.RandomState(random_seed)
 nTrials=int(input['nTrials']) #number of iterations of the initial spectral simulation step to perform
 weights= [ x.strip() for x in input['weights'].strip('{}').split(',') ]# [Weights for error in mean, standard deviation and skewness] Used to find the simulated spectra that best match the target from the statistically simulated response spectra
 weights= np.array(weights,dtype=float)
@@ -493,7 +494,7 @@ for ii in np.arange(len(site_code)):
                 covReq=Cov
                 stdevs=np.sqrt(np.diagonal(covReq))
 
-                simulated_spectra=simulate_spectra(nTrials,meanReq,covReq,stdevs,nGM,weights)
+                simulated_spectra=simulate_spectra(random, nTrials,meanReq,covReq,stdevs,nGM,weights)
 
                 sampleBig =np.log(SaKnown[:,indPer])
 

@@ -1,4 +1,4 @@
-def simulate_spectra(nTrials,meanReq,covReq,stdevs,nGM,weights):
+def simulate_spectra(random, nTrials,meanReq,covReq,stdevs,nGM,weights):
     # Import libraries
     import numpy as np
     from scipy.stats import skew
@@ -7,7 +7,7 @@ def simulate_spectra(nTrials,meanReq,covReq,stdevs,nGM,weights):
     devTotalSim =[]
     spettri=[]
     for j in np.arange(nTrials):
-        SpectraSample=np.exp(np.random.multivariate_normal(meanReq,covReq,nGM))
+        SpectraSample=np.exp(random.multivariate_normal(meanReq,covReq,nGM))
         spettri.append(SpectraSample)
         # evaluate simulation
         sampleMeanErr=np.mean(np.log(SpectraSample),axis=0)-meanReq
