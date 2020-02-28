@@ -23,7 +23,7 @@ print('Usage: python select_accelerograms.py job_selection.ini')
 
 #%% Initial setup
 #fileini = sys.argv[1]
-fileini = 'job_selection.ini'
+fileini = 'test/job_selection.ini'
 print("### Define directly for now")
 
 input={}
