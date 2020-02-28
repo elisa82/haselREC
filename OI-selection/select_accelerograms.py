@@ -81,10 +81,11 @@ for i in np.arange(len(intensity_measures)):
     elif(intensity_measures[i][0:3]=='PGA'):
         im_type.append('PGA')
         im_type_lbl.append(r'PGA')
-        print('### Should we add Tstar = 0 for PGA? If we do, the akkar_correlation function gives an error because it does not support T=0')
-#		Tstar[i]=0.0
+        Tstar[i]=0.0
     else:
-        sys.exit('Error: this intensity measure type '+intensity_measures[i]+' is not supported yet')
+        sys.exit('Error: this intensity measure type '+str(intensity_measures[i])+' is not supported yet')
+    if(Tstar[i]<minT or Tstar[i]>maxT):
+        sys.exit('Error: the period of interest '+str(Tstar[i])+' is outside the defined period range '+input['period_range'])
 
 corr_type=input['corr_type']  #baker_jayaram or akkar
 if(maxT>4.0 and corr_type=='akkar'):
@@ -446,9 +447,9 @@ for ii in np.arange(len(site_code)):
 
                 for i in range(len(T_CS)):
                     # Get the GMPE ouput for a rupture scenario
-                    if(im_type[im] == 'PGA'):
+                    if(T_CS[i]==0.):
                         P = imt.PGA()
-                    elif im_type[im] == 'AvgSA' or im_type[im] == 'SA':
+                    else:
                         P=imt.SA(period=T_CS[i])
                     S=[const.StdDev.TOTAL]
                     mu0,sigma0 = bgmpe().get_mean_and_stddevs(sctx, rctx, dctx, P, S)
