@@ -243,19 +243,20 @@ for ii in np.arange(len(site_code)):
     rlz = rlz_code[ii]
     
     # For each hazard of poe level investigated
-    count_poe=-1
-    for poe in probability_of_exceedance_num:
-        count_poe=count_poe+1
+    for jj in np.arange(len(probability_of_exceedance_num)):
+
+        poe=probability_of_exceedance_num[jj]
+
         if hasattr(maxsf_input, '__len__'):
-            maxsf=maxsf_input[count_poe]
+            maxsf=maxsf_input[jj]
         else:
             maxsf=maxsf_input
         if hasattr(radius_dist_input, '__len__'):
-            radius_dist=radius_dist_input[count_poe]
+            radius_dist=radius_dist_input[jj]
         else:
             radius_dist=radius_dist_input
         if hasattr(radius_mag_input, '__len__'):
-            radius_mag=radius_mag_input[count_poe]
+            radius_mag=radius_mag_input[jj]
         else:
             radius_mag=radius_mag_input
 
@@ -265,7 +266,7 @@ for ii in np.arange(len(site_code)):
                 # Get the name of the disaggregation file to look in
                 disagg_results='rlz-'+str(rlz)+'-'+intensity_measures[im]+'-sid-'+str(site)+'-poe-'+str(poe)+'_Mag_Dist_'+str(num_disagg)+'.csv'
                 name=intensity_measures[im]+'-site_'+str(site)+'-poe-'+str(poe)
-                selected_column=intensity_measures[im]+'-'+str(probability_of_exceedance[count_poe])
+                selected_column=intensity_measures[im]+'-'+str(probability_of_exceedance[jj])
                 file_with_OQ_acc_value='hazard_map-mean_'+str(num_classical)+'.csv'
                 
                 # Print some on screen feedback
@@ -286,7 +287,7 @@ for ii in np.arange(len(site_code)):
                 #Retrieve conditioning value
                 df=pd.read_csv(''.join([path_results_classical,'/',file_with_OQ_acc_value]),skiprows=1)
                 output_oq=df[selected_column]
-                output_oq=output_oq[site]
+                im_star=output_oq[site]
 
 # -----------------------------------------------------------------------------
                 # Initialise GSIMs
@@ -417,77 +418,78 @@ for ii in np.arange(len(site_code)):
                 Vs30=Vs30+np.zeros(rjb.shape)
                 setattr(sctx, 'vs30', Vs30)
 
+                # Screen the database of available ground motions
+
                 [SaKnown,indPer,TgtPer,nBig,allowedIndex,event_id,station_code,source,record_sequence_number_NGA,source,event_mw,event_mag,acc_distance,station_vs30,station_ec8]=screen_database(database_path,allowed_database,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D,allowedEC8code,minT,maxT,nGM,allowed_depth,allowedRecs_Vs30_defined,allowedEC8code_defined,Vs30)
 
-                TgtMean=[]
-                rho=[]
-                mean=[]
-                sigma=[]
-                if(intensity_measures[im]=='AvgSA'):
-                    [mean_SaTcond,stddvs_SaTcond]=compute_avgSA(avg_periods,sctx, rctx, dctx, bgmpe, corr_type)
-                    mean_SaTcond=np.log(mean_SaTcond)
+                # Get the GMPE ouput
+
+                if(im_type[im]=='AvgSA'):
+                    [median_im_cond, sigma_im_cond]=compute_avgSA(avg_periods,sctx, rctx, dctx, bgmpe, corr_type)
+                    mu_im_cond = np.log(median_im_cond)
                 else:
-                    if(intensity_measures[im]=='PGA'):
+                    if(im_type[im]=='PGA'):
                         P = imt.PGA()
-                    else:
+                    elif(im_type[im]=='SA'):
                         P = imt.SA(period=Tstar[im])
                     S=[const.StdDev.TOTAL]
-                    mean_SaTcond,stddvs_SaTcond=bgmpe().get_mean_and_stddevs(sctx,rctx,dctx,P,S)
-                    stddvs_SaTcond=stddvs_SaTcond[0]
-                epsilon=(np.log(output_oq)-mean_SaTcond)/stddvs_SaTcond
+                    mu_im_cond, sigma_im_cond=bgmpe().get_mean_and_stddevs(sctx,rctx,dctx,P,S)
+                    sigma_im_cond = sigma_im_cond[0]
+                # Compute how many standard deviations the PSHA differs from the GMPE value
+                epsilon = (np.log(im_star) - mu_im_cond)/sigma_im_cond
 
-                for per in TgtPer:
-                    if(per==0):
+                T_CS = TgtPer # Use the same periods as the available spectra to construct the conditional spectrum
+                mu_im = np.zeros(len(T_CS))
+                sigma_im = np.zeros(len(T_CS))
+                rho_T_Tstar = np.zeros(len(T_CS))
+                mu_im_im_cond = np.zeros(len(T_CS))
+
+                for i in range(len(T_CS)):
+                    # Get the GMPE ouput for a rupture scenario
+                    if(im_type[im] == 'PGA'):
                         P = imt.PGA()
-                    else:
-                        P=imt.SA(period=per)
+                    elif im_type[im] == 'AvgSA' or im_type[im] == 'SA':
+                        P=imt.SA(period=T_CS[i])
                     S=[const.StdDev.TOTAL]
-                    bMean_SA, bStDev_SA = bgmpe().get_mean_and_stddevs(sctx, rctx, dctx, P, S)
-                    mean.append(bMean_SA)
-                    sigma.append(bStDev_SA[0])
-                    if(intensity_measures[im]=='AvgSA'):
-                        rho_per=compute_rho_avgSA(per,avg_periods,sctx,rctx,dctx,stddvs_SaTcond, bgmpe, corr_type)
-                        rho.append(rho_per[0])
-                    else:
+                    mu0,sigma0 = bgmpe().get_mean_and_stddevs(sctx, rctx, dctx, P, S)
+                    mu_im[i]=mu0[0]
+                    sigma_im[i]=sigma0[0][0]
+                    if(im_type[im]=='AvgSA'):
+                        rho=compute_rho_avgSA(T_CS[i],avg_periods,sctx,rctx,dctx,sigma_im_cond,bgmpe, corr_type)
+                        rho=rho[0]
+                    elif im_type[im] == 'SA' or im_type[im] == 'PGA':
                         if(corr_type=='baker_jayaram'):
-                            rho_per = baker_jayaram_correlation(per,Tstar[im])
+                            rho= baker_jayaram_correlation(T_CS[i],Tstar[im])
                         if(corr_type=='akkar'):
-                            rho_per = akkar_correlation(per,Tstar[im])
-                        rho.append(rho_per)
-                    spectrum=bMean_SA+rho_per*bStDev_SA[0]*epsilon
-                    # (Log) Response Spectrum Mean: TgtMean
-                    TgtMean.append(spectrum[0])
-
-                TgtMean=np.array(TgtMean)
+                            rho= akkar_correlation(T_CS[i],Tstar[im])
+                    rho_T_Tstar[i] = rho
+                    # Get the value of the CMS
+                    mu_im_im_cond[i] = mu_im[i] + rho_T_Tstar[i]*epsilon[0]*sigma_im[i]
 
 #### Compute covariances and correlations at all periods
-                TgtCovs = np.zeros((len(TgtPer),len(TgtPer)))
-                for i in np.arange(len(TgtPer)):
-                    for j in np.arange(len(TgtPer)):
-                        Ti = TgtPer[i]
-                        Tj = TgtPer[j]
-                        varT = stddvs_SaTcond**2
-                        varT=varT[0]
-                        var1 = sigma[i]**2
-                        var1=var1[0]
-                        var2 = sigma[j]**2
-                        var2=var2[0]
+
+                # Compute the Covariance
+                Cov = np.zeros((len(T_CS),len(T_CS)))
+                for i in np.arange(len(T_CS)):
+                    for j in np.arange(len(T_CS)):
+                        var1 = sigma_im[i]**2
+                        var2 = sigma_im[j]**2
+                        varTstar = sigma_im_cond**2
 
                         if(corr_type=='baker_jayaram'):
-                            sigmaCorr=baker_jayaram_correlation(Ti, Tj)*np.sqrt(var1*var2)
+                            sigma_Corr = baker_jayaram_correlation(T_CS[i],T_CS[j])*np.sqrt(var1*var2)
                         if(corr_type=='akkar'):
-                            sigmaCorr=akkar_correlation(Ti, Tj)*np.sqrt(var1*var2)
-                        sigma11 = np.matrix([[var1, sigmaCorr], [sigmaCorr, var2]])
-                        sigma22 = np.array(varT)
-                        sigma12 =np.array([[rho[i]*np.sqrt(var1*varT)],[rho[j]*np.sqrt(var2*varT)]])
-                        sigmaCond = sigma11 - sigma12*1./(sigma22)*sigma12.T
-                        TgtCovs[i,j] = sigmaCond.item((0,1))
+                            sigma_Corr = akkar_correlation(T_CS[i],T_CS[j])*np.sqrt(var1*var2)
+                        sigma11 = np.matrix([[var1, sigma_Corr], [sigma_Corr, var2]]) 
+                        sigma22 = np.array(varTstar)
+                        sigma12 = np.array([rho_T_Tstar[i]*np.sqrt(var1*varTstar), rho_T_Tstar[j]*np.sqrt(varTstar*var2)])
+                        sigma_cond = sigma11 - sigma12*1./(sigma22)*sigma12.T
+                        Cov[i,j]=sigma_cond[0,1]
 
-# find covariance values of zero and set them to a small number so that random number generation can be performed
-                TgtCovs[np.absolute(TgtCovs) < 1e-10] = 1e-10
+                Cov[np.absolute(Cov) < 1e-10] = 1e-10 # find covariance values of zero and set them to a small number so that random number generation can be performed
 
-                meanReq=TgtMean
-                covReq=TgtCovs
+                meanReq=mu_im_im_cond
+                covReq=Cov
                 stdevs=np.sqrt(np.diagonal(covReq))
 
                 simulated_spectra=simulate_spectra(nTrials,meanReq,covReq,stdevs,nGM,weights)
