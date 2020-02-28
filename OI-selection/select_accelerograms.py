@@ -1,11 +1,13 @@
 #%% Import libraries
 # Standard built-in libraries
-import os,sys
+import os
+import sys
 import numpy as np
 import pandas as pd
 from scipy.stats import skew
 
 # Libraries from other files in lib
+sys.path.append("lib") #to be removed and added in PYTHONPATH
 from openquake.hazardlib import gsim, imt, const
 from im_correlation import akkar_correlation
 from im_correlation import baker_jayaram_correlation
@@ -17,9 +19,7 @@ from scale_acc import scale_acc
 from plot_final_selection import plot_final_selection
 
 #%% General notes
-print('Usage: python select_accelerograms.py $filename')
-print("### The correlation model needs to be handled a bit better")
-print("### The outputs and printing of results need to be more detailed here")
+print('Usage: python select_accelerograms.py job_selection.ini')
 
 #%% Initial setup
 #fileini = sys.argv[1]
@@ -66,13 +66,25 @@ minT=float(period_range[0])
 maxT=float(period_range[1])
 
 Tstar=np.zeros(len(intensity_measures))
+im_type = []
+im_type_lbl = []
+
 for i in np.arange(len(intensity_measures)):
-    if(intensity_measures[i][0:2]=='SA'):
+    if(intensity_measures[i]=='AvgSA'):
+        im_type.append('AvgSA')
+        im_type_lbl.append(r'AvgSa')
+    elif(intensity_measures[i][0:2]=='SA'):
+        im_type.append('SA')
+        im_type_lbl.append(r'Sa(T)')
         Tstar[i]=intensity_measures[i].strip('(,),SA')
         Tstar[i]=float(Tstar[i])
-#    if(intensity_measures[i][0:3]=='PGA'):
-#	    Tstar[i]=0.0
-print('### Should we add Tstar = 0 for PGA? If we do, the akkar_correlation function gives an error because it does not support T=0')
+    elif(intensity_measures[i][0:3]=='PGA'):
+        im_type.append('PGA')
+        im_type_lbl.append(r'PGA')
+        print('### Should we add Tstar = 0 for PGA? If we do, the akkar_correlation function gives an error because it does not support T=0')
+#		Tstar[i]=0.0
+    else:
+        sys.exit('Error: this intensity measure type '+intensity_measures[i]+' is not supported yet')
 
 corr_type=input['corr_type']  #baker_jayaram or akkar
 if(maxT>4.0 and corr_type=='akkar'):
@@ -88,7 +100,7 @@ if(len(Vs30_input)!=len(site_code)):
 
 vs30Type=[ x.strip() for x in input['vs30Type'].strip('{}').split(',') ] 
 if(len(vs30Type)!=len(site_code)):
-    sys.exit('Error: Vs30 must be an array of the same length of site_code')
+    sys.exit('Error: vs30Type must be an array of the same length of site_code')
 
 try:
     hypo_depth=float(input['hypo_depth'])
@@ -224,7 +236,7 @@ print('Inputs loaded, starting selection....')
 ind = 1
 
 # For each site investigated
-for ii in site_code:
+for ii in np.arange(len(site_code)):
     
     # Get the current site and realisation indices
     site = site_code[ii]
