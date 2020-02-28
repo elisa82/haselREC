@@ -9,13 +9,14 @@ Main contributors:
 
 # Dependencies
 OpenINsel requires the following dependencies:
-NumPy
-Pandas
-Scipy
-OS/Sys/Glob
-ObsPy
-Matplotlib
-Openquake.hazardlib
+
+ * NumPy
+ * Pandas
+ * Scipy
+ * ObsPy
+ * Matplotlib
+ * Openquake.hazardlib
+
 
 # Installation
 
