@@ -6,17 +6,15 @@ import numpy as np
 import pandas as pd
 from scipy.stats import skew
 
-# Libraries from other files in lib
-sys.path.append("lib") #to be removed and added in PYTHONPATH
 from openquake.hazardlib import gsim, imt, const
-from im_correlation import akkar_correlation
-from im_correlation import baker_jayaram_correlation
-from screen_database import screen_database
-from compute_avgSA import compute_avgSA
-from compute_avgSA import compute_rho_avgSA
-from simulate_spectra import simulate_spectra
-from scale_acc import scale_acc
-from plot_final_selection import plot_final_selection
+from lib.im_correlation import akkar_correlation
+from lib.im_correlation import baker_jayaram_correlation
+from lib.screen_database import screen_database
+from lib.compute_avgSA import compute_avgSA
+from lib.compute_avgSA import compute_rho_avgSA
+from lib.simulate_spectra import simulate_spectra
+from lib.scale_acc import scale_acc
+from lib.plot_final_selection import plot_final_selection
 
 #%% General notes
 print('Usage: python select_accelerograms.py job_selection.ini')
