@@ -12,7 +12,8 @@ def compute_avgSA(avg_periods,sctx, rctx, dctx, bgmpe, corr_type):
         # compute mean and standard deviation
         P=imt.SA(period=period)
         S=[const.StdDev.TOTAL]
-        mean,std = bgmpe.get_mean_and_stddevs(sctx, rctx, dctx,P,S)
+        import pdb; pdb.set_trace()
+        mean,std = bgmpe().get_mean_and_stddevs(sctx, rctx, dctx,P,S)
         mean_list.append(mean)
         stddvs_list.append(std[0]) # Support only for total!
 
@@ -47,7 +48,7 @@ def compute_rho_avgSA(per,avg_periods,sctx,rctx,dctx,stddvs_avgsa, bgmpe, corr_t
         if(corr_type=='akkar'):
             rho=akkar_correlation(per,i1)
         S=[const.StdDev.TOTAL]
-        mean1,std1 = bgmpe.get_mean_and_stddevs(sctx, rctx, dctx, imt.SA(period=i1),S)
+        mean1,std1 = bgmpe().get_mean_and_stddevs(sctx, rctx, dctx, imt.SA(period=i1),S)
         sum_numeratore=sum_numeratore+rho*std1[0]
 
     denominatore=len(avg_periods)*stddvs_avgsa
