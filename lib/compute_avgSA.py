@@ -37,8 +37,8 @@ def compute_avgSA(avg_periods,sctx, rctx, dctx, bgmpe, corr_type):
 def compute_rho_avgSA(per,avg_periods,sctx,rctx,dctx,stddvs_avgsa, bgmpe, corr_type):
     # Import libraries
     from openquake.hazardlib import imt, const
-    from im_correlation import baker_jayaram_correlation
-    from im_correlation import akkar_correlation
+    from lib.im_correlation import baker_jayaram_correlation
+    from lib.im_correlation import akkar_correlation
     
     sum_numeratore=0
     for i1 in avg_periods:
