@@ -12,7 +12,6 @@ def compute_avgSA(avg_periods,sctx, rctx, dctx, bgmpe, corr_type):
         # compute mean and standard deviation
         P=imt.SA(period=period)
         S=[const.StdDev.TOTAL]
-        import pdb; pdb.set_trace()
         mean,std = bgmpe().get_mean_and_stddevs(sctx, rctx, dctx,P,S)
         mean_list.append(mean)
         stddvs_list.append(std[0]) # Support only for total!
