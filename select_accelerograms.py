@@ -73,19 +73,24 @@ for i in np.arange(len(intensity_measures)):
         im_type_lbl.append(r'AvgSa')
         avg_periods = [ x.strip() for x in input['avg_periods'].strip('[]').split(',') ]
         avg_periods= np.array(avg_periods,dtype=float)
+        for j in np.arange(len(avg_periods)):
+            if(avg_periods[j]<minT or avg_periods[j]>maxT):
+                sys.exit('Error: the range of period of interest '+str(avg_periods)+' is outside the defined period range '+input['period_range'])
     elif(intensity_measures[i][0:2]=='SA'):
         im_type.append('SA')
         im_type_lbl.append(r'Sa(T)')
         Tstar[i]=intensity_measures[i].strip('(,),SA')
         Tstar[i]=float(Tstar[i])
+        if(Tstar[i]<minT or Tstar[i]>maxT):
+            sys.exit('Error: the period of interest '+str(Tstar[i])+' is outside the defined period range '+input['period_range'])
     elif(intensity_measures[i][0:3]=='PGA'):
         im_type.append('PGA')
         im_type_lbl.append(r'PGA')
         Tstar[i]=0.0
+        if(Tstar[i]<minT or Tstar[i]>maxT):
+            sys.exit('Error: the period of interest '+str(Tstar[i])+' is outside the defined period range '+input['period_range'])
     else:
         sys.exit('Error: this intensity measure type '+str(intensity_measures[i])+' is not supported yet')
-    if(Tstar[i]<minT or Tstar[i]>maxT):
-        sys.exit('Error: the period of interest '+str(Tstar[i])+' is outside the defined period range '+input['period_range'])
 
 corr_type=input['corr_type']  #baker_jayaram or akkar
 if(maxT>4.0 and corr_type=='akkar'):
@@ -517,7 +522,7 @@ for ii in np.arange(len(site_code)):
                     #compute scale factors and errors for each candidate ground motion
                     for j in np.arange(nBig):
                         rec_value=np.exp(sum(sampleBig[j,id_sel])/len(id_sel))
-                        rec_value=rec_value[0]
+                        #rec_value=rec_value[0]
                         if (rec_value == 0):
                             scaleFac[j] = 1000000
                         else:
