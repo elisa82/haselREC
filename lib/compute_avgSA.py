@@ -2,8 +2,8 @@ def compute_avgSA(avg_periods,sctx, rctx, dctx, bgmpe, corr_type):
     # Import libraries
     from openquake.hazardlib import imt, const
     import numpy as np
-    from im_correlation import baker_jayaram_correlation
-    from im_correlation import akkar_correlation
+    from lib.im_correlation import baker_jayaram_correlation
+    from lib.im_correlation import akkar_correlation
     
     mean_list = []
     stddvs_list = []

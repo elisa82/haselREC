@@ -20,8 +20,8 @@ from lib.plot_final_selection import plot_final_selection
 print('Usage: python select_accelerograms.py job_selection.ini')
 
 #%% Initial setup
-#fileini = sys.argv[1]
-fileini = 'test/job_selection.ini'
+fileini = sys.argv[1]
+#fileini = 'test/job_selection.ini'
 print("### Define directly for now")
 
 input={}

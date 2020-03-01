@@ -2,8 +2,8 @@ def scale_acc(nGM,index,NGA,path_NGA,path_ESM,source,event,station,name,output_f
      # Import libraries
     import numpy as np
     import os, sys
-    from create_acc import create_NGA_acc
-    from create_acc import create_ESM_acc
+    from lib.create_acc import create_NGA_acc
+    from lib.create_acc import create_ESM_acc
 
     #Read accelegrams, save them and apply scaling factor
     dts = []
