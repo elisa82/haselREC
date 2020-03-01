@@ -21,10 +21,6 @@ def akkar_correlation(t1, t2):
             0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.1, 1.2, 1.3, 1.4, 1.5,
             1.6, 1.7, 1.8, 1.9, 2, 2.2, 2.4, 2.6, 2.8, 3, 3.2, 3.4, 3.6, 3.8, 4]
 
-
-    # Import libraries
-    from openquake.hazardlib.gsim.mgmpe import akkar_coeff_table as act
-
     x=periods
     y=periods
     z=coeff_table

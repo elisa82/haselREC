@@ -1,4 +1,4 @@
-def screen_database(database_path,allowed_database,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D,allowedEC8code,minT,maxT,nGM,allowed_depth,allowedRecs_Vs30_defined,allowedEC8code_defined,Vs30):
+def screen_database(database_path,allowed_database,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D,allowedEC8code,target_periods,nGM,allowed_depth,allowedRecs_Vs30_defined,allowedEC8code_defined,Vs30):
     # Import libraries
     import numpy as np
     import pandas as pd
@@ -43,12 +43,15 @@ def screen_database(database_path,allowed_database,allowedRecs_Vs30,allowedRecs_
         else:
             allowedEC8code='D'
 
-    # select periods in the range
-    indPer = []
-    for i in np.arange(len(knownPer)):
-        if(knownPer[i]>=minT and knownPer[i]<=maxT):
-            indPer.append(i)
+    # Match periods (known periods and target periods for error computations) 
+    # save the indicies of the matched periods in knownPer
+    indPer = np.zeros((len(target_periods),1), dtype=int);
+    for i in np.arange(len(target_periods)):
+        indPer[i]=np.argmin(np.abs(knownPer-target_periods[i]))
 
+    # Remove any repeated values from TgtPer and redefine TgtPer as periods 
+    # provided in databases
+    indPer = np.unique(indPer);
     recPer = knownPer[indPer];
 
     SA_list=[]

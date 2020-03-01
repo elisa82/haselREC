@@ -59,9 +59,8 @@ investigation_time=float(input['investigation_time'])
 
 
 # Conditional spectrum parameters
-period_range = [ x.strip() for x in input['period_range'].strip('{}').split(',') ]
-minT=float(period_range[0])
-maxT=float(period_range[1])
+target_periods = [ x.strip() for x in input['target_periods'].strip('[]').split(',') ]
+target_periods=np.array(target_periods,dtype=float)
 
 Tstar=np.zeros(len(intensity_measures))
 im_type = []
@@ -73,28 +72,28 @@ for i in np.arange(len(intensity_measures)):
         im_type_lbl.append(r'AvgSa')
         avg_periods = [ x.strip() for x in input['avg_periods'].strip('[]').split(',') ]
         avg_periods= np.array(avg_periods,dtype=float)
-        for j in np.arange(len(avg_periods)):
-            if(avg_periods[j]<minT or avg_periods[j]>maxT):
-                sys.exit('Error: the range of period of interest '+str(avg_periods)+' is outside the defined period range '+input['period_range'])
+#        for j in np.arange(len(avg_periods)):
+#            if(avg_periods[j]<minT or avg_periods[j]>maxT):
+#                sys.exit('Error: the range of period of interest '+str(avg_periods)+' is outside the defined period range '+input['period_range'])
     elif(intensity_measures[i][0:2]=='SA'):
         im_type.append('SA')
         im_type_lbl.append(r'Sa(T)')
         Tstar[i]=intensity_measures[i].strip('(,),SA')
         Tstar[i]=float(Tstar[i])
-        if(Tstar[i]<minT or Tstar[i]>maxT):
-            sys.exit('Error: the period of interest '+str(Tstar[i])+' is outside the defined period range '+input['period_range'])
+#        if(Tstar[i]<minT or Tstar[i]>maxT):
+#            sys.exit('Error: the period of interest '+str(Tstar[i])+' is outside the defined period range '+input['period_range'])
     elif(intensity_measures[i][0:3]=='PGA'):
         im_type.append('PGA')
         im_type_lbl.append(r'PGA')
         Tstar[i]=0.0
-        if(Tstar[i]<minT or Tstar[i]>maxT):
-            sys.exit('Error: the period of interest '+str(Tstar[i])+' is outside the defined period range '+input['period_range'])
+#        if(Tstar[i]<minT or Tstar[i]>maxT):
+#            sys.exit('Error: the period of interest '+str(Tstar[i])+' is outside the defined period range '+input['period_range'])
     else:
         sys.exit('Error: this intensity measure type '+str(intensity_measures[i])+' is not supported yet')
 
 corr_type=input['corr_type']  #baker_jayaram or akkar
-if(maxT>4.0 and corr_type=='akkar'):
-    sys.exit('Error: akkar correlation model is defined only for T<4s')
+#if(maxT>4.0 and corr_type=='akkar'):
+#    sys.exit('Error: akkar correlation model is defined only for T<4s')
 GMPE_input=input['GMPE'] #array of GMPE according with sites?
 
 rake=float(input['rake'])
@@ -425,7 +424,7 @@ for ii in np.arange(len(site_code)):
 
                 # Screen the database of available ground motions
 
-                [SaKnown,indPer,TgtPer,nBig,allowedIndex,event_id,station_code,source,record_sequence_number_NGA,source,event_mw,event_mag,acc_distance,station_vs30,station_ec8]=screen_database(database_path,allowed_database,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D,allowedEC8code,minT,maxT,nGM,allowed_depth,allowedRecs_Vs30_defined,allowedEC8code_defined,Vs30)
+                [SaKnown,indPer,TgtPer,nBig,allowedIndex,event_id,station_code,source,record_sequence_number_NGA,source,event_mw,event_mag,acc_distance,station_vs30,station_ec8]=screen_database(database_path,allowed_database,allowedRecs_Vs30,allowedRecs_Mag,allowedRecs_D,allowedEC8code,target_periods,nGM,allowed_depth,allowedRecs_Vs30_defined,allowedEC8code_defined,Vs30)
 
                 # Get the GMPE ouput
 

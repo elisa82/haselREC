@@ -12,7 +12,7 @@ def plot_final_selection(name,nGM,TgtPer,sampleSmall,meanReq,stdevs,meanrecorded
 	plt.loglog(TgtPer,meanrecorded,'b',label='mean recorded')
 	plt.xlabel('Period (s)')
 	plt.ylabel('Spectral acceleration (g)')
-	plt.xlim((0.01, np.max(TgtPer)))
+	plt.xlim((0.1, np.max(TgtPer)))
 	plt.legend()
 
 	plt.grid(True)
