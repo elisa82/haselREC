@@ -21,6 +21,7 @@ print('Usage: python select_accelerograms.py job_selection.ini')
 
 #%% Initial setup
 fileini = sys.argv[1]
+calculation_mode=sys.argv[2]
 #fileini = 'test/job_selection.ini'
 print("### Define directly for now")
 
@@ -34,9 +35,6 @@ with open(fileini) as fp:
        line = fp.readline()
 
 #%% Extract input parameters
-# Calculation mode
-download_and_scale_acc=int(input['download_and_scale_acc']) #1=yes, 0=no
-
 
 # Hazard parameters
 intensity_measures = [ x.strip() for x in input['intensity_measures'].strip('{}').split(',') ]
@@ -235,37 +233,40 @@ path_ESM_folder=input['path_ESM_folder']
 # Output folder
 output_folder=input['output_folder']
 
-#%% Start the routine
-print('Inputs loaded, starting selection....')
-ind = 1
 
-# For each site investigated
-for ii in np.arange(len(site_code)):
+if calculation_mode=='--run-complete' or calculation_mode=='--run-selection':
+
+    #%% Start the routine
+    print('Inputs loaded, starting selection....')
+    ind = 1
+
+    # For each site investigated
+    for ii in np.arange(len(site_code)):
+        
+        # Get the current site and realisation indices
+        site = site_code[ii]
+        rlz = rlz_code[ii]
     
-    # Get the current site and realisation indices
-    site = site_code[ii]
-    rlz = rlz_code[ii]
-    
-    # For each hazard of poe level investigated
-    for jj in np.arange(len(probability_of_exceedance_num)):
+        # For each hazard of poe level investigated
+        for jj in np.arange(len(probability_of_exceedance_num)):
 
-        poe=probability_of_exceedance_num[jj]
+            poe=probability_of_exceedance_num[jj]
 
-        if hasattr(maxsf_input, '__len__'):
-            maxsf=maxsf_input[jj]
-        else:
-            maxsf=maxsf_input
-        if hasattr(radius_dist_input, '__len__'):
-            radius_dist=radius_dist_input[jj]
-        else:
-            radius_dist=radius_dist_input
-        if hasattr(radius_mag_input, '__len__'):
-            radius_mag=radius_mag_input[jj]
-        else:
-            radius_mag=radius_mag_input
+            if hasattr(maxsf_input, '__len__'):
+                maxsf=maxsf_input[jj]
+            else:
+                maxsf=maxsf_input
+            if hasattr(radius_dist_input, '__len__'):
+                radius_dist=radius_dist_input[jj]
+            else:
+                radius_dist=radius_dist_input
+            if hasattr(radius_mag_input, '__len__'):
+                radius_mag=radius_mag_input[jj]
+            else:
+                radius_mag=radius_mag_input
 
-        # For each intensity measure investigated
-        for im in np.arange(len(intensity_measures)):
+            # For each intensity measure investigated
+            for im in np.arange(len(intensity_measures)):
                 
                 # Get the name of the disaggregation file to look in
                 disagg_results='rlz-'+str(rlz)+'-'+intensity_measures[im]+'-sid-'+str(site)+'-poe-'+str(poe)+'_Mag_Dist_'+str(num_disagg)+'.csv'
@@ -618,10 +619,10 @@ for ii in np.arange(len(site_code)):
                     for i in np.arange(nGM):
                         elemento=recIdx[i]
                         if(source[elemento]=='ESM'):
-                            f.write("{} {} {} {} {} {} {} {} {} {:6.2f} \n".format(i+1,source[elemento],event_id[elemento],station_code[elemento],blank,event_mw[elemento],acc_distance[elemento],station_vs30[elemento],station_ec8[elemento],finalScaleFactors[i]))
+                            f.write("{} {} {} {} {} {} {} {} {} {:4.2f}\n".format(i+1,source[elemento],event_id[elemento],station_code[elemento],blank,event_mw[elemento],acc_distance[elemento],station_vs30[elemento],station_ec8[elemento],finalScaleFactors[i]))
                         if(source[elemento]=='NGA-West2'):
                             val=int(record_sequence_number_NGA[elemento])
-                            f.write("{} {} {} {} {} {} {} {} {} {:6.2f} \n".format(i+1,source[elemento],blank,blank,val,event_mag[elemento],acc_distance[elemento],station_vs30[elemento],station_ec8[elemento],finalScaleFactors[i]))
+                            f.write("{} {} {} {} {} {} {} {} {} {:4.2f}\n".format(i+1,source[elemento],blank,blank,val,event_mag[elemento],acc_distance[elemento],station_vs30[elemento],station_ec8[elemento],finalScaleFactors[i]))
                 f.close()
 
                 # Output conditional spectrum to a text file
@@ -632,7 +633,16 @@ for ii in np.arange(len(site_code)):
                         f.write("{:6.2f}{:6.2f}{:6.2f} \n".format(TgtPer[i],meanReq[i],stdevs[i]))
                 f.close()
 
-                if(download_and_scale_acc==1):
-
-                    scale_acc(nGM,recIdx,record_sequence_number_NGA,path_NGA_folder,path_ESM_folder,source,event_id,station_code,name,output_folder,finalScaleFactors)
-
+if calculation_mode=='--run-complete' or calculation_mode=='--run-scaling':
+    for ii in np.arange(len(site_code)):
+        site = site_code[ii]
+        for jj in np.arange(len(probability_of_exceedance_num)):
+            poe=probability_of_exceedance_num[jj]
+            for im in np.arange(len(intensity_measures)):
+                name=intensity_measures[im]+'-site_'+str(site)+'-poe-'+str(poe)
+            
+                folder=output_folder+'/'+name
+                name_summary=output_folder+'/'+name+'/'+name+"_summary_selection.txt"
+                    
+                summary=pd.read_csv(name_summary,sep=' ',skiprows=3)
+                scale_acc(nGM,recIdx,summary.recID_NGA,path_NGA_folder,path_ESM_folder,summary.source,summary.event_id_ESM,summary.station_code_ESM,name,output_folder,summary.scale_factor)
