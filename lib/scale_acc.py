@@ -1,4 +1,4 @@
-def scale_acc(nGM,index,NGA,path_NGA,path_ESM,source,event,station,name,output_folder,SF):
+def scale_acc(nGM,NGA,path_NGA,path_ESM,source,event,station,name,output_folder,SF):
      # Import libraries
     import numpy as np
     import os, sys
@@ -21,25 +21,24 @@ def scale_acc(nGM,index,NGA,path_NGA,path_ESM,source,event,station,name,output_f
         comp2=''
         desc1=''
         desc2=''
-        elemento=index[i]
-        if(source[elemento]=='NGA-West2'):
-            val=int(NGA[elemento])
+        if(source[i]=='NGA-West2'):
+            val=int(NGA[i])
             [desc1,desc2,time1,time2,inp_acc1,inp_acc2,npts1,npts2]=create_NGA_acc(val,path_NGA)
             desc1='%'+desc1
             desc2='%'+desc2
-        elif(source[elemento]=='ESM'):
-            folder_ESM=path_ESM+'/'+event[elemento]+'-'+station[elemento]
+        elif(source[i]=='ESM'):
+            folder_ESM=path_ESM+'/'+event[i]+'-'+station[i]
             if (os.path.isdir(folder_ESM)==False):
                 zip_output='output_'+str(i)+'.zip'
-                command='curl -X POST -F "message=@token.txt" "https://tex.mi.ingv.it/esmws/eventdata/1/query?eventid='+event[elemento]+'&data-type=ACC&station='+station[elemento]+'&format=ascii" -o '+zip_output
+                command='curl -X POST -F "message=@token.txt" "https://tex.mi.ingv.it/esmws/eventdata/1/query?eventid='+event[i]+'&data-type=ACC&station='+station[i]+'&format=ascii" -o '+zip_output
                 os.system(command)
                 command='unzip -o '+zip_output+' -d '+folder_ESM
                 os.system(command)
                 command='rm '+zip_output
                 os.system(command)
                 [time1,time2,inp_acc1,inp_acc2,npts1,npts2,comp1,comp2]=create_ESM_acc(folder_ESM)
-                desc1='%'+event[elemento]+' '+station[elemento]+' '+comp1
-                desc2='%'+event[elemento]+' '+station[elemento]+' '+comp2
+                desc1='%'+event[i]+' '+station[i]+' '+comp1
+                desc2='%'+event[i]+' '+station[i]+' '+comp2
 
         # Get the time steps and durations
         #dts.append(time1[1]-time1[0])

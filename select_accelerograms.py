@@ -645,4 +645,4 @@ if calculation_mode=='--run-complete' or calculation_mode=='--run-scaling':
                 name_summary=output_folder+'/'+name+'/'+name+"_summary_selection.txt"
                     
                 summary=pd.read_csv(name_summary,sep=' ',skiprows=3)
-                scale_acc(nGM,recIdx,summary.recID_NGA,path_NGA_folder,path_ESM_folder,summary.source,summary.event_id_ESM,summary.station_code_ESM,name,output_folder,summary.scale_factor)
+                scale_acc(nGM,summary.recID_NGA,path_NGA_folder,path_ESM_folder,summary.source,summary.event_id_ESM,summary.station_code_ESM,name,output_folder,summary.scale_factor)
