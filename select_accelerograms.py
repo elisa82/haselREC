@@ -634,26 +634,24 @@ if calculation_mode=='--run-complete' or calculation_mode=='--run-selection':
                 f.close()
 
 if calculation_mode=='--check-NGArec':
-    for ii in np.arange(len(site_code)):
-        site = site_code[ii]
-        for jj in np.arange(len(probability_of_exceedance_num)):
-            poe=probability_of_exceedance_num[jj]
-            for im in np.arange(len(intensity_measures)):
-                name=intensity_measures[im]+'-site_'+str(site)+'-poe-'+str(poe)
-            
-                folder=output_folder+'/'+name
-                name_summary=output_folder+'/'+name+'/'+name+"_summary_selection.txt"
-                summary=pd.read_csv(name_summary,sep=' ',skiprows=3)
-                missing_file=output_folder+'/'+name+'/'+name+"_missing_NGA_records.txt"
-                with open(missing_file, "w") as f:
-                    f.write("Missing NGA-West2 records\n")
+    missing_file=output_folder+'/missing_NGA_records.txt'
+    with open(missing_file, "w") as f:
+        f.write("Missing NGA-West2 records\n")
+        for ii in np.arange(len(site_code)):
+            site = site_code[ii]
+            for jj in np.arange(len(probability_of_exceedance_num)):
+                poe=probability_of_exceedance_num[jj]
+                for im in np.arange(len(intensity_measures)):
+                    name=intensity_measures[im]+'-site_'+str(site)+'-poe-'+str(poe)
+                    folder=output_folder+'/'+name
+                    name_summary=output_folder+'/'+name+'/'+name+"_summary_selection.txt"
+                    summary=pd.read_csv(name_summary,sep=' ',skiprows=3)
                     for i in np.arange(nGM):
                         if(summary.source[i]=='NGA-West2'):
                             for j in range(1,3):
                                 file_acc=path_NGA_folder+'/RSN'+str(summary.recID_NGA[i])+'_'+str(j)+'.AT2'
-                                if os.path.exists(file_acc)=='False':
+                                if not os.path.exists(file_acc):
                                     f.write("{}\n".format(file_acc))
-                f.close()
 
 if calculation_mode=='--run-complete' or calculation_mode=='--run-scaling':
     for ii in np.arange(len(site_code)):
