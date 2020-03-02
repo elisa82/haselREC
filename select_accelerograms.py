@@ -651,7 +651,7 @@ if calculation_mode=='--check-NGArec':
                         if(summary.source[i]=='NGA-West2'):
                             for j in range(1,3):
                                 file_acc=path_NGA_folder+'/RSN'+str(summary.recID_NGA[i])+'_'+str(j)+'.AT2'
-                                if os.path.isdir(file_acc)=='False':
+                                if os.path.exists(file_acc)=='False':
                                     f.write("{}\n".format(file_acc))
                 f.close()
 
