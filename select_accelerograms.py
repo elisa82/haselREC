@@ -17,14 +17,17 @@ from lib.simulate_spectra import simulate_spectra
 from lib.scale_acc import scale_acc
 from lib.plot_final_selection import plot_final_selection
 
-#%% General notes
-print('Usage: python select_accelerograms.py job_selection.ini')
-
 #%% Initial setup
-fileini = sys.argv[1]
-calculation_mode=sys.argv[2]
+try:
+    fileini = sys.argv[1]
+    calculation_mode=sys.argv[2]
+except IndexError:
+    sys.exit('usage: python select_accelerograms.py JOB.INI'+"\n"
+            +'       [--run-complete]'+"\n"
+            +'       [--run-selection]'+"\n"
+            +'       [--run-scaling]'+"\n"
+            +'       [--check-NGArec]')
 #fileini = 'test/job_selection.ini'
-print("### Define directly for now")
 
 input={}
 with open(fileini) as fp:
