@@ -1,2 +1,3 @@
 test/Output/**/*.png
+test/Output/**/*.pdf
 __pycache__/

@@ -599,18 +599,22 @@ if calculation_mode=='--run-complete' or calculation_mode=='--run-selection':
                             sampleSmall = np.concatenate((added2,sampleSmall[i:end,:]))
                             recID = np.concatenate((minID,recID[i:end]))
 
-                # Output information
+                # Collect information of the final record set
                 finalRecords = recID
                 recIdx = [allowedIndex[i] for i in finalRecords]
                 finalScaleFactors = IMScaleFac
                 meanrecorded=np.mean(np.exp(sampleSmall),axis=0)
+                meanrecorded_p2sigma = np.percentile(np.exp(sampleSmall),50+34.1+13.6,axis=0)
+                meanrecorded_n2sigma = np.percentile(np.exp(sampleSmall),50-34.1-13.6,axis=0)
+                meanrecorded_eps =  (np.log(meanrecorded_p2sigma)-np.log(meanrecorded_n2sigma))/(2*1.96)
 
-                folder=output_folder+'/'+name 
+		# Create the outputs folder
+                folder=output_folder+'/'+name
                 if not os.path.exists(folder):
                     os.makedirs(folder)
 
-                # Plot the figure
-                plot_final_selection(name,nGM,TgtPer,sampleSmall,meanReq,stdevs,meanrecorded,output_folder)
+		# Plot the figure
+                plot_final_selection(name,im_type_lbl[im],nGM,TgtPer,T_CS,sampleSmall,meanReq,stdevs,meanrecorded,meanrecorded_p2sigma,meanrecorded_n2sigma,meanrecorded_eps,output_folder)
 
                 # Output results to a text file
                 blank='-'
