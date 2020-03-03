@@ -309,7 +309,7 @@ if calculation_mode=='--run-complete' or calculation_mode=='--run-selection':
 
 # -----------------------------------------------------------------------------
                 # Initialise contexts
-                rjb=np.arange(meanDist,meanDist+1,1.)
+                rjb=np.arange(meanDist,meanDist+0.9999999,1.)
                 mag=meanMag
                 if(hypo_defined==1):
                     Z_hyp=hypo_depth
