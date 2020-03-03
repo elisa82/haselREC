@@ -314,7 +314,7 @@ if calculation_mode=='--run-complete' or calculation_mode=='--run-selection':
 
 # -----------------------------------------------------------------------------
                 # Initialise contexts
-                rjb=np.arange(meanDist,meanDist+0.9999999,1.)
+                rjb=np.array([meanDist])
                 mag=meanMag
                 if(hypo_defined==1):
                     Z_hyp=hypo_depth
@@ -615,7 +615,7 @@ if calculation_mode=='--run-complete' or calculation_mode=='--run-selection':
                     os.makedirs(folder)
 
 		# Plot the figure
-                plot_final_selection(name,im_type_lbl[im],nGM,TgtPer,T_CS,sampleSmall,meanReq,stdevs,meanrecorded,meanrecorded_p2sigma,meanrecorded_n2sigma,meanrecorded_eps,output_folder)
+                plot_final_selection(name,im_type_lbl[im],nGM,TgtPer,T_CS,sampleSmall,meanReq,stdevs,output_folder)
 
                 # Output results to a text file
                 blank='-'
@@ -673,6 +673,52 @@ if calculation_mode=='--check-NGArec':
                             #    f.write("{}\n".format(summary.recID_NGA[i]))
                             if not os.path.isfile(path_NGA_folder+'/'+start_string+'1.AT2') or not os.path.isfile(path_NGA_folder+'/'+start_string+'2.AT2'):
                                 f.write("{}\n".format(summary.recID_NGA[i]))
+
+if calculation_mode=='--check-selection':
+
+    for ii in np.arange(len(site_code)):
+        site = site_code[ii]
+        for jj in np.arange(len(probability_of_exceedance_num)):
+            poe=probability_of_exceedance_num[jj]
+            for im in np.arange(len(intensity_measures)):
+                name=intensity_measures[im]+'-site_'+str(site)+'-poe-'+str(poe)
+                name_CS=output_folder+'/'+name+'/'+name+"_CS.txt"
+                CS=np.loadtxt(name_CS,skiprows=1)
+
+                Sa1, Sa2 = [], []
+                RotD50 = np.zeros((nGM,len(CS[:,0])))
+                for i in np.arange(nGM):
+                    file1=output_folder+'/'+name+'/GMR_time_scaled_acc_'+str(i+1)+'_1.txt'
+                    file2=output_folder+'/'+name+'/GMR_time_scaled_acc_'+str(i+1)+'_2.txt'
+                    table1=np.loadtxt(file1)
+                    table2=np.loadtxt(file2)
+                    t1=table1[:,0]
+                    a1=table1[:,1]
+                    t2=table2[:,0]
+                    a2=table2[:,1]
+
+                    #%% Compute the response spectra of the two orthogonal components
+                    import eqsig
+
+                    #%% Define a function to compute RotDxx
+                    def get_RotDxx(acc1, acc2, dt, damp, T, xx):
+                        theta = np.linspace(1,np.pi, num=100, endpoint=True)
+                        Rot = np.zeros((len(theta),len(T)))
+                        RotDxx = np.zeros((len(T)))
+
+                        # Just do for one ground motion for now
+                        for j in np.arange(len(theta)):
+                            a = acc1*np.cos(theta[j])+acc2*np.sin(theta[j])
+                            _, _, Rot[j][:] = eqsig.sdof.pseudo_response_spectra(a, dt, T, xi=damp)
+                            RotDxx = np.percentile(Rot,xx,axis=0)
+
+                        return RotDxx
+
+                    #%% Compute the RotD50 directly
+                    RotD50[i] = get_RotDxx(a1, a2, table2[1,0]-table2[0,0], 0.05, CS[:,0],50)
+
+		# Plot the figure
+                plot_final_selection(name,im_type_lbl[im],nGM,CS[:,0],np.log(RotD50),CS[:,1],CS[:,2],output_folder)
 
 if calculation_mode=='--run-complete' or calculation_mode=='--run-scaling':
     for ii in np.arange(len(site_code)):
