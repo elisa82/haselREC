@@ -2,7 +2,7 @@ def plot_final_selection(name,lbl,nGM,TgtPer,T_CS,sampleSmall,meanReq,stdevs,mea
 	# Import libraries
 	import numpy as np
 	import matplotlib.pyplot as plt
-	
+
 #	plt.figure()
 #	for i in np.arange(nGM):
 #		plt.loglog(TgtPer,np.exp(sampleSmall[i,:]),'g')
@@ -39,8 +39,8 @@ def plot_final_selection(name,lbl,nGM,TgtPer,T_CS,sampleSmall,meanReq,stdevs,mea
 	plt.legend()
 	plt.savefig(output_folder+'/'+name+'/'+name+'_spectra_gms.pdf', bbox_inches='tight')
 	plt.close()
-	
-	# Spectra 
+
+	# Spectra
 	plt.figure(figsize=(1.5*2.36,2.36))
 	plt.rcParams.update({'font.size': 8})
 	plt.plot(T_CS,np.exp(meanReq),'r',label='CMS', linewidth=1.0)
@@ -59,7 +59,7 @@ def plot_final_selection(name,lbl,nGM,TgtPer,T_CS,sampleSmall,meanReq,stdevs,mea
 	plt.legend()
 	plt.savefig(output_folder+'/'+name+'/'+name+'_spectra.pdf', bbox_inches='tight')
 	plt.close()
-	
+
 	# Epsilon
 	plt.figure(figsize=(1.5*2.36,2.36))
 	plt.rcParams.update({'font.size': 8})

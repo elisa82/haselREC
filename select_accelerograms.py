@@ -4,6 +4,7 @@ import os
 import sys
 import numpy as np
 import pandas as pd
+import glob
 from scipy.stats import skew
 
 from openquake.hazardlib import gsim, imt, const
@@ -16,14 +17,17 @@ from lib.simulate_spectra import simulate_spectra
 from lib.scale_acc import scale_acc
 from lib.plot_final_selection import plot_final_selection
 
-#%% General notes
-print('Usage: python select_accelerograms.py job_selection.ini')
-
 #%% Initial setup
-fileini = sys.argv[1]
-calculation_mode=sys.argv[2]
+try:
+    fileini = sys.argv[1]
+    calculation_mode=sys.argv[2]
+except IndexError:
+    sys.exit('usage: python select_accelerograms.py JOB.INI'+"\n"
+            +'       [--run-complete]'+"\n"
+            +'       [--run-selection]'+"\n"
+            +'       [--run-scaling]'+"\n"
+            +'       [--check-NGArec]')
 #fileini = 'test/job_selection.ini'
-print("### Define directly for now")
 
 input={}
 with open(fileini) as fp:
@@ -309,7 +313,7 @@ if calculation_mode=='--run-complete' or calculation_mode=='--run-selection':
 
 # -----------------------------------------------------------------------------
                 # Initialise contexts
-                rjb=np.arange(meanDist,meanDist+1,1.)
+                rjb=np.arange(meanDist,meanDist+0.9999999,1.)
                 mag=meanMag
                 if(hypo_defined==1):
                     Z_hyp=hypo_depth
@@ -632,6 +636,37 @@ if calculation_mode=='--run-complete' or calculation_mode=='--run-selection':
                     for i in np.arange(len(TgtPer)):
                         f.write("{:6.2f}{:6.2f}{:6.2f} \n".format(TgtPer[i],meanReq[i],stdevs[i]))
                 f.close()
+
+if calculation_mode=='--check-NGArec':
+    missing_file=output_folder+'/missing_NGA_records.txt'
+    with open(missing_file, "w") as f:
+        f.write("Missing NGA-West2 IDrecords\n")
+        for ii in np.arange(len(site_code)):
+            site = site_code[ii]
+            for jj in np.arange(len(probability_of_exceedance_num)):
+                poe=probability_of_exceedance_num[jj]
+                for im in np.arange(len(intensity_measures)):
+                    name=intensity_measures[im]+'-site_'+str(site)+'-poe-'+str(poe)
+                    folder=output_folder+'/'+name
+                    name_summary=output_folder+'/'+name+'/'+name+"_summary_selection.txt"
+                    summary=pd.read_csv(name_summary,sep=' ',skiprows=3)
+                    for i in np.arange(nGM):
+                        if(summary.source[i]=='NGA-West2'):
+                            start_string='RSN'+str(summary.recID_NGA[i])+'_'
+                            comp1=['1','EW','-W','-E']
+                            comp2=['2','NS','-N']
+                            exist1=0
+                            exist2=0
+                            for k in np.arange(len(comp1)):
+                                end_string=comp1[k]+'.AT2'
+                                if glob.glob(path_NGA_folder+'/'+start_string+'*'+end_string):
+                                    exist1=1
+                            for k in np.arange(len(comp2)):
+                                end_string=comp2[k]+'.AT2'
+                                if glob.glob(path_NGA_folder+'/'+start_string+'*'+end_string):
+                                    exist2=1
+                            if exist1==0 or exist2==0:
+                                f.write("{}\n".format(summary.recID_NGA[i]))
 
 if calculation_mode=='--run-complete' or calculation_mode=='--run-scaling':
     for ii in np.arange(len(site_code)):
