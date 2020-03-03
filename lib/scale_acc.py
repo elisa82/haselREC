@@ -57,19 +57,19 @@ def scale_acc(nGM,NGA,path_NGA,path_ESM,source,event,station,name,output_folder,
                 f2.write("{:10.3f} {:15.10f}\n".format(time2[j],inp_acc2[j]*SF[i]))
         f2.close()
 
-        file_scaled_acc_out_1=output_folder+'/'+name+'/GMR_scaled_acc_'+str(i+1)+'_1.txt'
-        file_scaled_acc_out_2=output_folder+'/'+name+'/GMR_scaled_acc_'+str(i+1)+'_2.txt'
-        names1.append('GMR_scaled_acc_'+str(i+1)+'_1.txt')
-        names2.append('GMR_scaled_acc_'+str(i+1)+'_2.txt')
+        #file_scaled_acc_out_1=output_folder+'/'+name+'/GMR_scaled_acc_'+str(i+1)+'_1.txt'
+        #file_scaled_acc_out_2=output_folder+'/'+name+'/GMR_scaled_acc_'+str(i+1)+'_2.txt'
+        #names1.append('GMR_scaled_acc_'+str(i+1)+'_1.txt')
+        #names2.append('GMR_scaled_acc_'+str(i+1)+'_2.txt')
 
-        with open(file_scaled_acc_out_1, "w",newline='') as f1:
-            for j in np.arange(npts1):
-                f1.write("{:15.10f}\n".format(inp_acc1[j]*SF[i]))
-        f1.close()
-        with open(file_scaled_acc_out_2, "w",newline='') as f2:
-            for j in np.arange(npts2):
-                f2.write("{:15.10f}\n".format(inp_acc2[j]*SF[i]))
-        f2.close()
+        #with open(file_scaled_acc_out_1, "w",newline='') as f1:
+        #    for j in np.arange(npts1):
+        #        f1.write("{:15.10f}\n".format(inp_acc1[j]*SF[i]))
+        #f1.close()
+        #with open(file_scaled_acc_out_2, "w",newline='') as f2:
+        #    for j in np.arange(npts2):
+        #        f2.write("{:15.10f}\n".format(inp_acc2[j]*SF[i]))
+        #f2.close()
 
 
 #        # Print the time steps and the durations also

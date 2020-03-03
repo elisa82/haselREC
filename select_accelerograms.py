@@ -27,6 +27,7 @@ except IndexError:
             +'       [--run-selection]'+"\n"
             +'       [--run-scaling]'+"\n"
             +'       [--check-NGArec]')
+            +'       [--check-selection]')
 #fileini = 'test/job_selection.ini'
 
 input={}
@@ -641,8 +642,7 @@ if calculation_mode=='--run-complete' or calculation_mode=='--run-selection':
                         f.write("{:6.2f}{:6.2f}{:6.2f} \n".format(TgtPer[i],meanReq[i],stdevs[i]))
                 f.close()
 
-if calculation_mode=='--check-NGArec':
-    missing_file=output_folder+'/missing_NGA_records.txt'
+if calculation_mode=='--check-selection':
     with open(missing_file, "w") as f:
         f.write("Missing NGA-West2 IDrecords\n")
         for ii in np.arange(len(site_code)):
