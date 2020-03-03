@@ -26,7 +26,7 @@ except IndexError:
             +'       [--run-complete]'+"\n"
             +'       [--run-selection]'+"\n"
             +'       [--run-scaling]'+"\n"
-            +'       [--check-NGArec]')
+            +'       [--check-NGArec]'+"\n"
             +'       [--check-selection]')
 #fileini = 'test/job_selection.ini'
 
