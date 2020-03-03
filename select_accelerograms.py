@@ -661,15 +661,17 @@ if calculation_mode=='--check-NGArec':
                             comp2=['2','NS','-N']
                             exist1=0
                             exist2=0
-                            for k in np.arange(len(comp1)):
-                                end_string=comp1[k]+'.AT2'
-                                if glob.glob(path_NGA_folder+'/'+start_string+'*'+end_string):
-                                    exist1=1
-                            for k in np.arange(len(comp2)):
-                                end_string=comp2[k]+'.AT2'
-                                if glob.glob(path_NGA_folder+'/'+start_string+'*'+end_string):
-                                    exist2=1
-                            if exist1==0 or exist2==0:
+                            #for k in np.arange(len(comp1)):
+                            #    end_string=comp1[k]+'.AT2'
+                            #    if glob.glob(path_NGA_folder+'/'+start_string+'*'+end_string):
+                            #        exist1=1
+                            #for k in np.arange(len(comp2)):
+                            #    end_string=comp2[k]+'.AT2'
+                            #    if glob.glob(path_NGA_folder+'/'+start_string+'*'+end_string):
+                            #        exist2=1
+                            #if exist1==0 or exist2==0:
+                            #    f.write("{}\n".format(summary.recID_NGA[i]))
+                            if not os.path.isfile(path_NGA_folder+'/'+start_string+'1.AT2') or not os.path.isfile(path_NGA_folder+'/'+start_string+'2.AT2'):
                                 f.write("{}\n".format(summary.recID_NGA[i]))
 
 if calculation_mode=='--run-complete' or calculation_mode=='--run-scaling':
