@@ -615,7 +615,7 @@ if calculation_mode=='--run-complete' or calculation_mode=='--run-selection':
                     os.makedirs(folder)
 
 		# Plot the figure
-                plot_final_selection(name,im_type_lbl[im],nGM,TgtPer,T_CS,sampleSmall,meanReq,stdevs,output_folder)
+                plot_final_selection(name,im_type_lbl[im],nGM,T_CS,sampleSmall,meanReq,stdevs,output_folder)
 
                 # Output results to a text file
                 blank='-'
