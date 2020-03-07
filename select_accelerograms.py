@@ -643,6 +643,7 @@ if calculation_mode=='--run-complete' or calculation_mode=='--run-selection':
                 f.close()
 
 if calculation_mode=='--check-NGArec':
+    missing_file=output_folder+'/missing_NGArec.txt'
     with open(missing_file, "w") as f:
         f.write("Missing NGA-West2 IDrecords\n")
         for ii in np.arange(len(site_code)):
