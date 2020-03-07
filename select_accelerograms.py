@@ -693,10 +693,11 @@ if calculation_mode=='--check-selection':
                     file2=output_folder+'/'+name+'/GMR_time_scaled_acc_'+str(i+1)+'_2.txt'
                     table1=np.loadtxt(file1)
                     table2=np.loadtxt(file2)
-                    t1=table1[:,0]
-                    a1=table1[:,1]
-                    t2=table2[:,0]
-                    a2=table2[:,1]
+                    common_len=min(len(table1),len(table2))
+                    t1=table1[0:common_len,0]
+                    a1=table1[0:common_len,1]
+                    t2=table2[0:common_len,0]
+                    a2=table2[0:common_len,1]
 
                     #%% Compute the response spectra of the two orthogonal components
                     import eqsig
