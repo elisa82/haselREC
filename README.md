@@ -1,5 +1,5 @@
-# OpenINsel
-Open-source tool for INtegrated hazard analysis and ground motion record SELection (OpenINsel)
+# OpenSel
+OPEN-source tool for ground motion record SELection and scaling (OpenSel)
 
 It perfoms a ground motion record selection following a target conditional spectrum, using the OpenQuake libraries and disaggregation results.
 
@@ -8,7 +8,7 @@ Main contributors:
 * Gerard J. O'Reilly - Scuola Universitaria Superiore IUSS Pavia, Italy
 
 # Dependencies
-OpenINsel requires the following dependencies:
+OpenSel requires the following dependencies:
 
  * NumPy
  * Pandas
@@ -16,6 +16,7 @@ OpenINsel requires the following dependencies:
  * ObsPy
  * Matplotlib
  * Openquake.hazardlib
+ * shakelib.conversions.imc.boore_kishida_2017 (Optional. Only of the input intensity measure component is the larger between the two horizontal components).
 
 
 # Installation
@@ -36,11 +37,11 @@ RSN#NUM_3.AT2
 
 # License
 Copyright (c) 2020, OpenInsel Developers
-OpenINsel is a free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3.0 of the License, or (at your option) any later version.
+OpenSel is a free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3.0 of the License, or (at your option) any later version.
 You should have received a copy of the GNU General Public License with this download. If not, see http://www.gnu.org/licenses/
 
 # Disclaimer
-OpenINsel is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+OpenSel is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
 The authors of the software assume no liability for use of the software.
 
 # Known Issues

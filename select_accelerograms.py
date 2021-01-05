@@ -16,6 +16,7 @@ from lib.compute_avgSA import compute_rho_avgSA
 from lib.simulate_spectra import simulate_spectra
 from lib.scale_acc import scale_acc
 from lib.plot_final_selection import plot_final_selection
+from lib.geometries import compute_dists
 
 #%% Initial setup
 try:
@@ -114,6 +115,7 @@ try:
 except KeyError:
     print('Warning: if used, the hypocentral depth will be defined inside the code')
     hypo_defined=0
+    hypo_depth=[]
 
 try:
     dip_input=float(input['dip'])
@@ -121,6 +123,7 @@ try:
 except KeyError:
     print('Warning: if used, the dip angle will be defined inside the code')
     dip_defined=0
+    dip_input=[]
 
 try:
     azimuth=float(input['azimuth'])
@@ -316,73 +319,8 @@ if calculation_mode=='--run-complete' or calculation_mode=='--run-selection':
                 # Initialise contexts
                 rjb=np.array([meanDist])
                 mag=meanMag
-                if(hypo_defined==1):
-                    Z_hyp=hypo_depth
-                else:
-                    if (-45 <= rake <= 45) or (rake >= 135) or (rake <= -135):
-                        Z_hyp=5.63+0.68*mag
-                    else:
-                        Z_hyp=11.24-0.2*mag
 
-                if(dip_defined==1):
-                    dip=dip_input
-                else:
-                    if (-45 <= rake <= 45) or (rake >= 135) or (rake <= -135):
-                        dip=90
-                    elif RakeAverage > 0:
-                        dip=40
-                    else:
-                        dip=50
-
-                if (-45 <= rake <= 45) or (rake >= 135) or (rake <= -135):
-                     # strike slip
-                    width= 10.0 ** (-0.76 + 0.27 *mag)
-                elif RakeAverage > 0:
-                    # thrust/reverse
-                    width= 10.0 ** (-1.61 + 0.41 *mag)
-                else:
-                    # normal
-                    width= 10.0 ** (-1.14 + 0.35 *mag)
-
-                source_vertical_width=width*np.sin(np.radians(dip))
-                ztor=max(Z_hyp-0.6*source_vertical_width,upper_sd)
-                if((ztor+source_vertical_width)>lower_sd):
-                    source_vertical_width=lower_sd-ztor
-                    width=source_vertical_width/np.sin(np.radians(dip))
-
-                if(rjb==0):
-                    rx=0.5*width*np.cos(np.radians(dip))
-                else:
-                    if(dip==90):
-                        rx=rjb*np.sin(np.radians(azimuth))
-                    else:
-                        if (azimuth>=0 and azimuth<90) or (azimuth>90 and azimuth<=180):
-                            if(rjb*np.abs(np.tan(np.radians(azimuth)))<=width*np.cos(np.radians(dip))):
-                                rx=rjb*np.abs(np.tan(np.radians(azimuth)))
-                            else:
-                                rx=rjb*np.tan(np.radians(azimuth))*np.cos(np.radians(azimuth)-np.arcsin(width*np.cos(np.radians(dip))*np.cos(np.radians(azimuth))/rjb))
-                        elif (azimuth==90): #we assume that Rjb>0 
-                            rx=rjb+width*np.cos(np.radians(dip))
-                        else:
-                            rx=rjb*np.sin(np.radians(azimuth))
-
-                if(azimuth==90 or azimuth==-90):
-                    ry=0
-                elif(azimuth==0 or azimuth==180 or azimuth==-180):
-                    ry=rjb
-                else:
-                    ry=np.abs(rx*1./np.tan(np.radians(azimuth)))
-
-                if(dip==90):
-                    rrup=np.sqrt(np.square(rjb)+np.square(ztor))
-                else:
-                    if(rx<ztor*np.tan(np.radians(dip))):
-                        rrup1=np.sqrt(np.square(rx)+np.square(ztor))
-                    if(rx>=ztor*np.tan(np.radians(dip)) and rx<=ztor*np.tan(np.radians(dip))+width*1./np.cos(np.radians(dip))):
-                        rrup1=rx*np.sin(np.radians(dip))+ztor*np.cos(np.radians(dip))
-                    if(rx>ztor*np.tan(np.radians(dip))+width*1./np.cos(np.radians(dip))):
-                        rrup1=np.sqrt(np.square(rx-width*np.cos(np.radians(dip)))+np.square(ztor+width*np.sin(np.radians(dip))))
-                    rrup=np.sqrt(np.square(rrup1)+np.square(ry))
+                rx,rrup,width,ztor,dip,ry,Z_hyp=compute_dists(rjb,mag,hypo_defined,hypo_depth,rake,dip_defined,dip_input,upper_sd,lower_sd,azimuth)
 
                 Vs30=float(Vs30_input[ii])
                 if(vs30Type[ii]=='inferred'):
@@ -445,8 +383,15 @@ if calculation_mode=='--run-complete' or calculation_mode=='--run-selection':
                     S=[const.StdDev.TOTAL]
                     mu_im_cond, sigma_im_cond=bgmpe().get_mean_and_stddevs(sctx,rctx,dctx,P,S)
                     sigma_im_cond = sigma_im_cond[0]
+
                 # Compute how many standard deviations the PSHA differs from the GMPE value
                 epsilon = (np.log(im_star) - mu_im_cond)/sigma_im_cond
+
+                if(bgmpe.DEFINED_FOR_INTENSITY_MEASURE_COMPONENT=='Greater of two horizontal'):
+                    from shakelib.conversions.imc.boore_kishida_2017 import BooreKishida2017
+                    bk17 = BooreKishida2017(const.IMC.GREATER_OF_TWO_HORIZONTAL,const.IMC.RotD50)
+                    mu_im_cond=bk17.convertAmps(P,mu_im_cond,rrup,mag)
+                    sigma_im_cond = bk17.convertSigmas(P,sigma_im_cond[0])
 
                 T_CS = TgtPer # Use the same periods as the available spectra to construct the conditional spectrum
                 mu_im = np.zeros(len(T_CS))
@@ -462,6 +407,11 @@ if calculation_mode=='--run-complete' or calculation_mode=='--run-selection':
                         P=imt.SA(period=T_CS[i])
                     S=[const.StdDev.TOTAL]
                     mu0,sigma0 = bgmpe().get_mean_and_stddevs(sctx, rctx, dctx, P, S)
+
+                    if(bgmpe.DEFINED_FOR_INTENSITY_MEASURE_COMPONENT=='Greater of two horizontal'):
+                        mu0=bk17.convertAmps(P,mu0,rrup,mag)
+                        sigma0 = bk17.convertSigmas(P,sigma0[0])
+
                     mu_im[i]=mu0[0]
                     sigma_im[i]=sigma0[0][0]
                     if(im_type[im]=='AvgSA'):

@@ -65,7 +65,7 @@ def plot_final_selection(name,lbl,nGM,T_CS,sampleSmall,meanReq,stdevs,output_fol
     plt.savefig(output_folder+'/'+name+'/'+name+'_spectra.pdf', bbox_inches='tight')
     plt.close()
 
-	# Epsilon
+	# Dispersion
     plt.figure(figsize=(1.5*2.36,2.36))
     plt.rcParams.update({'font.size': 8})
     plt.plot(T_CS,stdevs,'r',label='CMS', linewidth=1.0)
