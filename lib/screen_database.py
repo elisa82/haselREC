@@ -76,14 +76,20 @@ def screen_database(database_path,allowed_database,allowedRecs_Vs30,allowedRecs_
                                             if(source[i]=='ESM'):
                                                 allowedIndex.append(i)
                                             if(source[i]=='NGA-West2'):
-                                                if(epi_lon[i]<-31 or epi_lon[i]>70):
+                                                if 'ESM' in allowed_database:
+                                                    if(epi_lon[i]<-31 or epi_lon[i]>70):
+                                                        allowedIndex.append(i)
+                                                else:
                                                     allowedIndex.append(i)
                                 else:
                                     if(station_vs30[i]>=allowedRecs_Vs30[0] and station_vs30[i]<allowedRecs_Vs30[1]):
                                         if(source[i]=='ESM'):
                                             allowedIndex.append(i)
                                         if(source[i]=='NGA-West2'):
-                                            if(epi_lon[i]<-31 or epi_lon[i]>70):
+                                            if 'ESM' in allowed_database:
+                                                if(epi_lon[i]<-31 or epi_lon[i]>70):
+                                                    allowedIndex.append(i)
+                                            else:
                                                 allowedIndex.append(i)
 
     SA=np.vstack(SA_list)
