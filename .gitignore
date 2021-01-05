@@ -2,6 +2,7 @@ test/Output/**/*.png
 test/Output/**/*.pdf
 select_accelerograms_for_CL.py
 test/job_selection_CL.ini
+test/Output/0.139/*
 token.txt
 prova.py
 __pycache__/
