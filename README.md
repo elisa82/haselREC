@@ -22,7 +22,7 @@ OpenSel requires the following dependencies:
 # Installation
 
 - Add the lib folder to PYTHONPATH. For Linux open the file ~/.bashrc in your text editor and add the following line at the end:
-	export PYTHONPATH=/path/to/OpenInsel/lib
+	export PYTHONPATH=/path/to/OpenSel/lib
 Save the file, Close your terminal application; and Start your terminal application again to see the changes.
 - All NGA-West2 recordings have to be stored in a folder and renamed as:
 RSN#NUM_1.AT2
