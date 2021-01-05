@@ -27,8 +27,8 @@ Save the file, Close your terminal application; and Start your terminal applicat
 RSN#NUM_1.AT2
 RSN#NUM_2.AT2
 RSN#NUM_3.AT2
-- ESM recordings can be stored in advance or automatically downloaded from internet using a token file. To obtain the token file you need at first to register at: https://tex.mi.ingv.it/ and then run the command:
-	curl -X POST -F 'message={"user_email": "email","user_password": "password"}' "https://tex.mi.ingv.it/esmws/generate-signed-message/1/query" > token.txt
+- ESM recordings can be stored in advance or automatically downloaded from internet using a token file. To obtain the token file you need at first to register at: https://esm-db.eu/ and then run the command:
+	curl -X POST -F 'message={"user_email": "email","user_password": "password"}' "https://esm-db.eu/esmws/generate-signed-message/1/query" > token.txt
 
 # Usage
 * cd OI-selection

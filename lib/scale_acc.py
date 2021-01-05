@@ -30,7 +30,7 @@ def scale_acc(nGM,NGA,path_NGA,path_ESM,source,event,station,name,output_folder,
             folder_ESM=path_ESM+'/'+event[i]+'-'+station[i]
             if not os.path.isdir(folder_ESM):
                 zip_output='output_'+str(i)+'.zip'
-                command='curl -X POST -F "message=@token.txt" "https://tex.mi.ingv.it/esmws/eventdata/1/query?eventid='+event[i]+'&data-type=ACC&station='+station[i]+'&format=ascii" -o '+zip_output
+                command='curl -X POST -F "message=@token.txt" "https://esm-db.eu/esmws/eventdata/1/query?eventid='+event[i]+'&data-type=ACC&station='+station[i]+'&format=ascii" -o '+zip_output
                 os.system(command)
                 command='unzip -o '+zip_output+' -d '+folder_ESM
                 os.system(command)
