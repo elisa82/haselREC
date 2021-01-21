@@ -1,11 +1,12 @@
 # OpenSel
 OPEN-source tool for ground motion record SELection and scaling (OpenSel)
 
-It perfoms a ground motion record selection following a target conditional spectrum, using the OpenQuake libraries and disaggregation results.
+It perfoms a ground motion record selection following a target conditional spectrum, using the OpenQuake libraries and hazard results.
 
 Main contributors:
 * Elisa Zuccolo - EUCENTRE Foundation, Italy
 * Gerard J. O'Reilly - Scuola Universitaria Superiore IUSS Pavia, Italy
+* Valerio Poggi - OGS, Italy
 
 # Dependencies
 OpenSel requires the following dependencies:
@@ -32,11 +33,20 @@ RSN#NUM_3.AT2
 	curl -X POST -F 'message={"user_email": "email","user_password": "password"}' "https://esm-db.eu/esmws/generate-signed-message/1/query" > token.txt
 
 # Usage
-* cd OI-selection
-* python select_accelerograms.py $filename.ini
+* opensel.py $filename.ini [option]
+Possible options are: 
+*--run-complete 
+*--run-selection
+*--run-scaling
+*--check-NGArec
+*--check-selection
+
+# Demo
+* ./opensel.py demo/job_selection.ini --job_selection.ini
+The output files are stored in demo/Output
 
 # License
-Copyright (c) 2020, OpenInsel Developers
+Copyright (c) 2020-2021, Elisa Zuccolo
 OpenSel is a free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3.0 of the License, or (at your option) any later version.
 You should have received a copy of the GNU General Public License with this download. If not, see http://www.gnu.org/licenses/
 
@@ -46,14 +56,11 @@ The authors of the software assume no liability for use of the software.
 
 # Known Issues
 A list of issues that need to be fixed:
-* Need to download complete NGA West 2 database and keep original filenames to make adding/removing easier. Should try to find a way to download the whole database
+* Use of original names for recordings from the NGA-West2 database 
 
 # Potential Improvements
 A list of things that could be improved:
-* The need to directly state the IM and period info could be removed and taken from the chosen disaggregation outputs - ???
-* Possibility to directly specify the strong-motion database to be used - DONE
-* To increase the database of GMPE -DONE
-* Adding the possibility to directly execute a disaggregation analysis - NO
+* Computation of exact CS 
 
 # Main References
 

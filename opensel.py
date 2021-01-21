@@ -1,5 +1,25 @@
+#!/usr/bin/env python
+
+# Copyright (C) 2020-2021 Elisa Zuccolo
+#
+# OpenQuake is free software: you can redistribute it and/or modify it
+# under the terms of the GNU Affero General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# OpenQuake is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with OpenQuake. If not, see <http://www.gnu.org/licenses/>.
+
+
 #%% Import libraries
 # Standard built-in libraries
+
+
 import os
 import sys
 import numpy as np
@@ -23,13 +43,13 @@ try:
     fileini = sys.argv[1]
     calculation_mode=sys.argv[2]
 except IndexError:
-    sys.exit('usage: python select_accelerograms.py JOB.INI'+"\n"
+    sys.exit('usage: opensel JOB.INI [option]'+"\n"
             +'       [--run-complete]'+"\n"
             +'       [--run-selection]'+"\n"
             +'       [--run-scaling]'+"\n"
             +'       [--check-NGArec]'+"\n"
             +'       [--check-selection]')
-#fileini = 'test/job_selection.ini'
+#fileini = 'demo/job_selection.ini '
 
 input={}
 with open(fileini) as fp:

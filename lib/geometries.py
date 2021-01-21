@@ -1,4 +1,4 @@
-def compute_dists(rjb,mag,hypo_defined,hypo_depth,rake,dip_defined,dip_input,upper_sd,lower_sd,azimuth):
+def compute_dists(rjb, mag, hypo_defined, hypo_depth, rake, dip_defined, dip_input, upper_sd, lower_sd, azimuth):
     import numpy as np
 
     if(hypo_defined==1):
