@@ -42,11 +42,11 @@ Possible options are:
 *--check-selection
 
 # Demo
-* ./opensel.py demo/job_selection.ini --job_selection.ini
+* ./opensel.py demo/job_selection.ini --run-selection
 The output files are stored in demo/Output
 
 # License
-Copyright (c) 2020-2021, Elisa Zuccolo
+Copyright (c) 2020-2021 Elisa Zuccolo
 OpenSel is a free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3.0 of the License, or (at your option) any later version.
 You should have received a copy of the GNU General Public License with this download. If not, see http://www.gnu.org/licenses/
 
