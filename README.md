@@ -6,7 +6,6 @@ It perfoms a ground motion record selection following a target conditional spect
 Main contributors:
 * Elisa Zuccolo - EUCENTRE Foundation, Italy
 * Gerard J. O'Reilly - Scuola Universitaria Superiore IUSS Pavia, Italy
-* Valerio Poggi - OGS, Italy
 
 # Dependencies
 OpenSel requires the following dependencies:
@@ -26,9 +25,11 @@ OpenSel requires the following dependencies:
 	export PYTHONPATH=/path/to/OpenSel/lib
 Save the file, Close your terminal application; and Start your terminal application again to see the changes.
 - All NGA-West2 recordings have to be stored in a folder and renamed as:
-RSN#NUM_1.AT2
-RSN#NUM_2.AT2
-RSN#NUM_3.AT2
+RSN#NUM_1.AT2 (1st horiz comp)
+RSN#NUM_2.AT2 (2nd horiz comp)
+RSN#NUM_3.AT2 (vertical component)
+
+#NUM is the 'record_sequence_number_NGA'
 - ESM recordings can be stored in advance or automatically downloaded from internet using a token file. To obtain the token file you need at first to register at: https://esm-db.eu/ and then run the command:
 	curl -X POST -F 'message={"user_email": "email","user_password": "password"}' "https://esm-db.eu/esmws/generate-signed-message/1/query" > token.txt
 
@@ -46,9 +47,11 @@ Possible options are:
 The output files are stored in demo/Output
 
 # License
-Copyright (c) 2020-2021 Elisa Zuccolo
-OpenSel is a free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3.0 of the License, or (at your option) any later version.
-You should have received a copy of the GNU General Public License with this download. If not, see http://www.gnu.org/licenses/
+Copyright (C) 2020-2021 Elisa Zuccolo, Eucentre Foundation
+OpenSel is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+OpenSel is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.
+You should have received a copy of the GNU Affero General Public License along with OpenSel. If not, see <http://www.gnu.org/licenses/>.
+
 
 # Disclaimer
 OpenSel is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
