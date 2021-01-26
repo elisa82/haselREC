@@ -4,3 +4,5 @@ select_accelerograms_for_CL.py
 token.txt
 prova.py
 __pycache__/
+.idea/
+*.pyc
