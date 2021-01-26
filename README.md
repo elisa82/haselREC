@@ -40,7 +40,6 @@ Possible options are:
 *--run-selection
 *--run-scaling
 *--check-NGArec
-*--check-selection
 
 # Demo
 * ./opensel.py demo/job_selection.ini --run-selection
