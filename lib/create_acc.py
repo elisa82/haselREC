@@ -55,7 +55,7 @@ def create_esm_acc(folder):
             header['starttime'] \
                 = to_utc_date_time(headers
                                    ['DATE_TIME_FIRST_SAMPLE_YYYYMMDD_HHMMSS'])
-        except:
+        except ValueError:
             header['starttime'] = to_utc_date_time('19700101_000000')
         header['sampling_rate'] = 1 / float(headers['SAMPLING_INTERVAL_S'])
         header['delta'] = float(headers['SAMPLING_INTERVAL_S'])
@@ -220,7 +220,7 @@ def strtofloat(sf):
     """
     try:
         x = float(sf)
-    except:
+    except ValueError:
         return None
     return x
 
@@ -231,7 +231,7 @@ def strtoint(sf):
     """
     try:
         x = int(sf)
-    except:
+    except ValueError:
         return None
     return x
 
