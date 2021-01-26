@@ -32,7 +32,7 @@ def scaling_module(site_code, probability_of_exceedance_num,
                                 "_summary_selection.txt")
 
                 summary = pd.read_csv(name_summary, sep=' ', skiprows=3)
-                scale_acc(n_gm, summary.rec_id_nga, path_nga_folder,
+                scale_acc(n_gm, summary.recID_NGA, path_nga_folder,
                           path_esm_folder, summary.source,
                           summary.event_id_esm, summary.station_code_esm, name,
                           output_folder, summary.scale_factor)

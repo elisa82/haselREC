@@ -19,6 +19,7 @@
 # Standard built-in libraries
 
 import sys
+import os
 from lib.read_input_data import read_input_data
 from lib.scaling_module import scaling_module
 from lib.check_module import check_module
@@ -66,8 +67,13 @@ if calculation_mode == '--run-complete' or \
 if calculation_mode == '--check-NGArec':
     check_module(output_folder, site_code, probability_of_exceedance_num,
                  intensity_measures, n_gm, path_nga_folder)
+    command='tail -n +2 '+output_folder+'/missing_NGArec.txt  | sort | uniq > '+output_folder+'/temp'
+    os.system(command)
+    command='mv '+output_folder+'/temp '+output_folder+'/missing_NGArec.txt'
+    os.system(command)
 
 if calculation_mode == '--run-complete' or calculation_mode == '--run-scaling':
     scaling_module(site_code, probability_of_exceedance_num,
                    intensity_measures, output_folder, n_gm,
                    path_nga_folder, path_esm_folder)
+

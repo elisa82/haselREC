@@ -42,8 +42,17 @@ Possible options are:
 *--check-NGArec
 
 # Demo
-* ./opensel.py demo/job_selection.ini --run-selection
-The output files are stored in demo/Output
+demo1: ./opensel.py demo/job_selection_1.ini --run-selection
+The output files are stored in demo/Output_1. 4 subfolders are created:
+PGA-site_1-poe-1   
+PGA-site_1-poe-2  
+SA(0.2)-site_1-poe-1  
+SA(0.2)-site_1-poe-2
+The folder name is IM-site_{#num_site}-poe-{#num_poe}
+Each folder cointais 5 files (3 plots and 2 txt files). The 2 txt files contains the summary of record selection (*summary_selection.txt) and the CS (*_CS.txt).
+
+demo2: ./opensel.py demo/job_selection_1.ini --check-NGArec
+The output files are stored in demo/Output_1. A file called 'missing_NGArec.txt' is produced. It contains the ID of all missing NGArecords
 
 # License
 Copyright (C) 2020-2021 Elisa Zuccolo, Eucentre Foundation

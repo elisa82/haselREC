@@ -34,8 +34,8 @@ def check_module(output_folder, site_code, probability_of_exceedance_num,
                     summary = pd.read_csv(name_summary, sep=' ', skiprows=3)
                     for i in np.arange(n_gm):
                         if summary.source[i] == 'NGA-West2':
-                            start_string = 'RSN' + str(
-                                summary.recID_NGA[i]) + '_'
+                            start_string = 'RSN' + str(summary.recID_NGA[i]) +\
+                                           '_'
                             # comp1 = ['1', 'EW', '-W', '-E']
                             # comp2 = ['2', 'NS', '-N']
                             # import glob
@@ -58,5 +58,5 @@ def check_module(output_folder, site_code, probability_of_exceedance_num,
                                     '1.AT2') or not \
                                     os.path.isfile(path_nga_folder + '/' +
                                                    start_string + '2.AT2'):
-                                f.write("{}\n".format(summary.rec_id_nga[i]))
+                                f.write("{}\n".format(summary.recID_NGA[i]))
     return
