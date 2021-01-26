@@ -29,7 +29,6 @@ def check_module(output_folder, site_code, probability_of_exceedance_num,
                 for im in np.arange(len(intensity_measures)):
                     name = intensity_measures[im] + '-site_' + str(
                         site) + '-poe-' + str(poe)
-                    folder = output_folder + '/' + name
                     name_summary = (output_folder + '/' + name + '/' + name +
                                     "_summary_selection.txt")
                     summary = pd.read_csv(name_summary, sep=' ', skiprows=3)
@@ -37,8 +36,8 @@ def check_module(output_folder, site_code, probability_of_exceedance_num,
                         if summary.source[i] == 'NGA-West2':
                             start_string = 'RSN' + str(
                                 summary.recID_NGA[i]) + '_'
-                            comp1 = ['1', 'EW', '-W', '-E']
-                            comp2 = ['2', 'NS', '-N']
+                            # comp1 = ['1', 'EW', '-W', '-E']
+                            # comp2 = ['2', 'NS', '-N']
                             # import glob
                             # exist1 = 0
                             # exist2 = 0

@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with OpenSel. If not, see <http://www.gnu.org/licenses/>.
 
-def simulate_spectra(random, n_trials, mean_req, cov_req, stdevs, n_gm,
+def simulate_spectra(random_seed, n_trials, mean_req, cov_req, stdevs, n_gm,
                      weights):
     """
     """
@@ -21,6 +21,7 @@ def simulate_spectra(random, n_trials, mean_req, cov_req, stdevs, n_gm,
     import numpy as np
     from scipy.stats import skew
 
+    random = np.random.RandomState(random_seed)
     # simulate response spectra from the target mean and covariance matrix
     dev_total_sim = []
     spettri = []

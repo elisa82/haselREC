@@ -22,23 +22,23 @@ def create_esm_acc(folder):
     import numpy as np
 
     filename_in = ''
-    for l in range(1, 3):
+    for i in range(1, 3):
         if folder.find('ESM/GR') > -1:
             file_ew = folder + '/*2.D.*'
             file_ns = folder + '/*3.D.*'
         else:
             file_ew = folder + '/*E.D.*'
             file_ns = folder + '/*N.D.*'
-        if l == 1:
+        if i == 1:
             filename_in = glob.glob(file_ew)[0]
-        if l == 2:
+        if i == 2:
             filename_in = glob.glob(file_ns)[0]
 
         headers = {}
 
         # read file
         fh = open(filename_in, 'rt')
-        for i in range(64):
+        for j in range(64):
             key, value = fh.readline().strip().split(':', 1)
             headers[key.strip()] = value.strip()
 
@@ -179,12 +179,12 @@ def create_esm_acc(folder):
             t = j * header['delta']
             time.append(t)
 
-        if l == 1:
+        if i == 1:
             inp_acc1 = np.asarray(acc_data) / 981  # in g
             # comp1=header['channel']
             npts1 = header['npts']
             time1 = time
-        if l == 2:
+        if i == 2:
             inp_acc2 = np.asarray(acc_data) / 981  # in g
             # comp2=header['channel']
             npts2 = header['npts']
@@ -227,6 +227,7 @@ def strtofloat(sf):
 
 def strtoint(sf):
     """
+
     """
     try:
         x = int(sf)
@@ -243,6 +244,12 @@ def create_nga_acc(num_rec, path_nga_folder):
 
     # desc1 = ""
     # desc2 = ""
+    time1 = []
+    time2 = []
+    inp_acc1 = []
+    inp_acc2 = []
+    npts1 = []
+    npts2 = []
     for i in range(1, 3):
         file_acc = path_nga_folder + '/RSN' + str(num_rec) + '_' + str(
             i) + '.AT2'

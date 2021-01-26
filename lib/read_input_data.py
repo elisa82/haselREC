@@ -180,8 +180,8 @@ def read_input_data(fileini):
         allowed_ec8_code = [x.strip() for x in
                             input['allowedEC8code'].strip('{}').split(',')]
     except KeyError:
-        print('Warning: the EC8 soil class will be defined consistently with the EC8'
-              ' soil class of the site ')
+        print('Warning: the EC8 soil class will be defined consistently with'
+              ' the EC8 soil class of the site ')
 
     try:
         maxsf_input = float(input['maxsf'])
