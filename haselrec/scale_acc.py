@@ -21,8 +21,8 @@ def scale_acc(n_gm, nga, path_nga, path_esm, source, event, station, name,
     # Import libraries
     import numpy as np
     import os
-    from lib.create_acc import create_nga_acc
-    from lib.create_acc import create_esm_acc
+    from .create_acc import create_nga_acc
+    from .create_acc import create_esm_acc
     from zipfile import ZipFile
     import requests
 

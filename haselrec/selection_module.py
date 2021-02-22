@@ -27,14 +27,14 @@ def selection_module(intensity_measures, site_code, rlz_code,
     import os
     import pandas as pd
     import numpy as np
-    from lib.screen_database import screen_database
-    from lib.simulate_spectra import simulate_spectra
-    from lib.plot_final_selection import plot_final_selection
-    from lib.input_GMPE import inizialize_gmm
-    from lib.create_output_files import create_output_files
-    from lib.compute_cs import compute_cs
-    from lib.find_ground_motion import find_ground_motion
-    from lib.optimizing_ground_motion import optimizing_ground_motion
+    from .screen_database import screen_database
+    from .simulate_spectra import simulate_spectra
+    from .plot_final_selection import plot_final_selection
+    from .input_GMPE import inizialize_gmm
+    from .create_output_files import create_output_files
+    from .compute_cs import compute_cs
+    from .find_ground_motion import find_ground_motion
+    from .optimizing_ground_motion import optimizing_ground_motion
 
     # %% Start the routine
     print('Inputs loaded, starting selection....')

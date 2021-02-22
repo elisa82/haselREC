@@ -6,3 +6,4 @@ __pycache__/
 *.pyc
 GM-Records/ESM/
 GM-Records/NGA/
+/build

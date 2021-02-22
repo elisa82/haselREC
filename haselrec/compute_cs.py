@@ -27,7 +27,7 @@ def compute_cs(t_cs, bgmpe, sctx, rctx, dctx, im_type, t_star, rrup, mag,
     import numpy as np
     import sys
     from openquake.hazardlib import imt, const, gsim
-    from lib.compute_avgSA import compute_rho_avgsa
+    from .compute_avgSA import compute_rho_avgsa
 
     # Use the same periods as the available spectra to construct the
     # conditional spectrum

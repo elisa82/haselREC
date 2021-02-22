@@ -12,7 +12,7 @@ Some demos are currently available to run the different execution modes.
 Run:
 
 ```
-python haselrec/haselrec.py demo/job_selection_1.ini --run-selection
+python -m haselrec demo/job_selection_1.ini --run-selection
 ```
 
 The output files are stored in *demo/Output_1* 
@@ -37,7 +37,7 @@ The 2 txt files have the extension:
 
 Run:
 ```
-python haselrec/haselrec.py demo/job_selection_1.ini --check-NGArec
+python -m haselrec demo/job_selection_1.ini --check-NGArec
 ```
 
 The output files are stored in *demo/Output_1* 
@@ -51,7 +51,7 @@ It contains the ID of all missing NGArecords
 
 Run:
 ```
-python haselrec/haselrec.py demo/job_selection_2.ini --run-selection
+python -m haselrec demo/job_selection_2.ini --run-selection
 ```
 The output files are stored in *demo/Output_2*
 
@@ -75,7 +75,7 @@ to download ESM recordings.
 Run:
 
 ```
-python haselrec/haselrec.py demo/job_selection_2.ini --run-scaling
+python -m haselrec demo/job_selection_2.ini --run-scaling
 ```
 10 files (*nGMx2*) called *GMR_time_scaled_acc_#GMnum_#comp.txt* are produced
 *GMnum* is a sequential number ranging from 1 to *nGM*
@@ -91,7 +91,7 @@ to download ESM recordings.
 Run:
 
 ```
-python haselrec/haselrec.py demo/job_selection_3.ini --run-complete
+python -m haselrec demo/job_selection_3.ini --run-complete
 ```
 
 The output files are stored in *demo/Output_3*.

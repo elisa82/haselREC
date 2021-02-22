@@ -24,10 +24,10 @@ HaselREC (HAzard-based SELection of RECords)
 
 import sys
 import os
-from lib.read_input_data import read_input_data
-from lib.scaling_module import scaling_module
-from lib.check_module import check_module
-from lib.selection_module import selection_module
+from .read_input_data import read_input_data
+from .scaling_module import scaling_module
+from .check_module import check_module
+from .selection_module import selection_module
 
 if __name__ == '__main__':
 
@@ -36,7 +36,8 @@ if __name__ == '__main__':
         fileini = sys.argv[1]
         calculation_mode = sys.argv[2]
     except IndexError:
-        sys.exit('usage: haselrec JOB.INI [option]' + "\n"
+        sys.exit('usage:\n'
+                 'python -m haselrec JOB.INI [option]' + "\n"
                  + '       [--run-complete]' + "\n"
                  + '       [--run-selection]' + "\n"
                  + '       [--run-scaling]' + "\n"

@@ -18,7 +18,7 @@ def scaling_module(site_code, probability_of_exceedance_num,
                    path_nga_folder, path_esm_folder):
     import numpy as np
     import pandas as pd
-    from lib.scale_acc import scale_acc
+    from .scale_acc import scale_acc
 
     for ii in np.arange(len(site_code)):
         site = site_code[ii]
