@@ -32,12 +32,11 @@ if __name__ == '__main__':
         fileini = sys.argv[1]
         calculation_mode = sys.argv[2]
     except IndexError:
-        sys.exit('usage: opensel JOB.INI [option]' + "\n"
+        sys.exit('usage: haselrec JOB.INI [option]' + "\n"
                  + '       [--run-complete]' + "\n"
                  + '       [--run-selection]' + "\n"
                  + '       [--run-scaling]' + "\n"
                  + '       [--check-NGArec]')
-    # fileini = 'demo/job_selection.ini '
 
     # Read fileini
 
