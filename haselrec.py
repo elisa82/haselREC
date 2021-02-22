@@ -74,6 +74,10 @@ if calculation_mode == '--check-NGArec':
     os.system(command)
 
 if calculation_mode == '--run-complete' or calculation_mode == '--run-scaling':
+    if not os.path.exists(path_nga_folder):
+        os.makedirs(path_nga_folder)
+    if not os.path.exists(path_esm_folder):
+        os.makedirs(path_esm_folder)
     scaling_module(site_code, probability_of_exceedance_num,
                    intensity_measures, output_folder, n_gm,
                    path_nga_folder, path_esm_folder)

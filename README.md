@@ -1,14 +1,16 @@
-# OpenSel
-OPEN-source tool for ground motion record SELection and scaling (OpenSel)
+# HaselREC 
+HAzard-based SELection of RECords
 
 It perfoms a ground motion record selection following a target conditional spectrum, using the OpenQuake libraries and hazard results.
+The code is described in:
+*Zuccolo E, Poggi V, O'Reilly G, Monteiro R (2021). HaselREC: an open-source ground motion record selection tool bridging seismic hazard and structural analyses. Submitted to SDEE
 
 Main contributors:
-* Elisa Zuccolo - EUCENTRE Foundation, Italy
-* Gerard J. O'Reilly - Scuola Universitaria Superiore IUSS Pavia, Italy
+* Elisa Zuccolo - EUCENTRE Foundation, Italy, elisa.zuccolo@eucentre.it
+* Gerard J. O'Reilly - Scuola Universitaria Superiore IUSS Pavia, Italy, gerard.oreilly@iusspavia.it
 
 # Dependencies
-OpenSel requires the following dependencies:
+HaselREC has the following dependencies:
 
  * NumPy
  * Pandas
@@ -18,63 +20,45 @@ OpenSel requires the following dependencies:
  * Openquake.hazardlib
  * shakelib.conversions.imc.boore_kishida_2017 (Optional. Only of the input intensity measure component is the larger between the two horizontal components).
 
-
 # Installation
+Add the lib folder to PYTHONPATH. For Linux open the file ~/.bashrc in your text editor and add the following line at the end:
+```
+export PYTHONPATH=/path/to/HaselREC/lib
+```
 
-- Add the lib folder to PYTHONPATH. For Linux open the file ~/.bashrc in your text editor and add the following line at the end:
-	export PYTHONPATH=/path/to/OpenSel/lib
-Save the file, Close your terminal application; and Start your terminal application again to see the changes.
+##Database
 - All NGA-West2 recordings have to be stored in a folder and renamed as:
-RSN#NUM_1.AT2 (1st horiz comp)
-RSN#NUM_2.AT2 (2nd horiz comp)
-RSN#NUM_3.AT2 (vertical component)
+*RSN#NUM_1.AT2* (1st horiz comp)
+*RSN#NUM_2.AT2* (2nd horiz comp)
+*RSN#NUM_3.AT2* (vertical component)
+#NUM is the record sequence number of NGA recordings
 
-#NUM is the 'record_sequence_number_NGA'
 - ESM recordings can be stored in advance or automatically downloaded from internet using a token file. To obtain the token file you need at first to register at: https://esm-db.eu/ and then run the command:
-	curl -X POST -F 'message={"user_email": "email","user_password": "password"}' "https://esm-db.eu/esmws/generate-signed-message/1/query" > token.txt
+```
+curl -X POST -F 'message={"user_email": "email","user_password": "password"}' "https://esm-db.eu/esmws/generate-signed-message/1/query" > token.txt
+```
 
 # Usage
-* opensel.py $filename.ini [option]
-Possible options are: 
-*--run-complete 
-*--run-selection
-*--run-scaling
-*--check-NGArec
-
-# Demo
-demo1: ./opensel.py demo/job_selection_1.ini --run-selection
-The output files are stored in demo/Output_1. 4 subfolders are created:
-PGA-site_1-poe-1   
-PGA-site_1-poe-2  
-SA(0.2)-site_1-poe-1  
-SA(0.2)-site_1-poe-2
-The folder name is IM-site_{#num_site}-poe-{#num_poe}
-Each folder cointais 5 files (3 plots and 2 txt files). The 2 txt files contains the summary of record selection (*summary_selection.txt) and the CS (*_CS.txt).
-
-demo2: ./opensel.py demo/job_selection_1.ini --check-NGArec
-The output files are stored in demo/Output_1. A file called 'missing_NGArec.txt' is produced. It contains the ID of all missing NGArecords
+```
+haselrec.py $filename.ini [option]
+```
+Possible [option] are: 
+- --run-complete 
+- --run-selection
+- --run-scaling
+- --check-NGArec
 
 # License
 Copyright (C) 2020-2021 Elisa Zuccolo, Eucentre Foundation
-OpenSel is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-OpenSel is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.
-You should have received a copy of the GNU Affero General Public License along with OpenSel. If not, see <http://www.gnu.org/licenses/>.
-
+HaselREC is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+HaselREC is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.
+You should have received a copy of the GNU Affero General Public License along with HaselREC. If not, see <http://www.gnu.org/licenses/>.
 
 # Disclaimer
-OpenSel is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+HaselREC is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
 The authors of the software assume no liability for use of the software.
-
-# Known Issues
-A list of issues that need to be fixed:
-* Use of original names for recordings from the NGA-West2 database 
 
 # Potential Improvements
 A list of things that could be improved:
+* Use of original names for recordings from the NGA-West2 database 
 * Computation of exact CS 
-
-# Main References
-
-* Baker JW, Lee C. (2018) An Improved Algorithm for Selecting Ground Motions to Match a Conditional Spectrum. Journal of Earthquake Engineering 22(4): 708–723. 
-* Kaklamanos, J., L. G. Baise, and D. M. Boore (2011). Estimating unknown input parameters when implementing the NGA ground-motion prediction equations in engineering practice, Earthquake Spectra 27(4): 1219-1235.
-* Kohrangi M, Bazzurro P, Vamvatsikos D, Spillatura A. (2017) Conditional spectrum-based ground motion record selection using average spectral acceleration. Earthquake Engng Struct. Dyn. 46: 1667–1685.

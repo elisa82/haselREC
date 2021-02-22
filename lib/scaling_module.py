@@ -34,6 +34,6 @@ def scaling_module(site_code, probability_of_exceedance_num,
                 summary = pd.read_csv(name_summary, sep=' ', skiprows=3)
                 scale_acc(n_gm, summary.recID_NGA, path_nga_folder,
                           path_esm_folder, summary.source,
-                          summary.event_id_esm, summary.station_code_esm, name,
+                          summary.event_id_ESM, summary.station_code_ESM, name,
                           output_folder, summary.scale_factor)
     return

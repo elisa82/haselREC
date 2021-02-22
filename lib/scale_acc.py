@@ -46,8 +46,7 @@ def scale_acc(n_gm, nga, path_nga, path_esm, source, event, station, name,
                 os.system(command)
                 command = 'unzip -o ' + zip_output + ' -d ' + folder_esm
                 os.system(command)
-                command = 'rm ' + zip_output
-                os.system(command)
+                os.remove(zip_output)
             [time1, time2, inp_acc1, inp_acc2, npts1, npts2] = \
                 create_esm_acc(folder_esm)
 

@@ -21,6 +21,13 @@ def create_esm_acc(folder):
     from obspy.core import Stats
     import numpy as np
 
+    time1 = []
+    time2 = []
+    inp_acc1 = []
+    inp_acc2 = []
+    npts1 = []
+    npts2 = []
+
     filename_in = ''
     for i in range(1, 3):
         if folder.find('ESM/GR') > -1:
@@ -168,12 +175,6 @@ def create_esm_acc(folder):
         acc_data = np.loadtxt(fh, dtype='float32')
         fh.close()
 
-        time1 = []
-        time2 = []
-        inp_acc1 = []
-        inp_acc2 = []
-        npts1 = []
-        npts2 = []
         time = []
         for j in range(0, header['npts']):
             t = j * header['delta']

@@ -1,0 +1,9 @@
+reference hazard value =  1.090606
+mean_mag_disag =  6.347683361014376
+mean_dist_disag =  15.909873748773544
+num source event_id_ESM station_code_ESM recID_NGA magnitude distance vs30 EC8 scale_factor
+1 ESM EMSC-20161030_0000029 CIT - 6.5 26.8 nan C* 4.02
+2 ESM EMSC-20160824_0000006 FOC - 6.0 45.7 nan C* 4.11
+3 ESM IT-2012-0011 CNT - 6.0 21.9 nan C* 4.75
+4 ESM EMSC-20161026_0000095 FOC - 5.9 23.0 nan C* 2.07
+5 ESM EMSC-20161030_0000029 FOC - 6.5 27.8 nan C* 3.07

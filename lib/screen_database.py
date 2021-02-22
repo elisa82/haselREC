@@ -17,6 +17,8 @@ def screen_database(database_path, allowed_database, allowed_recs_vs30,
                     allowed_recs_mag, allowed_recs_d, allowed_ec8_code,
                     target_periods, n_gm, allowed_depth, vs30):
     """
+    Screen the database of candidate ground motion to select only appropriate
+    ground motions
     """
     # Import libraries
     import numpy as np
