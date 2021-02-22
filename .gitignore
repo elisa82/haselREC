@@ -1,8 +1,9 @@
-test/Output/**/*.png
-test/Output/**/*.pdf
+demo/Output_?/**/*.png
+demo/Output_?/**/*.pdf
 select_accelerograms_for_CL.py
 token.txt
-prova.py
 __pycache__/
 .idea/
 *.pyc
+GM-Records/ESM/
+GM-Records/NGA/
