@@ -13,64 +13,22 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with HaselREC. If not, see <http://www.gnu.org/licenses/>.
 
-
-def compute_avgsa(avg_periods, sctx, rctx, dctx, bgmpe, corr_type):
-    """
-    """
-    # Import libraries
-    from openquake.hazardlib import imt, const
-    import numpy as np
-    from lib.im_correlation import baker_jayaram_correlation
-    from lib.im_correlation import akkar_correlation
-
-    mean_list = []
-    stddvs_list = []
-    # Loop over averaging periods
-    for period in avg_periods:
-        # compute mean and standard deviation
-        p = imt.SA(period)
-        s = [const.StdDev.TOTAL]
-        mean, std = bgmpe().get_mean_and_stddevs(sctx, rctx, dctx, p, s)
-        mean_list.append(mean)
-        stddvs_list.append(std[0])  # Support only for total!
-
-    mean_avgsa = 0.
-    stddvs_avgsa = 0.
-
-    for i1 in np.arange(len(avg_periods)):
-        mean_avgsa += mean_list[i1]
-        for i2 in np.arange(len(avg_periods)):
-            rho = []
-            if corr_type == 'baker_jayaram':
-                rho = baker_jayaram_correlation(avg_periods[i1],
-                                                avg_periods[i2])
-            if corr_type == 'akkar':
-                rho = akkar_correlation(avg_periods[i1], avg_periods[i2])
-
-            stddvs_avgsa += rho * stddvs_list[i1] * stddvs_list[i2]
-
-    mean_avgsa *= (1. / len(avg_periods))
-    stddvs_avgsa *= (1. / len(avg_periods)) ** 2
-    stddvs_avgsa = np.sqrt(stddvs_avgsa)
-    return [np.exp(mean_avgsa), stddvs_avgsa]
-
-
 def compute_rho_avgsa(per, avg_periods, sctx, rctx, dctx, stddvs_avgsa, bgmpe,
                       corr_type):
     """
     """
     # Import libraries
-    from openquake.hazardlib import imt, const
-    from lib.im_correlation import baker_jayaram_correlation
-    from lib.im_correlation import akkar_correlation
+    from openquake.hazardlib import imt, const, gsim
 
     sum_numeratore = 0
     for i1 in avg_periods:
         rho = []
         if corr_type == 'baker_jayaram':
-            rho = baker_jayaram_correlation(per, i1)
+            rho = gsim.mgmpe.generic_gmpe_avgsa. \
+                    BakerJayaramCorrelationModel([per, i1])(0, 1)
         if corr_type == 'akkar':
-            rho = akkar_correlation(per, i1)
+            rho = gsim.mgmpe.generic_gmpe_avgsa. \
+                    AkkarCorrelationModel([per, i1])(0, 1)
         s = [const.StdDev.TOTAL]
         mean1, std1 = bgmpe().get_mean_and_stddevs(sctx, rctx, dctx,
                                                    imt.SA(i1), s)

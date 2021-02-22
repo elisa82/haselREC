@@ -131,7 +131,7 @@ def selection_module(intensity_measures, site_code, rlz_code,
                 [mean_req, cov_req, stdevs] = \
                     compute_cs(tgt_per, bgmpe, sctx, rctx, dctx, im_type[im],
                                tstar[im], rrup, mag, avg_periods, corr_type,
-                               im_star)
+                               im_star, gmpe_input)
 
                 simulated_spectra = simulate_spectra(random_seed,
                                                      n_trials,
