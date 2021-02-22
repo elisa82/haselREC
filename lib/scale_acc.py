@@ -16,12 +16,15 @@
 def scale_acc(n_gm, nga, path_nga, path_esm, source, event, station, name,
               output_folder, sf):
     """
+    Scales selected accelerograms and writes selected accelerograms
     """
     # Import libraries
     import numpy as np
     import os
     from lib.create_acc import create_nga_acc
     from lib.create_acc import create_esm_acc
+    from zipfile import ZipFile
+    import requests
 
     # Read accelerograms, save them and apply scaling factor
     for i in np.arange(n_gm):
@@ -39,13 +42,32 @@ def scale_acc(n_gm, nga, path_nga, path_esm, source, event, station, name,
             folder_esm = path_esm + '/' + event[i] + '-' + station[i]
             if not os.path.isdir(folder_esm):
                 zip_output = 'output_' + str(i) + '.zip'
-                command = 'curl -X POST -F "message=@token.txt" ' \
-                          '"https://esm-db.eu/esmws/eventdata/1/query?eventid='\
-                          + event[i] + '&data-type=ACC&station=' + station[i] \
-                          + '&format=ascii" -o ' + zip_output
-                os.system(command)
-                command = 'unzip -o ' + zip_output + ' -d ' + folder_esm
-                os.system(command)
+                
+                params = (
+                    ('eventid', event[i]),
+                    ('data-type', 'ACC'),
+                    ('station', station[i]),
+                    ('format', 'ascii'),
+                )
+
+                files = {
+                    'message': ('path/to/token.txt', open('token.txt', 'rb')),
+                }
+
+                headers={'Authorization': 'token {}'.format('token.txt')}
+
+                url = 'https://esm-db.eu/esmws/eventdata/1/query'
+
+                req = requests.post(url=url, params=params, files=files)
+
+                if req.status_code == 200:
+                    with open(zip_output, "wb") as zf:
+                        zf.write(req.content)
+                else:
+                    sys.exit()
+
+                with ZipFile(zip_output, 'r') as zipObj:
+                    zipObj.extractall(folder_esm)
                 os.remove(zip_output)
             [time1, time2, inp_acc1, inp_acc2, npts1, npts2] = \
                 create_esm_acc(folder_esm)

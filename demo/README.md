@@ -81,11 +81,6 @@ Run:
 cd ..
 ./haselrec.py demo/job_selection_2.ini --run-scaling
 ```
-
-GMR_time_scaled_acc_1_1.txt  GMR_time_scaled_acc_2_2.txt  GMR_time_scaled_acc_4_1.txt  GMR_time_scaled_acc_5_2.txt      PGA-site_1-poe-1_spectra.pdf
-GMR_time_scaled_acc_1_2.txt  GMR_time_scaled_acc_3_1.txt  GMR_time_scaled_acc_4_2.txt  PGA-site_1-poe-1_CS.txt          PGA-site_1-poe-1_spectra_gms.pdf
-GMR_time_scaled_acc_2_1.txt  GMR_time_scaled_acc_3_2.txt  GMR_time_scaled_acc_5_1.txt
-
 10 files (*nGMx2*) called *GMR_time_scaled_acc_#GMnum_#comp.txt* are produced
 *GMnum* is a sequential number ranging from 1 to *nGM*
 *#comp* can be *1* or *2* to indicate the component of motion 

@@ -17,6 +17,11 @@ HaselREC has the following dependencies:
  * Scipy
  * ObsPy
  * Matplotlib
+ * os
+ * zipfile
+ * response
+ * pathlib
+ * glob
  * Openquake.hazardlib
  * shakelib.conversions.imc.boore_kishida_2017 (Optional. Only of the input intensity measure component is the larger between the two horizontal components).
 
