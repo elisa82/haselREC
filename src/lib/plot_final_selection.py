@@ -1,0 +1,125 @@
+# Copyright (C) 2020-2021 Elisa Zuccolo, Eucentre Foundation
+#
+# HaselREC is free software: you can redistribute it and/or modify it
+# under the terms of the GNU Affero General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# HaselREC is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with HaselREC. If not, see <http://www.gnu.org/licenses/>.
+
+def plot_final_selection(name, lbl, n_gm, t_cs, sample_small, mean_req, stdevs,
+                         output_folder):
+    """
+    """
+    # Import libraries
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    meanrecorded = np.mean(np.exp(sample_small), axis=0)
+    meanrecorded_p2sigma = np.percentile(np.exp(sample_small), 50 + 34.1 + 13.6,
+                                         axis=0)
+    meanrecorded_n2sigma = np.percentile(np.exp(sample_small), 50 - 34.1 - 13.6,
+                                         axis=0)
+    meanrecorded_eps = (np.log(meanrecorded_p2sigma) - np.log(
+        meanrecorded_n2sigma)) / (2 * 1.96)
+    indexes = [i for i, x in enumerate(t_cs) if x > 0]
+    stdevs_gt0 = []
+    t_cs_gt0 = []
+    mean_req_gt0 = []
+    meanrecorded_eps_gt0 = []
+    meanrecorded_p2sigma_gt0 = []
+    meanrecorded_n2sigma_gt0 = []
+    meanrecorded_gt0 = []
+    for i in indexes:
+        t_cs_gt0.append(t_cs[i])
+        meanrecorded_eps_gt0.append(meanrecorded_eps[i])
+        meanrecorded_p2sigma_gt0.append(meanrecorded_p2sigma[i])
+        meanrecorded_n2sigma_gt0.append(meanrecorded_n2sigma[i])
+        meanrecorded_gt0.append(meanrecorded[i])
+        stdevs_gt0.append(stdevs[i])
+        mean_req_gt0.append(mean_req[i])
+    stdevs_gt0 = np.asarray(stdevs_gt0)
+    t_cs_gt0 = np.asarray(t_cs_gt0)
+    mean_req_gt0 = np.asarray(mean_req_gt0)
+    meanrecorded_eps_gt0 = np.asarray(meanrecorded_eps_gt0)
+    meanrecorded_p2sigma_gt0 = np.asarray(meanrecorded_p2sigma_gt0)
+    meanrecorded_n2sigma_gt0 = np.asarray(meanrecorded_n2sigma_gt0)
+    meanrecorded_gt0 = np.asarray(meanrecorded_gt0)
+
+    # Spectra with ground motions
+    plt.figure(figsize=(1.5 * 2.36, 2.36))
+    plt.rcParams.update({'font.size': 8})
+    for i in np.arange(n_gm):
+        sample_small_gt0 = []
+        for j in indexes:
+            sample_small_gt0.append(sample_small[i, j])
+        plt.loglog(t_cs_gt0, np.exp(sample_small_gt0), 'g', linewidth=.5)
+    plt.loglog(t_cs_gt0, np.exp(mean_req_gt0), 'r', label='CMS', linewidth=1.0)
+    plt.loglog(t_cs_gt0, np.exp(mean_req_gt0 + 2 * stdevs_gt0), '--r',
+               label=r'CMS $\pm 2\sigma$', linewidth=1.0)
+    plt.loglog(t_cs_gt0, np.exp(mean_req_gt0 - 2 * stdevs_gt0), '--r',
+               linewidth=1.0)
+    plt.loglog(t_cs_gt0, meanrecorded_gt0, 'k', label='Selected', linewidth=1.0)
+    plt.loglog(t_cs_gt0, meanrecorded_p2sigma_gt0, '--k',
+               label=r'Selected $\pm 2\sigma$', linewidth=1.0)
+    plt.loglog(t_cs_gt0, meanrecorded_n2sigma_gt0, '--k', linewidth=1.0)
+    plt.xlabel('Period [s]')
+    plt.ylabel(lbl + ' [g]')
+    plt.xlim(min(t_cs_gt0), max(t_cs_gt0))
+    plt.ylim(1e-2, 1e1)
+    plt.yscale('log')
+    plt.xscale('log')
+    # number=int(name[9])+1
+    # plt.title('site '+str(number))
+    plt.grid(True)
+    plt.legend()
+    plt.savefig(output_folder + '/' + name + '/' + name + '_spectra_gms.pdf',
+                bbox_inches='tight')
+    plt.close()
+
+    # Spectra
+    plt.figure(figsize=(1.5 * 2.36, 2.36))
+    plt.rcParams.update({'font.size': 8})
+    plt.loglog(t_cs_gt0, np.exp(mean_req_gt0), 'r', label='CMS', linewidth=1.0)
+    plt.loglog(t_cs_gt0, np.exp(mean_req_gt0 + 2 * stdevs_gt0), '--r',
+               label=r'CMS $\pm 2\sigma$', linewidth=1.0)
+    plt.loglog(t_cs_gt0, np.exp(mean_req_gt0 - 2 * stdevs_gt0), '--r',
+               linewidth=1.0)
+    plt.loglog(t_cs_gt0, meanrecorded_gt0, 'k', label='Selected', linewidth=1.0)
+    plt.loglog(t_cs_gt0, meanrecorded_p2sigma_gt0, '--k',
+               label=r'Selected $\pm 2\sigma$', linewidth=1.0)
+    plt.loglog(t_cs_gt0, meanrecorded_n2sigma_gt0, '--k', linewidth=1.0)
+    plt.xlabel('Period [s]')
+    plt.ylabel(lbl + ' [g]')
+    plt.xlim(min(t_cs_gt0), max(t_cs_gt0))
+    plt.ylim(1e-2, 1e1)
+    plt.yscale('log')
+    plt.xscale('log')
+    plt.grid(True)
+    plt.legend()
+    plt.savefig(output_folder + '/' + name + '/' + name + '_spectra.pdf',
+                bbox_inches='tight')
+    plt.close()
+
+    # Dispersion
+    plt.figure(figsize=(1.5 * 2.36, 2.36))
+    plt.rcParams.update({'font.size': 8})
+    plt.plot(t_cs_gt0, stdevs_gt0, 'r', label='CMS', linewidth=1.0)
+    plt.plot(t_cs_gt0, meanrecorded_eps_gt0, 'k', label='Selected',
+             linewidth=1.0)
+    plt.xlabel('Period [s]')
+    plt.ylabel('Dispersion')
+    plt.xlim(min(t_cs_gt0), max(t_cs_gt0))
+    plt.ylim(0, 1)
+    plt.xscale('log')
+    plt.grid(True)
+    plt.legend()
+    plt.savefig(output_folder + '/' + name + '/' + name + '_dispersion.pdf',
+                bbox_inches='tight')
+    plt.close()
