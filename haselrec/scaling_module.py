@@ -16,6 +16,16 @@
 def scaling_module(site_code, probability_of_exceedance_num,
                    intensity_measures, output_folder, n_gm,
                    path_nga_folder, path_esm_folder):
+
+    """
+    This module is called when mode :code:`--run-scaling` is specified.
+
+    It requires to have run mode :code:`--run-selection` in advance since it reads
+    in input the summary file created by mode :code:`--run-selection`
+
+    Scaled recorded accelerograms are created by :code:`scale_acc` module.
+    """
+
     import numpy as np
     import pandas as pd
     from .scale_acc import scale_acc

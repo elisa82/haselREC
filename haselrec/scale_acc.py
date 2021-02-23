@@ -15,16 +15,28 @@
 
 def scale_acc(n_gm, nga, path_nga, path_esm, source, event, station, name,
               output_folder, sf):
+
     """
-    Scales selected accelerograms and writes selected accelerograms
+
+    Scales selected accelerograms and writes them in the output folder.
+
+    :code:`nGM` x 2 files are created. Their name is::
+
+        GMR_time_scaled_acc_<GMnum>_<comp>.txt
+
+    where:
+        - <`GMnum`> is a sequential number ranging from 1 to :code:`nGM`
+        - <`comp`> can be `1` or `2` and indicates the horizontal component of motion
+
+    Each file contains the selected scaled accelerograms, expressed with
+    2 columns: time series `(s)` and accelerations `(g)`
+
     """
     # Import libraries
     import numpy as np
-    import os
     from .create_acc import create_nga_acc
     from .create_acc import create_esm_acc
-    from zipfile import ZipFile
-    import requests
+
 
     # Read accelerograms, save them and apply scaling factor
     for i in np.arange(n_gm):
@@ -34,43 +46,16 @@ def scale_acc(n_gm, nga, path_nga, path_esm, source, event, station, name,
         inp_acc2 = []
         npts1 = 0
         npts2 = 0
+
         if source[i] == 'NGA-West2':
             val = int(nga[i])
             [time1, time2, inp_acc1, inp_acc2, npts1, npts2] = \
                 create_nga_acc(val, path_nga)
+
         elif source[i] == 'ESM':
             folder_esm = path_esm + '/' + event[i] + '-' + station[i]
-            if not os.path.isdir(folder_esm):
-                zip_output = 'output_' + str(i) + '.zip'
-                
-                params = (
-                    ('eventid', event[i]),
-                    ('data-type', 'ACC'),
-                    ('station', station[i]),
-                    ('format', 'ascii'),
-                )
-
-                files = {
-                    'message': ('path/to/token.txt', open('token.txt', 'rb')),
-                }
-
-                headers={'Authorization': 'token {}'.format('token.txt')}
-
-                url = 'https://esm-db.eu/esmws/eventdata/1/query'
-
-                req = requests.post(url=url, params=params, files=files)
-
-                if req.status_code == 200:
-                    with open(zip_output, "wb") as zf:
-                        zf.write(req.content)
-                else:
-                    sys.exit()
-
-                with ZipFile(zip_output, 'r') as zipObj:
-                    zipObj.extractall(folder_esm)
-                os.remove(zip_output)
             [time1, time2, inp_acc1, inp_acc2, npts1, npts2] = \
-                create_esm_acc(folder_esm)
+                create_esm_acc(folder_esm,event[i],station[i],i)
 
         # Create the filenames
         file_time_scaled_acc_out_1 = (output_folder + '/' + name +

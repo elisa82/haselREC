@@ -15,8 +15,23 @@
 
 def check_module(output_folder, site_code, probability_of_exceedance_num,
                  intensity_measures, n_gm, path_nga_folder):
+
     """
-    Identifies missing NGA-West2 ID records 
+
+    This module is called when mode :code:`--check-NGArec` is specified.
+
+    It identifies NGA-West2 records not already stored on the computer
+    from the list of selected IDs.
+
+    It requires to have run mode :code:`--run-selection` in advance since it reads
+    in input the summary file created by mode :code:`--run-selection`
+
+    It generates the file::
+
+        missing_NGArec.txt
+
+    which contains the list of missing NGA-West2 records.
+
     """
 
     import os

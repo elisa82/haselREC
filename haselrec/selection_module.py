@@ -24,8 +24,32 @@ def selection_module(intensity_measures, site_code, rlz_code,
                      allowed_ec8_code, maxsf_input, radius_dist_input,
                      radius_mag_input, allowed_depth, n_gm, random_seed,
                      n_trials, weights, n_loop, penalty, output_folder):
+    """
+    This module is called when mode :code:`--run-selection` is specified.
+
+    It performs record selection following these steps:
+
+        1) retrieve conditioning value (:code:`compute_conditioning_value` module)
+        2) defines all inputs necessary to apply ground motion prediction equations
+           (:code:`inizialize_gmm` module)
+        3) screening of the database of candidate ground motion
+           (:code:`screen_database` module)
+        4) computation of the target response spectrum distribution
+           (:code:`compute_cs` module)
+        5) statistical simulation of response spectra from the target
+           distribution
+           (:code:`simulate_spectra` module)
+        6) selection of ground motions from the database that individually match
+           the statistically simulated spectra
+           (:code:`find_ground_motion` module)
+        7) execution of incremental changes to the initially selected ground
+           motion set to further optimize its fit to the target spectrum
+           distribution (:code:`optimizing_ground_motion` module)
+        8) produce output files (3 figure created by :code:`plot_final_selection`
+           module and 2 `txt` files created by :code:`create_output_files` modules)
+
+    """
     import os
-    import pandas as pd
     import numpy as np
     from .screen_database import screen_database
     from .simulate_spectra import simulate_spectra
@@ -68,16 +92,8 @@ def selection_module(intensity_measures, site_code, rlz_code,
             # For each intensity measure investigated
             for im in np.arange(len(intensity_measures)):
 
-                # Get the name of the disaggregation file to look in
-                disagg_results = 'rlz-' + str(rlz) + '-' + intensity_measures[
-                    im] + '-sid-' + str(site) + '-poe-' + str(
-                    poe) + '_Mag_Dist_' + str(num_disagg) + '.csv'
                 name = intensity_measures[im] + '-site_' + str(
                     site) + '-poe-' + str(poe)
-                selected_column = intensity_measures[im] + '-' + str(
-                    probability_of_exceedance[jj])
-                file_with_oq_acc_value = 'hazard_map-mean_' + str(
-                    num_classical) + '.csv'
 
                 # Print some on screen feedback
                 print('Processing ' + name + ' Case: ' + str(ind) + '/' + str(
@@ -85,26 +101,16 @@ def selection_module(intensity_measures, site_code, rlz_code,
                         intensity_measures)))
                 ind += 1
 
-                # Retrieve disaggregation results
-                df = pd.read_csv(
-                    ''.join([path_results_disagg, '/', disagg_results]),
-                    skiprows=1)
-                df['rate'] = -np.log(1 - df['poe']) / investigation_time
-                df['rate_norm'] = df['rate'] / df['rate'].sum()
-                # mode = df.sort_values(by='rate_norm', ascending=False)[0:1]
-                mean_mag = np.sum(df['mag'] * df['rate_norm'])
-                mean_dist = np.sum(df['dist'] * df['rate_norm'])
-                allowed_recs_d = [mean_dist - radius_dist, mean_dist +
-                                  radius_dist]
-                allowed_recs_mag = [mean_mag - radius_mag,
-                                    mean_mag + radius_mag]
+                [im_star, allowed_recs_d, allowed_recs_mag] = \
+                    compute_conditioning_value(rlz, intensity_measures[im],
+                                               site, poe, num_disagg,
+                                               probability_of_exceedance[jj],
+                                               num_classical,
+                                               path_results_disagg,
+                                               investigation_time,
+                                               radius_dist, radius_mag,
+                                               path_results_classical)
 
-                # Retrieve conditioning value
-                df = pd.read_csv(''.join(
-                    [path_results_classical, '/', file_with_oq_acc_value]),
-                    skiprows=1)
-                output_oq = df[selected_column]
-                im_star = output_oq[site]
 
                 # -----------------------------------------------------------------------------
 

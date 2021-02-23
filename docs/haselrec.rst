@@ -1,14 +1,16 @@
 ********
-HazelREC
+HaselREC
 ********
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 5
    :caption: Contents:
 
-   check_module.rst
-   scaling_module.rst
+
+   input_data.rst
    selection_module.rst
+   scaling_module.rst
+   check_module.rst
 
 
 .. automodule:: haselrec.__main__

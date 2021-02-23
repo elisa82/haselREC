@@ -13,13 +13,56 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with HaselREC. If not, see <http://www.gnu.org/licenses/>.
 
-def create_esm_acc(folder):
+def create_esm_acc(folder, event, station, num):
+
     """
+
+    ESM recordings can be stored in advance or automatically downloaded from
+    internet using a token file (:code:`token.txt`). To obtain the token file you need
+    at first to register at: `https://esm-db.eu/` and then you can run the command::
+
+        curl -X POST -F 'message={"user_email": "email","user_password": "password"}
+        ' "https://esm-db.eu/esmws/generate-signed-message/1/query" > token.txt
+
     """
+
     # Import libraries
     import glob
     from obspy.core import Stats
     import numpy as np
+    import os
+    from zipfile import ZipFile
+    import requests
+
+    if not os.path.isdir(folder):
+        zip_output = 'output_' + str(num) + '.zip'
+
+        params = (
+            ('eventid', event),
+            ('data-type', 'ACC'),
+            ('station', station),
+            ('format', 'ascii'),
+        )
+
+        files = {
+            'message': ('path/to/token.txt', open('token.txt', 'rb')),
+        }
+
+        headers = {'Authorization': 'token {}'.format('token.txt')}
+
+        url = 'https://esm-db.eu/esmws/eventdata/1/query'
+
+        req = requests.post(url=url, params=params, files=files)
+
+        if req.status_code == 200:
+            with open(zip_output, "wb") as zf:
+                zf.write(req.content)
+        else:
+            sys.exit()
+
+        with ZipFile(zip_output, 'r') as zipObj:
+            zipObj.extractall(folder_esm)
+        os.remove(zip_output)
 
     time1 = []
     time2 = []
@@ -238,8 +281,18 @@ def strtoint(sf):
 
 
 def create_nga_acc(num_rec, path_nga_folder):
+
     """
+    All NGA-West2 recordings have to be stored in advance in a folder and
+    renamed as::
+
+        - RSN<NUM>_1.AT2 (1st horiz comp)
+        - RSN<NUM>_2.AT2 (2nd horiz comp)
+        - RSN<NUM>_3.AT2 (vertical component, not used)
+
+    where `<NUM>` is the record sequence number of NGA recordings
     """
+
     # Import libraries
     import numpy as np
 

@@ -18,6 +18,7 @@ from haselrec.scaling_module import scaling_module
 from haselrec.screen_database import screen_database
 from haselrec.selection_module import selection_module
 from haselrec.simulate_spectra import simulate_spectra
+from haselrec.compute_conditioning_value import compute_conditioning_value
 
 __all__ = [
     'simulate_spectra',
@@ -39,4 +40,5 @@ __all__ = [
     'create_output_files',
     'create_nga_acc',
     'check_module',
+    'compute_conditioning_value',
 ]

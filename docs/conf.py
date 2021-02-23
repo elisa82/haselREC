@@ -20,7 +20,7 @@
 # -- Project information -----------------------------------------------------
 
 project = u'HaselREC'
-copyright = u'2021, Elisa Zuccolo EUCENTRE Foundation'
+copyright = u'2020-2021, Elisa Zuccolo, EUCENTRE Foundation'
 author = u'Elisa Zuccolo EUCENTRE Foundation'
 
 # The short X.Y version

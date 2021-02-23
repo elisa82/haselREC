@@ -20,6 +20,37 @@
 
 """
 HaselREC (HAzard-based SELection of RECords)
+It is a useful open-source tool for OpenQuake users, able to select and scale
+recorded accelerograms to be used for dynamic analyses.
+
+It is described in:
+Zuccolo E, Poggi V, O'Reilly G, Monteiro R (2021).
+HaselREC: an open-source ground motion record selection tool bridging seismic
+hazard and structural analyses. Submitted to SDEE.
+
+HaselREC can be launched with the following command::
+
+    python -m haselrec <input_file> <mode>
+
+Four modes are permitted:
+
+    - :code:`--run-selection`: it performs record selection only
+    - :code:`--run-scaling`: it performs record scaling only (requires to have run
+       mode :code:`--run-selection` in advance)
+    - :code:`--run-complete`: it performs both record selection and scaling
+    - :code:`--check-NGArec`: it identifies NGA-West2 record IDs not already stored
+       on the computer (it requires to have run mode :code:`--run-selection` in
+       advance)
+
+The output files are store in a folder, which has the following name structure::
+
+    <IM>-site_<num_site>-poe-<num_poe>
+
+where:
+    - `<IM>` is the required intensity measure
+    - `<num_site>` is the site number
+    - `<num_poe>` is the probability of exceedance number
+
 """
 
 import sys
@@ -37,44 +68,49 @@ if __name__ == '__main__':
         calculation_mode = sys.argv[2]
     except IndexError:
         sys.exit('usage:\n'
-                 'python -m haselrec JOB.INI [option]' + "\n"
+                 'python -m haselrec #input_file [mode]' + "\n"
                  + '       [--run-complete]' + "\n"
                  + '       [--run-selection]' + "\n"
                  + '       [--run-scaling]' + "\n"
                  + '       [--check-NGArec]')
 
+
     # Read fileini
 
     [intensity_measures, site_code, rlz_code, path_results_classical,
-     path_results_disagg, num_disagg, num_classical, probability_of_exceedance_num,
-     probability_of_exceedance, investigation_time, target_periods, tstar, im_type,
+     path_results_disagg, num_disagg, num_classical,
+     probability_of_exceedance_num, probability_of_exceedance,
+     investigation_time, target_periods, tstar, im_type,
      im_type_lbl, avg_periods, corr_type, gmpe_input, rake, vs30, vs30type,
-     hypo_depth, dip, azimuth, fhw, z2pt5, z1pt0, upper_sd, lower_sd, database_path,
-     allowed_database, allowed_recs_vs30, allowed_ec8_code, maxsf_input,
-     radius_dist_input, radius_mag_input, allowed_depth, n_gm, random_seed,
-     n_trials, weights, n_loop, penalty, path_nga_folder, path_esm_folder,
-     output_folder] = read_input_data(fileini)
+     hypo_depth, dip, azimuth, fhw, z2pt5, z1pt0, upper_sd, lower_sd,
+     database_path, allowed_database, allowed_recs_vs30, allowed_ec8_code,
+     maxsf_input, radius_dist_input, radius_mag_input, allowed_depth, n_gm,
+     random_seed, n_trials, weights, n_loop, penalty, path_nga_folder,
+     path_esm_folder, output_folder] = read_input_data(fileini)
 
     if calculation_mode == '--run-complete' or \
             calculation_mode == '--run-selection':
 
         selection_module(intensity_measures, site_code, rlz_code,
-                         path_results_classical, path_results_disagg, num_disagg,
-                         num_classical, probability_of_exceedance_num,
+                         path_results_classical, path_results_disagg,
+                         num_disagg, num_classical,
+                         probability_of_exceedance_num,
                          probability_of_exceedance, investigation_time,
-                         target_periods, tstar, im_type, im_type_lbl, avg_periods,
-                         corr_type, gmpe_input, rake, vs30, vs30type, hypo_depth,
-                         dip, azimuth, fhw, z2pt5, z1pt0, upper_sd, lower_sd,
-                         database_path, allowed_database, allowed_recs_vs30,
-                         allowed_ec8_code, maxsf_input, radius_dist_input,
-                         radius_mag_input, allowed_depth, n_gm, random_seed,
-                         n_trials, weights, n_loop, penalty, output_folder)
+                         target_periods, tstar, im_type, im_type_lbl,
+                         avg_periods, corr_type, gmpe_input, rake, vs30,
+                         vs30type, hypo_depth, dip, azimuth, fhw, z2pt5, z1pt0,
+                         upper_sd, lower_sd, database_path, allowed_database,
+                         allowed_recs_vs30, allowed_ec8_code, maxsf_input,
+                         radius_dist_input, radius_mag_input, allowed_depth,
+                         n_gm, random_seed, n_trials, weights, n_loop, penalty,
+                         output_folder)
 
     if calculation_mode == '--check-NGArec':
         check_module(output_folder, site_code, probability_of_exceedance_num,
                      intensity_measures, n_gm, path_nga_folder)
 
-    if calculation_mode == '--run-complete' or calculation_mode == '--run-scaling':
+    if calculation_mode == '--run-complete' or \
+            calculation_mode == '--run-scaling':
         if not os.path.exists(path_nga_folder):
             os.makedirs(path_nga_folder)
         if not os.path.exists(path_esm_folder):
