@@ -16,6 +16,33 @@
 def plot_final_selection(name, lbl, n_gm, t_cs, sample_small, mean_req, stdevs,
                          output_folder):
     """
+    Three plots are generated::
+
+        1) <IM>-site_<num_site>-poe-<num_poe>_spectra.pdf
+        2) <IM>-site_<num_site>-poe-<num_poe>_spectra_gms.pdf
+        3) <IM>-site_<num_site>-poe-<num_poe>_dispersion.pdf
+
+    where:
+        - `<IM>` is the required intensity measure
+        - `<num_site>` is the site number
+        - `<num_poe>` is the probability of exceedance number
+
+    The plots represent:
+
+        1) the response spectra of selected ground motions (:code:`nGM`
+           green lines) and their distribution (black lines), and the target
+           conditional spectrum (red lines). Solid lines: average spectrum,
+           dashed lines: average spectrum values plus and minus 2 standard
+           deviations.
+
+        2) the distribution of the response spectra of selected ground
+           motions (black lines), and the target conditional spectrum
+           (red lines). Solid lines: average spectrum, dashed lines: average
+           spectrum values plus and minus 2 standard deviations.
+
+        3) the dispersion of the response spectra of selected ground
+           motions (black line) and the dispersion of the target conditional
+           spectrum (red lines).
     """
     # Import libraries
     import numpy as np

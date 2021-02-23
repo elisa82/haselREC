@@ -16,6 +16,10 @@
 def simulate_spectra(random_seed, n_trials, mean_req, cov_req, stdevs, n_gm,
                      weights):
     """
+    Statistically simulates response spectra from the target distribution. From:
+    Jayaram N, Lin T, Baker J. (2011). A Computationally Efficient Ground-Motion
+    Selection Algorithm for Matching a Target Response Spectrum Mean and
+    Variance. Earthq Spectra 2011;27:797-815. https://doi.org/10.1193/1.3608002.
     """
     # Import libraries
     import numpy as np

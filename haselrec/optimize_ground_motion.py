@@ -17,8 +17,12 @@ def optimize_ground_motion(n_loop, n_gm, sample_small, n_big, id_sel, ln_sa1,
                              maxsf, sample_big, tgt_per, mean_req, stdevs,
                              weights, penalty, rec_id, im_scale_fac):
     """
+    Executes incremental changes to the initially selected ground motion set to
+    further optimize its fit to the target spectrum distribution. From:
+    Jayaram N, Lin T, Baker J. (2011). A Computationally Efficient Ground-Motion
+    Selection Algorithm for Matching a Target Response Spectrum Mean and
+    Variance. Earthq Spectra 2011;27:797-815. https://doi.org/10.1193/1.3608002.
     """
-    
 
     import numpy as np
 

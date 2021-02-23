@@ -16,6 +16,13 @@
 def find_ground_motion(tgt_per, tstar, avg_periods, intensity_measures, n_gm,
                        sa_known, ind_per, mean_req, n_big, simulated_spectra,
                        maxsf):
+    """
+    Select ground motions from the database that individually match the
+    statistically simulated spectra. From:
+    Jayaram N, Lin T, Baker J. (2011) A Computationally Efficient Ground-Motion
+    Selection Algorithm for Matching a Target Response Spectrum Mean and
+    Variance. Earthq Spectra 2011;27:797-815. https://doi.org/10.1193/1.3608002.
+    """
     import numpy as np
 
     sample_big = np.log(sa_known[:, ind_per])

@@ -21,8 +21,10 @@ def compute_cs(t_cs, bgmpe, sctx, rctx, dctx, im_type, t_star, rrup, mag,
     to Match a Conditional Spectrum. J Earthq Eng 2018;22:708-23.
     https://doi.org/10.1080/13632469.2016.1264334.
 
-    The Boore and Kishida (2017) relationship can be applied only to PGA
-    and SA. 
+    When the IM and the GMM are defined for the maximum of the two horizontal
+    components, the The Boore and Kishida (2017) relationship is applied to
+    convert the maximum of the two horizontal components into `RotD50`. This is
+    done only for `PGA` and `SA`.
     """
     import numpy as np
     import sys

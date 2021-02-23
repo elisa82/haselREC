@@ -31,6 +31,23 @@ def check_module(output_folder, site_code, probability_of_exceedance_num,
         missing_NGArec.txt
 
     which contains the list of missing NGA-West2 records.
+    Example::
+
+        Missing NGA-West2 IDrecords
+        65
+        68
+        158
+        159
+        165
+        170
+        171
+        179
+        180
+        181
+        183
+        184
+        191
+        266
 
     """
 

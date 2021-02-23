@@ -14,11 +14,31 @@
 # along with HaselREC. If not, see <http://www.gnu.org/licenses/>.
 
 def screen_database(database_path, allowed_database, allowed_recs_vs30,
-                    allowed_recs_mag, allowed_recs_d, allowed_ec8_code,
-                    target_periods, n_gm, allowed_depth, vs30):
+                    radius_dist, radius_mag, mean_dist, mean_mag,
+                    allowed_ec8_code, target_periods, n_gm, allowed_depth,
+                    vs30):
     """
     Screen the database of candidate ground motion to select only appropriate
-    ground motions
+    ground motions. The screening criteria are:
+
+        - database (NGAWest2, ESM or both); When both databases are considered,
+          ground motions from the NGA-West2 database are retained only if
+          recorded at stations located outside the geographical area covered by
+          the ESM database;
+        - magnitude range, defined as a symmetric interval around the mean
+          magnitude from the disaggregation analysis;
+        - distance range, defined as a symmetric interval around the mean
+          distance from the disaggregation analysis;
+        - range of allowed `vs30`. If not defined, it is set by the code
+          according to the `vs30` of the site, following the `vs30` limit values
+          associated to EC8 soil categories;
+        - range of allowed EC8 codes. If not defined, they are set according to
+          the vs30 of the site. If both `vs30` and EC8 soil classes criteria are
+          specified, preference is given to the `vs30`; therefore, EC8 soil
+          category criterium is considered only if the `vs30` of the station is
+          not specified;
+        - range of allowed focal depths;
+        - only free-field ground motions are retained.
     """
     # Import libraries
     import numpy as np
@@ -47,6 +67,9 @@ def screen_database(database_path, allowed_database, allowed_recs_vs30,
     source = dbacc['source']
     epi_lon = dbacc['epi_lon']
     # epi_lat = dbacc['epi_lat']
+
+    allowed_recs_d = [mean_dist - radius_dist, mean_dist + radius_dist]
+    allowed_recs_mag = [mean_mag - radius_mag, mean_mag + radius_mag]
 
     if allowed_recs_vs30 is None:
         if vs30 >= 800.0:

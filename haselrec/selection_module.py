@@ -45,8 +45,8 @@ def selection_module(intensity_measures, site_code, rlz_code,
         7) execution of incremental changes to the initially selected ground
            motion set to further optimize its fit to the target spectrum
            distribution (:code:`optimize_ground_motion` module)
-        8) produce output files (3 figure created by :code:`plot_final_selection`
-           module and 2 `txt` files created by :code:`create_output_files` modules)
+        8) produce output files (3 figures created by :code:`plot_final_selection`
+           module and 2 `.txt` files created by :code:`create_output_files` modules)
 
     """
     import os
@@ -102,14 +102,13 @@ def selection_module(intensity_measures, site_code, rlz_code,
                         intensity_measures)))
                 ind += 1
 
-                [im_star, allowed_recs_d, allowed_recs_mag, rjb, mag] = \
+                [im_star, rjb, mag] = \
                     compute_conditioning_value(rlz, intensity_measures[im],
                                                site, poe, num_disagg,
                                                probability_of_exceedance[jj],
                                                num_classical,
                                                path_results_disagg,
                                                investigation_time,
-                                               radius_dist, radius_mag,
                                                path_results_classical)
 
                 [bgmpe, sctx, rctx, dctx, vs30, rrup] = \
@@ -123,8 +122,8 @@ def selection_module(intensity_measures, site_code, rlz_code,
                  station_code, source, record_sequence_number_nga, event_mw,
                  event_mag, acc_distance, station_vs30, station_ec8] = \
                     screen_database(database_path, allowed_database,
-                                    allowed_recs_vs30, allowed_recs_mag,
-                                    allowed_recs_d, allowed_ec8_code,
+                                    allowed_recs_vs30, radius_dist, radius_mag,
+                                    rjb, mag, allowed_ec8_code,
                                     target_periods, n_gm, allowed_depth, vs30)
 
                 # Compute the target spectrum

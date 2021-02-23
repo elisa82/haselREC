@@ -16,8 +16,13 @@
 def compute_conditioning_value(rlz, intensity_measures, site, poe, num_disagg,
                                probability_of_exceedance, num_classical,
                                path_results_disagg, investigation_time,
-                               radius_dist, radius_mag, path_results_classical):
-
+                               path_results_classical):
+    """
+    Reads 2 output files ('.csv') from OpenQuake: the file with disaggregation
+    results and the map with hazard values and computes the IM value at which to
+    condition the CS, along with the mean magnitude and distance from the
+    disaggregation analysis.
+    """
     import pandas as pd
     import numpy as np
 
@@ -37,8 +42,6 @@ def compute_conditioning_value(rlz, intensity_measures, site, poe, num_disagg,
     # mode = df.sort_values(by='rate_norm', ascending=False)[0:1]
     mean_mag = np.sum(df['mag'] * df['rate_norm'])
     mean_dist = np.sum(df['dist'] * df['rate_norm'])
-    allowed_recs_d = [mean_dist - radius_dist, mean_dist + radius_dist]
-    allowed_recs_mag = [mean_mag - radius_mag, mean_mag + radius_mag]
 
     # Retrieve conditioning value
     df = pd.read_csv(''.join(
@@ -49,4 +52,4 @@ def compute_conditioning_value(rlz, intensity_measures, site, poe, num_disagg,
     dist = np.array([mean_dist])
     mag = mean_mag
 
-    return im_star, allowed_recs_d, allowed_recs_mag, dist, mag
+    return im_star, dist, mag
