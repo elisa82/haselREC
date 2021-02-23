@@ -15,7 +15,57 @@
 
 def read_input_data(fileini):
     """
+    Reads the input file for HaselREC.
+    An example is::
 
+        [general]
+        description = Selection for Italy - AvgSA
+
+        [hazard parameters]
+        intensity_measures={AvgSA}
+        site_code={0,1,2,3,4,5}
+        rlz_code={0,0,0,0,0,0}
+        probability_of_exceedance_num={2}
+        probability_of_exceedance={0.1}
+        path_results_classical=output_classical_AvgSA
+        path_results_disagg=output_disagg_AvgSA
+        num_disagg=107
+        num_classical=108
+        investigation_time=50
+
+        [conditional spectrum parameters]
+        target_periods=[0.01,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.75,0.8,0.9,1,2,3,4]
+        corr_type=akkar
+        GMPE=AkkarBommer2010
+        avg_periods=[0.2,0.3,0.4,0.5,0.75,1.0]
+        rake=0.
+        Vs30={300,300,300,600,600,600}
+        vs30Type={inferred,inferred,inferred,inferred,inferred,inferred}
+        azimuth=50
+        hypo_depth=10
+
+        [database parameters for screening recordings]
+        database_path=../OpenInsel/GM-Records-Database/database_flatfile.csv
+        allowed_database={ESM,NGA-West2}
+        allowed_depth=[0,30]
+        radius_dist={50}
+        radius_mag={0.50}
+        maxsf={3.0}
+
+        [selection parameters]
+        nGM=30
+        nTrials = 10
+        weights={0.6,0.3,0.1}
+        nLoop=10
+        penalty=10
+        random_seed=333
+
+        [accelerogram folders]
+        path_NGA_folder=/media/sf_condivisa/Progetti/INFRA-NAT/NGA2records
+        path_ESM_folder=/media/sf_condivisa/Progetti/INFRA-NAT/ESM
+
+        [output folder]
+        output_folder=output_acc_AvgSA
     """
 
     import sys
