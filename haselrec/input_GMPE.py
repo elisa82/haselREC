@@ -16,6 +16,17 @@
 def inizialize_gmm(index, gmpe_input, rjb, mag, z_hyp_input, dip_input, rake,
                    upper_sd_input, lower_sd_input, azimuth_input, fhw, vs30type,
                    vs30_input, z2pt5_input, z1pt0_input):
+    """
+    Defines all the parameters for the computation of a Ground Motion Model. If
+    not defined by the user as input parameters, most parameters (dip,
+    hypocentral depth, fault width, ztor, azimuth, source-to-site distances
+    based on extended sources, z2pt5, z1pt0) are defined  according to the
+    relationships included in:
+    Kaklamanos J, Baise LG, Boore DM. (2011) Estimating unknown input parameters
+    when implementing the NGA ground-motion prediction equations in engineering
+    practice. Earthquake Spectra 27: 1219-1235.
+    https://doi.org/10.1193/1.3650372.
+    """
 
     import sys
     from openquake.hazardlib import gsim
@@ -198,9 +209,9 @@ def compute_soil_params(vs30_input, z2pt5_input, z1pt0_input, gmpe_input,
 
     vs30 = float(vs30_input[index])
 
-    vs30measured = 0
+    vs30measured = False
     if vs30type[index] == 'inferred':
-        vs30measured = 1
+        vs30measured = True
 
     z1pt0 = []
     if z1pt0_input is None:
