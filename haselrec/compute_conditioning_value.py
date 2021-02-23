@@ -46,4 +46,7 @@ def compute_conditioning_value(rlz, intensity_measures, site, poe, num_disagg,
     output_oq = df[selected_column]
     im_star = output_oq[site]
 
-    return im_star, allowed_recs_d, allowed_recs_mag
+    dist = np.array([mean_dist])
+    mag = mean_mag
+
+    return im_star, allowed_recs_d, allowed_recs_mag, dist, mag

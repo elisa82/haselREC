@@ -44,13 +44,14 @@ def selection_module(intensity_measures, site_code, rlz_code,
            (:code:`find_ground_motion` module)
         7) execution of incremental changes to the initially selected ground
            motion set to further optimize its fit to the target spectrum
-           distribution (:code:`optimizing_ground_motion` module)
+           distribution (:code:`optimize_ground_motion` module)
         8) produce output files (3 figure created by :code:`plot_final_selection`
            module and 2 `txt` files created by :code:`create_output_files` modules)
 
     """
     import os
     import numpy as np
+    from .compute_conditioning_value import compute_conditioning_value
     from .screen_database import screen_database
     from .simulate_spectra import simulate_spectra
     from .plot_final_selection import plot_final_selection
@@ -58,7 +59,7 @@ def selection_module(intensity_measures, site_code, rlz_code,
     from .create_output_files import create_output_files
     from .compute_cs import compute_cs
     from .find_ground_motion import find_ground_motion
-    from .optimizing_ground_motion import optimizing_ground_motion
+    from .optimize_ground_motion import optimize_ground_motion
 
     # %% Start the routine
     print('Inputs loaded, starting selection....')
@@ -101,7 +102,7 @@ def selection_module(intensity_measures, site_code, rlz_code,
                         intensity_measures)))
                 ind += 1
 
-                [im_star, allowed_recs_d, allowed_recs_mag] = \
+                [im_star, allowed_recs_d, allowed_recs_mag, rjb, mag] = \
                     compute_conditioning_value(rlz, intensity_measures[im],
                                                site, poe, num_disagg,
                                                probability_of_exceedance[jj],
@@ -110,12 +111,6 @@ def selection_module(intensity_measures, site_code, rlz_code,
                                                investigation_time,
                                                radius_dist, radius_mag,
                                                path_results_classical)
-
-
-                # -----------------------------------------------------------------------------
-
-                rjb = np.array([mean_dist])
-                mag = mean_mag
 
                 [bgmpe, sctx, rctx, dctx, vs30, rrup] = \
                     inizialize_gmm(ii, gmpe_input, rjb, mag, hypo_depth, dip,
@@ -157,7 +152,7 @@ def selection_module(intensity_measures, site_code, rlz_code,
                 # Further optimize the ground motion selection
 
                 [final_records, final_scale_factors, sample_small] = \
-                    optimizing_ground_motion(n_loop, n_gm, sample_small, n_big,
+                    optimize_ground_motion(n_loop, n_gm, sample_small, n_big,
                                              id_sel, ln_sa1, maxsf, sample_big,
                                              tgt_per, mean_req, stdevs, weights,
                                              penalty, rec_id,
@@ -176,8 +171,8 @@ def selection_module(intensity_measures, site_code, rlz_code,
                 # Collect information of the final record set
                 rec_idx = [allowed_index[i] for i in final_records]
                 # Create the summary file along with the file with the CS
-                create_output_files(output_folder, name, im_star, mean_mag,
-                                    mean_dist, n_gm, rec_idx, source, event_id,
+                create_output_files(output_folder, name, im_star, mag,
+                                    rjb[0], n_gm, rec_idx, source, event_id,
                                     station_code, event_mw, acc_distance,
                                     station_vs30, station_ec8,
                                     final_scale_factors, tgt_per, mean_req,

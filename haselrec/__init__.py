@@ -10,7 +10,7 @@ from haselrec.create_output_files import create_output_files
 from haselrec.find_ground_motion import find_ground_motion
 from haselrec.input_GMPE import compute_dists, inizialize_gmm, \
     compute_soil_params, compute_source_params
-from haselrec.optimizing_ground_motion import optimizing_ground_motion
+from haselrec.optimize_ground_motion import optimize_ground_motion
 from haselrec.plot_final_selection import plot_final_selection
 from haselrec.read_input_data import read_input_data
 from haselrec.scale_acc import scale_acc
@@ -32,7 +32,7 @@ __all__ = [
     'scaling_module',
     'read_input_data',
     'plot_final_selection',
-    'optimizing_ground_motion',
+    'optimize_ground_motion',
     'compute_source_params',
     'compute_cs',
     'inizialize_gmm',

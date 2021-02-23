@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with HaselREC. If not, see <http://www.gnu.org/licenses/>.
 
-def optimizing_ground_motion(n_loop, n_gm, sample_small, n_big, id_sel, ln_sa1,
+def optimize_ground_motion(n_loop, n_gm, sample_small, n_big, id_sel, ln_sa1,
                              maxsf, sample_big, tgt_per, mean_req, stdevs,
                              weights, penalty, rec_id, im_scale_fac):
     """
