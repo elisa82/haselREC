@@ -153,11 +153,10 @@ def read_input_data(fileini):
           `probability_of_exceedance`);
         - :code:`radius_mag`: list of radius values to be used for the
           definition of the allowable magnitude values. They must be
-          specified for each probability of exceedance (:code:
-          `probability_of_exceedance`);
+          specified for each probability of exceedance
+          (:code:`probability_of_exceedance`);
         - :code:`maxsf`: list of maximum allowable scale factor. They must be
-          specified for each probability of exceedance (:code:
-          `probability_of_exceedance`);
+          specified for each probability of exceedance (:code:`probability_of_exceedance`);
 
     **Selection Parameters - section**
 
