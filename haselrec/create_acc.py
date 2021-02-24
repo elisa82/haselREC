@@ -61,7 +61,7 @@ def create_esm_acc(folder, event, station, num):
             sys.exit()
 
         with ZipFile(zip_output, 'r') as zipObj:
-            zipObj.extractall(folder_esm)
+            zipObj.extractall(folder)
         os.remove(zip_output)
 
     time1 = []

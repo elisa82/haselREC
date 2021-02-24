@@ -209,9 +209,9 @@ def compute_soil_params(vs30_input, z2pt5_input, z1pt0_input, gmpe_input,
 
     vs30 = float(vs30_input[index])
 
-    vs30measured = False
+    vs30measured = True
     if vs30type[index] == 'inferred':
-        vs30measured = True
+        vs30measured = False
 
     z1pt0 = []
     if z1pt0_input is None:

@@ -61,11 +61,125 @@ def read_input_data(fileini):
         random_seed=333
 
         [accelerogram folders]
-        path_NGA_folder=/media/sf_condivisa/Progetti/INFRA-NAT/NGA2records
-        path_ESM_folder=/media/sf_condivisa/Progetti/INFRA-NAT/ESM
+        path_NGA_folder=/rec/NGA2records
+        path_ESM_folder=/rec/ESM
 
         [output folder]
         output_folder=output_acc_AvgSA
+
+    The structure of the input file is similar to the structure of the input
+    file for OpenQuake.
+
+    **General - section**
+    It contains the description of the run. It is not used by HaselREC.
+
+    **Hazard Parameters - section**
+    It contains the hazard parameters, which must be defined according to the
+    OpenQuake standards.
+
+        - :code:`intensity_measures`: list of intensity measures to consider.
+          They can be [`PGA`, `SA(T)` or `AvgSA`], where `T` is the spectral
+          ordinate;
+        - :code:`site_code`: list with site codes according to OpenQuake file
+          names;
+        - :code:`rlz_code`: list with realization codes according to OpenQuake
+          file names (one for each site, :code:`site_code`);
+        - :code:`probability_of_exceedance_num`: list with probability of
+          exceedance numbers according to OpenQuake file names;
+        - :code:`probability_of_exceedance`: list with the probability of
+          exceedance associated to :code:`probability_of_exceedance_num`;
+        - :code:`path_results_classical`: path to the folder containing the
+          results of a classical PSHA performed by OpenQuake;
+        - :code:`path_results_disagg`: path to the folder containing the
+          results of a disaggregation analysis performed by OpenQuake;
+        - :code:`num_disagg`: OpenQuake calculation ID containing
+          the disaggregation results;
+        - :code:`num_classical`: OpenQuake calculation ID containing
+          the PSHA results;
+        - :code:`investigation_time`: period of time (in years) used for PSHA in
+          OpenQuake;
+
+    **Conditional Spectrum Parameters - section**
+
+        - :code:`target_periods`: array of periods at which to compute the CS;
+        - :code:`corr_type`: correlation relationship to be used for the
+          computation of the CS. It can be [baker_jayaram or akkar];
+        - :code:`GMPE`: name of the GMPE to be used for the the construction of
+          the CS. It must be defined according to OpenQuake
+          (see https://docs.openquake.org/oq-engine/master/openquake.hazardlib.
+          gsim.html);
+        - :code:`avg_periods`: range of periods to be used to compute AvgSA.
+          It must be defined only when :code:`intensity_measures={AvgSA}`;
+        - :code:`rake`: fault rake;
+        - :code:`Vs30`: list of vs30 values (one for each target site,
+          :code:`site_code`);
+        - :code:`vs30Type`: list of vs30 sites (one for each target site,
+          :code:`site_code`). It can be ["inferred" or "measured"];
+        - :code:`azimuth`: (optional) source-to-site azimuth. It can be defined
+          as an alternative to :code:`fhw`. If not defined, if required,
+          it will be defined inside the code;
+        - :code:`fhw`: (optional) hanging-wall flag. It can be [`=1` or `=-1`].
+          If not defined, if required, it will be defined inside the code;
+        - :code:`hypo_depth`: (optional) hypocentral depth. If not defined, if
+          required, it will be defined inside the code;
+        - :code:`dip`: (optional) fault dip. If not defined, if
+          required, it will be defined inside the code;
+        - :code:`z1pt0`: (optional) Depth to Vs=1.0 km/s. If not defined, if
+          required, it will be defined inside the code;
+        - :code:`z2pt5`: (optional) Depth to Vs=2.5 km/s. If not defined, if
+          required, it will be defined inside the code;
+        - :code:`upper_sd`: (optional) Upper seismogenic depth. If not defined,
+          if required, it will be defined inside the code;
+        - :code:`lower_sd`: (optional) Lower seismogenic depth. If not defined,
+          if required, it will be defined inside the code;
+        - :code:`allowed_recs_vs30`: (optional) Range of allowed vs30 values.
+          If not defined, the vs30 range will be defined consistently withe the
+          vs30 of the site;
+        - :code:`allowed_ec8_code`: (optional). List of allowed EC8 soil class
+          codes. It can be ['A', 'B', 'C', 'D', 'E' or 'All']. If not defined,
+          the EC8 soil class will be defined consistently withe the EC8 soil
+          class of the site;
+
+    **Database Parameters For Screening Recordings - section**
+
+        - :code:`database_path`: path to the folder containing the strong motion
+          database;
+        - :code:`allowed_database`: list of databases to consider for record
+          selection. They can be ['NGA-West2' or 'ESM'];
+        - :code:`allowed_depth`: upper and lower bound of allowable depths;
+        - :code:`radius_dist`: list of radius values to be used for the
+          definition of the allowable distance values. They must be
+          specified for each probability of exceedance (:code:
+          `probability_of_exceedance`);
+        - :code:`radius_mag`: list of radius values to be used for the
+          definition of the allowable magnitude values. They must be
+          specified for each probability of exceedance (:code:
+          `probability_of_exceedance`);
+        - :code:`maxsf`: list of maximum allowable scale factor. They must be
+          specified for each probability of exceedance (:code:
+          `probability_of_exceedance`);
+
+    **Selection Parameters - section**
+
+        - :code:`nGM`: number of records to select;
+        - :code:`nTrials`: number of iterations of the initial spectral
+          simulation step to perform;
+        - :code:`weights`: {weight for error in mean, weight for error in
+          standard deviation, weight for error in skewness};
+        - :code:`nLoop`: number of loops of optimization to perform;
+        - :code:`penalty`: >0 to penalize selected spectra more than 3 sigma
+          from the target at any period, =0 otherwise;
+        - :code:`random_seed`: random seed number to simulate response spectra
+          for initial matching;
+
+    **Accelerogram Folders - section**
+
+        - :code:`path_NGA_folder`: folder with NGA-Wes2 recordings;
+        - :code:`path_ESM_folder`: folder with ESM recordings (it can be empty);
+
+    **Output Folder - section**
+
+        - :code:`output_folder`: path to the output folder.
     """
 
     import sys
@@ -142,8 +256,7 @@ def read_input_data(fileini):
 
     # baker_jayaram or akkar
     corr_type = input['corr_type']
-    gmpe_input = input['GMPE']  # array of GMPE according with sites?
-
+    gmpe_input = input['GMPE']
     rake = float(input['rake'])
 
     vs30_input = [x.strip() for x in input['Vs30'].strip('{}').split(',')]
@@ -216,6 +329,7 @@ def read_input_data(fileini):
     database_path = input['database_path']
     allowed_database = [x.strip() for x in
                         input['allowed_database'].strip('{}').split(',')]
+
 
     allowed_recs_vs30 = None
     try:
@@ -296,15 +410,8 @@ def read_input_data(fileini):
     penalty = float(input['penalty'])
 
     # Accelerogram folders
-    path_nga_folder = input[
-        'path_NGA_folder']  # NGA recordings have to be stored
+    path_nga_folder = input['path_NGA_folder']# NGA recordings have to be stored
     path_esm_folder = input['path_ESM_folder']
-    # If not, found in the folder, ESM recording are authomatically downloaded
-    # from internet, need to generate the file token.txt
-    # At first you need to register at: https://tex.mi.ingv.it/
-    # curl -X POST -F
-    # 'message={"user_email": "email","user_password": "password"}'
-    # "https://tex.mi.ingv.it/esmws/generate-signed-message/1/query" > token.txt
 
     # Output folder
     output_folder = input['output_folder']
