@@ -19,6 +19,7 @@ def compute_rho_avgsa(per, avg_periods, sctx, rctx, dctx, stddvs_avgsa, bgmpe,
     """
     # Import libraries
     from openquake.hazardlib import imt, const, gsim
+    from .modified_akkar_correlation_model import ModifiedAkkarCorrelationModel
 
     sum_numeratore = 0
     for i1 in avg_periods:
@@ -27,8 +28,7 @@ def compute_rho_avgsa(per, avg_periods, sctx, rctx, dctx, stddvs_avgsa, bgmpe,
             rho = gsim.mgmpe.generic_gmpe_avgsa. \
                     BakerJayaramCorrelationModel([per, i1])(0, 1)
         if corr_type == 'akkar':
-            rho = gsim.mgmpe.generic_gmpe_avgsa. \
-                    AkkarCorrelationModel([per, i1])(0, 1)
+            rho = ModifiedAkkarCorrelationModel([per, i1])(0, 1)
         s = [const.StdDev.TOTAL]
         mean1, std1 = bgmpe().get_mean_and_stddevs(sctx, rctx, dctx,
                                                    imt.SA(i1), s)
