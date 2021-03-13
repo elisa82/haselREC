@@ -1,17 +1,17 @@
 # Copyright (C) 2020-2021 Elisa Zuccolo, Eucentre Foundation
 #
-# HaselREC is free software: you can redistribute it and/or modify it
+# haselREC is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Affero General Public License as published
 # by the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# HaselREC is distributed in the hope that it will be useful,
+# haselREC is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with HaselREC. If not, see <http://www.gnu.org/licenses/>.
+# along with haselREC. If not, see <http://www.gnu.org/licenses/>.
 
 def compute_cs(t_cs, bgmpe, sctx, rctx, dctx, im_type, t_star, rrup, mag,
                avg_periods, corr_type, im_star, gmpe_input):
@@ -30,6 +30,7 @@ def compute_cs(t_cs, bgmpe, sctx, rctx, dctx, im_type, t_star, rrup, mag,
     import sys
     from openquake.hazardlib import imt, const, gsim
     from .compute_avgSA import compute_rho_avgsa
+    from .modified_akkar_correlation_model import ModifiedAkkarCorrelationModel
 
     # Use the same periods as the available spectra to construct the
     # conditional spectrum
@@ -112,8 +113,7 @@ def compute_cs(t_cs, bgmpe, sctx, rctx, dctx, im_type, t_star, rrup, mag,
                 rho = gsim.mgmpe.generic_gmpe_avgsa. \
                     BakerJayaramCorrelationModel([t_cs[i], t_star])(0, 1)
             if corr_type == 'akkar':
-                rho = gsim.mgmpe.generic_gmpe_avgsa. \
-                    AkkarCorrelationModel([t_cs[i], t_star])(0, 1)
+                rho = ModifiedAkkarCorrelationModel([t_cs[i], t_star])(0, 1)
         rho_t_tstar[i] = rho
         # Get the value of the CMS
         mu_im_im_cond[i] = \
@@ -133,8 +133,7 @@ def compute_cs(t_cs, bgmpe, sctx, rctx, dctx, im_type, t_star, rrup, mag,
                     BakerJayaramCorrelationModel([t_cs[i], t_cs[j]])(0, 1) * \
                     np.sqrt(var1 * var2)
             if corr_type == 'akkar':
-                sigma_corr = gsim.mgmpe.generic_gmpe_avgsa. \
-                    AkkarCorrelationModel([t_cs[i], t_cs[j]])(0, 1) * \
+                sigma_corr = ModifiedAkkarCorrelationModel([t_cs[i], t_cs[j]])(0, 1) * \
                     np.sqrt(var1 * var2)
             sigma11 = np.matrix(
                 [[var1, sigma_corr], [sigma_corr, var2]])

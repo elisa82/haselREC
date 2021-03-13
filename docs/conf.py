@@ -19,7 +19,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = u'HaselREC'
+project = u'haselREC'
 copyright = u'2020-2021, Elisa Zuccolo, EUCENTRE Foundation'
 author = u'Elisa Zuccolo EUCENTRE Foundation'
 
@@ -106,7 +106,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'HaselRECdoc'
+htmlhelp_basename = 'haselRECdoc'
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -133,7 +133,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'HaselREC.tex', u'HaselREC Documentation',
+    (master_doc, 'haselREC.tex', u'haselREC Documentation',
      u'Elisa Zuccolo EUCENTRE Foundation', 'manual'),
 ]
 
@@ -143,7 +143,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'haselrec', u'HaselREC Documentation',
+    (master_doc, 'haselrec', u'haselREC Documentation',
      [author], 1)
 ]
 
@@ -154,8 +154,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'HaselREC', u'HaselREC Documentation',
-     author, 'HaselREC', 'One line description of project.',
+    (master_doc, 'haselREC', u'haselREC Documentation',
+     author, 'haselREC', 'One line description of project.',
      'Miscellaneous'),
 ]
 

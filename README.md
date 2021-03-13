@@ -1,8 +1,10 @@
-# HaselREC - HAzard-based SELection of RECords
+![haselREC Logo](docs/logo.png)
+
+# haselREC - HAzard-based SELection of RECords
 
 The code is described in:
 Zuccolo E, Poggi V, O'Reilly G, Monteiro R (2021). 
-HaselREC: an open-source ground motion record selection tool bridging seismic 
+haselREC: an open-source ground motion record selection tool bridging seismic 
 hazard and structural analyses. Submitted to SDEE
 
 Contributors:
@@ -12,19 +14,13 @@ gerard.oreilly@iusspavia.it
 * Andrea Francia - andrea@andreafrancia.it 
 
 # Dependencies
-HaselREC has the following dependencies:
+haselREC has the following dependencies:
 
  * numpy
  * pandas
  * scipy
  * obspy
  * matplotlib
- * os
- * zipfile
- * response
- * pathlib
- * glob
- * sys
  * openquake.hazardlib
  * shakelib.conversions.imc.boore_kishida_2017 (Optional. Only of the input 
  intensity measure component is the larger between the two horizontal 
@@ -34,7 +30,7 @@ HaselREC has the following dependencies:
 Add the lib folder to PYTHONPATH. For Linux open the file `~/.bashrc` in your 
 text editor and add the following line at the end:
 ```
-export PYTHONPATH=/path/to/HaselREC
+export PYTHONPATH=/path/to/haselREC
 ```
 
 # Documentation
@@ -51,15 +47,15 @@ folder
 
 # License
 Copyright (C) 2020-2021 Elisa Zuccolo, Eucentre Foundation
-HaselREC is free software: you can redistribute it and/or modify it under the 
+haselREC is free software: you can redistribute it and/or modify it under the 
 terms of the GNU Affero General Public License as published by the Free Software
 Foundation, either version 3 of the License, or (at your option) any later 
 version. See the GNU Affero General Public License for more details. You should
 have received a copy of the GNU Affero General Public  License along with 
-HaselREC. If not, see <http://www.gnu.org/licenses/>.
+haselREC. If not, see <http://www.gnu.org/licenses/>.
 
 # Disclaimer
-HaselREC is distributed in the hope that it will be useful, but WITHOUT ANY 
+haselREC is distributed in the hope that it will be useful, but WITHOUT ANY 
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
 The authors of the software assume no liability for use of the software.
