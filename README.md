@@ -1,3 +1,5 @@
+![HaselREC Logo](docs/logo.png)
+
 # HaselREC - HAzard-based SELection of RECords
 
 The code is described in:
