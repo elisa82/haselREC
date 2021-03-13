@@ -1,5 +1,5 @@
 """
-HaselREC (HAzard-based SELection of RECords)
+haselREC (HAzard-based SELection of RECords)
 """
 
 from haselrec.check_module import check_module

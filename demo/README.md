@@ -1,4 +1,4 @@
-# HaselREC - Demos
+# haselREC - Demos
 
 Some demos are currently available to run the different execution modes.
 All the demos can be executed with the command:

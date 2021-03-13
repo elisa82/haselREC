@@ -1,5 +1,5 @@
 ********
-HaselREC
+haselREC
 ********
 
 .. toctree::

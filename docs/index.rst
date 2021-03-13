@@ -1,9 +1,9 @@
-.. HaselREC documentation master file, created by
+.. haselREC documentation master file, created by
    sphinx-quickstart on Mon Feb 22 22:19:15 2021.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to HaselREC's documentation!
+Welcome to haselREC's documentation!
 ====================================
 
 .. toctree::

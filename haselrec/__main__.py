@@ -2,33 +2,33 @@
 
 # Copyright (C) 2020-2021 Elisa Zuccolo, Eucentre Foundation
 #
-# HaselREC is free software: you can redistribute it and/or modify it
+# haselREC is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Affero General Public License as published
 # by the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# HaselREC is distributed in the hope that it will be useful,
+# haselREC is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with HaselREC. If not, see <http://www.gnu.org/licenses/>.
+# along with haselREC. If not, see <http://www.gnu.org/licenses/>.
 
 # %% Import libraries
 # Standard built-in libraries
 
 """
-HaselREC (HAzard-based SELection of RECords)
+haselREC (HAzard-based SELection of RECords)
 It is a useful open-source tool for OpenQuake users, able to select and scale
 recorded accelerograms to be used for dynamic analyses.
 
 It is described in:
 Zuccolo E, Poggi V, O'Reilly G, Monteiro R (2021).
-HaselREC: an open-source ground motion record selection tool bridging seismic
+haselREC: an open-source ground motion record selection tool bridging seismic
 hazard and structural analyses. Submitted to SDEE.
 
-HaselREC can be launched with the following command::
+haselREC can be launched with the following command::
 
     python -m haselrec <input_file> <mode>
 
