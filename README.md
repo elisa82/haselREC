@@ -32,6 +32,14 @@ text editor and add the following line at the end:
 ```
 export PYTHONPATH=/path/to/haselREC
 ```
+# How to make haselREC to automatically download ESM recordings
+ESM recordings can be stored in advance or automatically downloaded from 
+internet using a token file (token.txt). To obtain the token file you need 
+at first to register at: https://esm-db.eu/ and then you can run the command:
+
+```
+curl -X POST -F 'message={"user_email": "email","user_password": "password"}' "https://esm-db.eu/esmws/generate-signed-message/1/query" > token.txt
+```
 
 # Documentation
 The documentation of the code can be generated using Sphinx (v1.8.5).
@@ -44,6 +52,8 @@ The documentation will be generated in the *build* folder
 # Demos
 Some demos can be found in the *demo* folder. See the README file in the *demo*
 folder
+
+
 
 # License
 Copyright (C) 2020-2021 Elisa Zuccolo, Eucentre Foundation
