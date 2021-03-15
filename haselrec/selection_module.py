@@ -18,7 +18,7 @@ def selection_module(intensity_measures, site_code, rlz_code,
                      num_classical, probability_of_exceedance_num,
                      probability_of_exceedance, investigation_time,
                      target_periods, tstar, im_type, im_type_lbl, avg_periods,
-                     corr_type, gmpe_input, rake, vs30, vs30type, hypo_depth,
+                     corr_type, gmpe_input, rake, vs30_input, vs30type, hypo_depth,
                      dip, azimuth, fhw, z2pt5, z1pt0, upper_sd, lower_sd,
                      database_path, allowed_database, allowed_recs_vs30,
                      allowed_ec8_code, maxsf_input, radius_dist_input,
@@ -114,7 +114,7 @@ def selection_module(intensity_measures, site_code, rlz_code,
                 [bgmpe, sctx, rctx, dctx, vs30, rrup] = \
                     inizialize_gmm(ii, gmpe_input, rjb, mag, hypo_depth, dip,
                                    rake, upper_sd, lower_sd, azimuth, fhw,
-                                   vs30type, vs30, z2pt5, z1pt0)
+                                   vs30type, vs30_input, z2pt5, z1pt0)
 
                 # Screen the database of available ground motions
 

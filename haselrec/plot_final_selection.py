@@ -102,10 +102,13 @@ def plot_final_selection(name, lbl, n_gm, t_cs, sample_small, mean_req, stdevs,
     plt.ylim(1e-2, 1e1)
     plt.yscale('log')
     plt.xscale('log')
-    # number=int(name[9])+1
-    # plt.title('site '+str(number)+' - IM '+lbl)
+    #number=int(name[11])+1 #per AvgSA
+    #number = int(name[9]) + 1 #per PGA
+    #plt.title('site '+str(number)+' - '+lbl)
     plt.grid(True)
     plt.legend()
+    #plt.savefig(output_folder + '/' + name + '/' + name + '_spectra_gms.png',
+    #            bbox_inches='tight')
     plt.savefig(output_folder + '/' + name + '/' + name + '_spectra_gms.pdf',
                 bbox_inches='tight')
     plt.close()
