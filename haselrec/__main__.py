@@ -25,8 +25,8 @@ recorded accelerograms to be used for dynamic analyses.
 
 It is described in:
 Zuccolo E, Poggi V, O'Reilly G, Monteiro R (2021).
-haselREC: an open-source ground motion record selection tool bridging seismic
-hazard and structural analyses. Submitted to SDEE.
+haselREC: an automated open-source ground motion record selection tool
+compatible with OpenQuake. Submitted to SDEE
 
 haselREC can be launched with the following command::
 

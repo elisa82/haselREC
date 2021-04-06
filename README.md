@@ -3,9 +3,9 @@
 # haselREC - HAzard-based SELection of RECords
 
 The code is described in:
-Zuccolo E, Poggi V, O'Reilly G, Monteiro R (2021). 
-haselREC: an open-source ground motion record selection tool bridging seismic 
-hazard and structural analyses. Submitted to SDEE
+Zuccolo E, Poggi V, O'Reilly GJ, Monteiro R (2021). 
+haselREC: an automated open-source ground motion record selection tool
+compatible with OpenQuake. Submitted to SDEE
 
 Contributors:
 * Elisa Zuccolo - EUCENTRE Foundation, Italy, elisa.zuccolo@eucentre.it
