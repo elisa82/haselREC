@@ -5,7 +5,7 @@
 The code is described in:
 Zuccolo E, Poggi V, O'Reilly GJ, Monteiro R (2021). 
 haselREC: an automated open-source ground motion record selection tool
-compatible with OpenQuake. Submitted to SDEE
+compatible with OpenQuake. Submitted to Advances in Engineering Software
 
 Contributors:
 * Elisa Zuccolo - EUCENTRE Foundation, Italy, elisa.zuccolo@eucentre.it
