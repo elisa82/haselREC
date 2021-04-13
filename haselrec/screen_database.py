@@ -74,20 +74,28 @@ def screen_database(database_path, allowed_database, allowed_recs_vs30,
     if allowed_recs_vs30 is None:
         if vs30 >= 800.0:
             allowed_recs_vs30 = [800.0, 3000.0]
-        elif 360. <= vs30 < 800.:
+        elif 360. < vs30 < 800.:
             allowed_recs_vs30 = [360.0, 800.0]
-        elif 180. <= vs30 < 360.:
+        elif vs30 ==360.:
+            allowed_recs_vs30 = [180.0, 800.0]
+        elif 180. < vs30 < 360.:
             allowed_recs_vs30 = [180.0, 360.0]
+        elif vs30 == 180.:
+            allowed_recs_vs30 = [0.0, 360.0]
         else:
             allowed_recs_vs30 = [0.0, 180.0]
 
     if allowed_ec8_code is None:
         if vs30 >= 800.0:
             allowed_ec8_code = 'A'
-        elif 360. <= vs30 < 800.:
+        elif 360. < vs30 < 800.:
             allowed_ec8_code = 'B'
-        elif 180. <= vs30 < 360.:
+        elif vs30 ==360.:
+            allowed_recs_vs30 = ['B', 'C']
+        elif 180. < vs30 < 360.:
             allowed_ec8_code = 'C'
+        elif vs30 == 180.:
+            allowed_recs_vs30 = ['C', 'D']
         else:
             allowed_ec8_code = 'D'
 
