@@ -91,11 +91,11 @@ def screen_database(database_path, allowed_database, allowed_recs_vs30,
         elif 360. < vs30 < 800.:
             allowed_ec8_code = 'B'
         elif vs30 ==360.:
-            allowed_recs_vs30 = ['B', 'C']
+            allowed_ec8_code = ['B', 'C']
         elif 180. < vs30 < 360.:
             allowed_ec8_code = 'C'
         elif vs30 == 180.:
-            allowed_recs_vs30 = ['C', 'D']
+            allowed_ec8_code = ['C', 'D']
         else:
             allowed_ec8_code = 'D'
 
