@@ -33,6 +33,7 @@ def create_esm_acc(folder, event, station, num):
     import os
     from zipfile import ZipFile
     import requests
+    import sys
 
     if not os.path.isdir(folder):
         zip_output = 'output_' + str(num) + '.zip'
@@ -58,7 +59,7 @@ def create_esm_acc(folder, event, station, num):
             with open(zip_output, "wb") as zf:
                 zf.write(req.content)
         else:
-            sys.exit()
+            sys.exit('Problem with ESM record. Status code:'+req.status_code)
 
         with ZipFile(zip_output, 'r') as zipObj:
             zipObj.extractall(folder)
