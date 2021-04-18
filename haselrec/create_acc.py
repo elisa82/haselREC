@@ -59,7 +59,10 @@ def create_esm_acc(folder, event, station, num):
             with open(zip_output, "wb") as zf:
                 zf.write(req.content)
         else:
-            sys.exit('Problem with ESM record. Status code:'+req.status_code)
+            if req.status_code == 403:
+                sys.exit('Problem with ESM download. Maybe the token is no longer valid')
+            else:
+                sys.exit('Problem with ESM download. Status code:'+req.status_code)
 
         with ZipFile(zip_output, 'r') as zipObj:
             zipObj.extractall(folder)
