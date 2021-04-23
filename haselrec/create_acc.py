@@ -62,7 +62,7 @@ def create_esm_acc(folder, event, station, num):
             if req.status_code == 403:
                 sys.exit('Problem with ESM download. Maybe the token is no longer valid')
             else:
-                sys.exit('Problem with ESM download. Status code:'+req.status_code)
+                sys.exit('Problem with ESM download. Status code: '+str(req.status_code))
 
         with ZipFile(zip_output, 'r') as zipObj:
             zipObj.extractall(folder)
