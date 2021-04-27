@@ -1,0 +1,300 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Input data &#8212; haselREC  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Selection Module" href="selection_module.html" />
+    <link rel="prev" title="haselREC" href="haselrec.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-haselrec.read_input_data">
+<span id="input-data"></span><h1>Input data<a class="headerlink" href="#module-haselrec.read_input_data" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="haselrec.read_input_data.read_input_data">
+<code class="descclassname">haselrec.read_input_data.</code><code class="descname">read_input_data</code><span class="sig-paren">(</span><em>fileini</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/haselrec/read_input_data.html#read_input_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#haselrec.read_input_data.read_input_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the input file for haselREC.
+An example is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">general</span><span class="p">]</span>
+<span class="n">description</span> <span class="o">=</span> <span class="n">Selection</span> <span class="k">for</span> <span class="n">Italy</span> <span class="o">-</span> <span class="n">AvgSA</span>
+
+<span class="p">[</span><span class="n">hazard</span> <span class="n">parameters</span><span class="p">]</span>
+<span class="n">intensity_measures</span><span class="o">=</span><span class="p">{</span><span class="n">AvgSA</span><span class="p">}</span>
+<span class="n">site_code</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">}</span>
+<span class="n">rlz_code</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">}</span>
+<span class="n">probability_of_exceedance_num</span><span class="o">=</span><span class="p">{</span><span class="mi">2</span><span class="p">}</span>
+<span class="n">probability_of_exceedance</span><span class="o">=</span><span class="p">{</span><span class="mf">0.1</span><span class="p">}</span>
+<span class="n">path_results_classical</span><span class="o">=</span><span class="n">output_classical_AvgSA</span>
+<span class="n">path_results_disagg</span><span class="o">=</span><span class="n">output_disagg_AvgSA</span>
+<span class="n">num_disagg</span><span class="o">=</span><span class="mi">107</span>
+<span class="n">num_classical</span><span class="o">=</span><span class="mi">108</span>
+<span class="n">investigation_time</span><span class="o">=</span><span class="mi">50</span>
+
+<span class="p">[</span><span class="n">conditional</span> <span class="n">spectrum</span> <span class="n">parameters</span><span class="p">]</span>
+<span class="n">target_periods</span><span class="o">=</span><span class="p">[</span><span class="mf">0.01</span><span class="p">,</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.4</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.6</span><span class="p">,</span><span class="mf">0.7</span><span class="p">,</span><span class="mf">0.75</span><span class="p">,</span><span class="mf">0.8</span><span class="p">,</span><span class="mf">0.9</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span>
+<span class="n">corr_type</span><span class="o">=</span><span class="n">akkar</span>
+<span class="n">GMPE</span><span class="o">=</span><span class="n">AkkarBommer2010</span>
+<span class="n">avg_periods</span><span class="o">=</span><span class="p">[</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.4</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.75</span><span class="p">,</span><span class="mf">1.0</span><span class="p">]</span>
+<span class="n">rake</span><span class="o">=</span><span class="mf">0.</span>
+<span class="n">Vs30</span><span class="o">=</span><span class="p">{</span><span class="mi">300</span><span class="p">,</span><span class="mi">300</span><span class="p">,</span><span class="mi">300</span><span class="p">,</span><span class="mi">600</span><span class="p">,</span><span class="mi">600</span><span class="p">,</span><span class="mi">600</span><span class="p">}</span>
+<span class="n">vs30Type</span><span class="o">=</span><span class="p">{</span><span class="n">inferred</span><span class="p">,</span><span class="n">inferred</span><span class="p">,</span><span class="n">inferred</span><span class="p">,</span><span class="n">inferred</span><span class="p">,</span><span class="n">inferred</span><span class="p">,</span><span class="n">inferred</span><span class="p">}</span>
+<span class="n">azimuth</span><span class="o">=</span><span class="mi">50</span>
+<span class="n">hypo_depth</span><span class="o">=</span><span class="mi">10</span>
+
+<span class="p">[</span><span class="n">database</span> <span class="n">parameters</span> <span class="k">for</span> <span class="n">screening</span> <span class="n">recordings</span><span class="p">]</span>
+<span class="n">database_path</span><span class="o">=../</span><span class="n">OpenInsel</span><span class="o">/</span><span class="n">GM</span><span class="o">-</span><span class="n">Records</span><span class="o">-</span><span class="n">Database</span><span class="o">/</span><span class="n">database_flatfile</span><span class="o">.</span><span class="n">csv</span>
+<span class="n">allowed_database</span><span class="o">=</span><span class="p">{</span><span class="n">ESM</span><span class="p">,</span><span class="n">NGA</span><span class="o">-</span><span class="n">West2</span><span class="p">}</span>
+<span class="n">allowed_depth</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">30</span><span class="p">]</span>
+<span class="n">radius_dist</span><span class="o">=</span><span class="p">{</span><span class="mi">50</span><span class="p">}</span>
+<span class="n">radius_mag</span><span class="o">=</span><span class="p">{</span><span class="mf">0.50</span><span class="p">}</span>
+<span class="n">maxsf</span><span class="o">=</span><span class="p">{</span><span class="mf">3.0</span><span class="p">}</span>
+
+<span class="p">[</span><span class="n">selection</span> <span class="n">parameters</span><span class="p">]</span>
+<span class="n">nGM</span><span class="o">=</span><span class="mi">30</span>
+<span class="n">nTrials</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">weights</span><span class="o">=</span><span class="p">{</span><span class="mf">0.6</span><span class="p">,</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.1</span><span class="p">}</span>
+<span class="n">nLoop</span><span class="o">=</span><span class="mi">10</span>
+<span class="n">penalty</span><span class="o">=</span><span class="mi">10</span>
+<span class="n">random_seed</span><span class="o">=</span><span class="mi">333</span>
+
+<span class="p">[</span><span class="n">accelerogram</span> <span class="n">folders</span><span class="p">]</span>
+<span class="n">path_NGA_folder</span><span class="o">=/</span><span class="n">rec</span><span class="o">/</span><span class="n">NGA2records</span>
+<span class="n">path_ESM_folder</span><span class="o">=/</span><span class="n">rec</span><span class="o">/</span><span class="n">ESM</span>
+
+<span class="p">[</span><span class="n">output</span> <span class="n">folder</span><span class="p">]</span>
+<span class="n">output_folder</span><span class="o">=</span><span class="n">output_acc_AvgSA</span>
+</pre></div>
+</div>
+<p>The structure of the input file is similar to the structure of the input
+file for OpenQuake.</p>
+<p><strong>General - section</strong>
+It contains the description of the run. It is not used by haselREC.</p>
+<p><strong>Hazard Parameters - section</strong>
+It contains the hazard parameters, which must be defined according to the
+OpenQuake standards.</p>
+<blockquote>
+<div><ul class="simple">
+<li><code class="code docutils literal notranslate"><span class="pre">intensity_measures</span></code>: list of intensity measures to consider.
+They can be [<cite>PGA</cite>, <cite>SA(T)</cite> or <cite>AvgSA</cite>], where <cite>T</cite> is the spectral
+ordinate;</li>
+<li><code class="code docutils literal notranslate"><span class="pre">site_code</span></code>: list with site codes according to OpenQuake file
+names;</li>
+<li><code class="code docutils literal notranslate"><span class="pre">rlz_code</span></code>: list with realization codes according to OpenQuake
+file names (one for each site, <code class="code docutils literal notranslate"><span class="pre">site_code</span></code>);</li>
+<li><code class="code docutils literal notranslate"><span class="pre">probability_of_exceedance_num</span></code>: list with probability of
+exceedance numbers according to OpenQuake file names;</li>
+<li><code class="code docutils literal notranslate"><span class="pre">probability_of_exceedance</span></code>: list with the probability of
+exceedance associated to <code class="code docutils literal notranslate"><span class="pre">probability_of_exceedance_num</span></code>;</li>
+<li><code class="code docutils literal notranslate"><span class="pre">path_results_classical</span></code>: path to the folder containing the
+results of a classical PSHA performed by OpenQuake;</li>
+<li><code class="code docutils literal notranslate"><span class="pre">path_results_disagg</span></code>: path to the folder containing the
+results of a disaggregation analysis performed by OpenQuake;</li>
+<li><code class="code docutils literal notranslate"><span class="pre">num_disagg</span></code>: OpenQuake calculation ID containing
+the disaggregation results;</li>
+<li><code class="code docutils literal notranslate"><span class="pre">num_classical</span></code>: OpenQuake calculation ID containing
+the PSHA results;</li>
+<li><code class="code docutils literal notranslate"><span class="pre">investigation_time</span></code>: period of time (in years) used for PSHA in
+OpenQuake;</li>
+</ul>
+</div></blockquote>
+<p><strong>Conditional Spectrum Parameters - section</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><code class="code docutils literal notranslate"><span class="pre">target_periods</span></code>: array of periods at which to compute the CS;</li>
+<li><code class="code docutils literal notranslate"><span class="pre">corr_type</span></code>: correlation relationship to be used for the
+computation of the CS. It can be [baker_jayaram or akkar];</li>
+<li><code class="code docutils literal notranslate"><span class="pre">GMPE</span></code>: name of the GMPE to be used for the the construction of
+the CS. It must be defined according to OpenQuake
+(see <a class="reference external" href="https://docs.openquake.org/oq-engine/master/openquake.hazardlib">https://docs.openquake.org/oq-engine/master/openquake.hazardlib</a>.
+gsim.html);</li>
+<li><code class="code docutils literal notranslate"><span class="pre">avg_periods</span></code>: range of periods to be used to compute AvgSA.
+It must be defined only when <code class="code docutils literal notranslate"><span class="pre">intensity_measures={AvgSA}</span></code>;</li>
+<li><code class="code docutils literal notranslate"><span class="pre">rake</span></code>: fault rake;</li>
+<li><code class="code docutils literal notranslate"><span class="pre">Vs30</span></code>: list of vs30 values (one for each target site,
+<code class="code docutils literal notranslate"><span class="pre">site_code</span></code>);</li>
+<li><code class="code docutils literal notranslate"><span class="pre">vs30Type</span></code>: list of vs30 sites (one for each target site,
+<code class="code docutils literal notranslate"><span class="pre">site_code</span></code>). It can be [“inferred” or “measured”];</li>
+<li><code class="code docutils literal notranslate"><span class="pre">azimuth</span></code>: (optional) source-to-site azimuth. It can be defined
+as an alternative to <code class="code docutils literal notranslate"><span class="pre">fhw</span></code>. If not defined, if required,
+it will be defined inside the code;</li>
+<li><code class="code docutils literal notranslate"><span class="pre">fhw</span></code>: (optional) hanging-wall flag. It can be [<cite>=1</cite> or <cite>=-1</cite>].
+If not defined, if required, it will be defined inside the code;</li>
+<li><code class="code docutils literal notranslate"><span class="pre">hypo_depth</span></code>: (optional) hypocentral depth. If not defined, if
+required, it will be defined inside the code;</li>
+<li><code class="code docutils literal notranslate"><span class="pre">dip</span></code>: (optional) fault dip. If not defined, if
+required, it will be defined inside the code;</li>
+<li><code class="code docutils literal notranslate"><span class="pre">z1pt0</span></code>: (optional) Depth to Vs=1.0 km/s. If not defined, if
+required, it will be defined inside the code;</li>
+<li><code class="code docutils literal notranslate"><span class="pre">z2pt5</span></code>: (optional) Depth to Vs=2.5 km/s. If not defined, if
+required, it will be defined inside the code;</li>
+<li><code class="code docutils literal notranslate"><span class="pre">upper_sd</span></code>: (optional) Upper seismogenic depth. If not defined,
+if required, it will be defined inside the code;</li>
+<li><code class="code docutils literal notranslate"><span class="pre">lower_sd</span></code>: (optional) Lower seismogenic depth. If not defined,
+if required, it will be defined inside the code;</li>
+<li><code class="code docutils literal notranslate"><span class="pre">allowed_recs_vs30</span></code>: (optional) Range of allowed vs30 values.
+If not defined, the vs30 range will be defined consistently withe the
+vs30 of the site;</li>
+<li><code class="code docutils literal notranslate"><span class="pre">allowed_ec8_code</span></code>: (optional). List of allowed EC8 soil class
+codes. It can be [‘A’, ‘B’, ‘C’, ‘D’, ‘E’ or ‘All’]. If not defined,
+the EC8 soil class will be defined consistently withe the EC8 soil
+class of the site;</li>
+</ul>
+</div></blockquote>
+<p><strong>Database Parameters For Screening Recordings - section</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><code class="code docutils literal notranslate"><span class="pre">database_path</span></code>: path to the folder containing the strong motion
+database;</li>
+<li><code class="code docutils literal notranslate"><span class="pre">allowed_database</span></code>: list of databases to consider for record
+selection. They can be [‘NGA-West2’ or ‘ESM’];</li>
+<li><code class="code docutils literal notranslate"><span class="pre">allowed_depth</span></code>: upper and lower bound of allowable depths;</li>
+<li><code class="code docutils literal notranslate"><span class="pre">radius_dist</span></code>: list of radius values to be used for the
+definition of the allowable distance values. They must be
+specified for each probability of exceedance (:code:
+<cite>probability_of_exceedance</cite>);</li>
+<li><code class="code docutils literal notranslate"><span class="pre">radius_mag</span></code>: list of radius values to be used for the
+definition of the allowable magnitude values. They must be
+specified for each probability of exceedance
+(<code class="code docutils literal notranslate"><span class="pre">probability_of_exceedance</span></code>);</li>
+<li><code class="code docutils literal notranslate"><span class="pre">maxsf</span></code>: list of maximum allowable scale factor. They must be
+specified for each probability of exceedance (<code class="code docutils literal notranslate"><span class="pre">probability_of_exceedance</span></code>);</li>
+</ul>
+</div></blockquote>
+<p><strong>Selection Parameters - section</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><code class="code docutils literal notranslate"><span class="pre">nGM</span></code>: number of records to select;</li>
+<li><code class="code docutils literal notranslate"><span class="pre">nTrials</span></code>: number of iterations of the initial spectral
+simulation step to perform;</li>
+<li><code class="code docutils literal notranslate"><span class="pre">weights</span></code>: {weight for error in mean, weight for error in
+standard deviation, weight for error in skewness};</li>
+<li><code class="code docutils literal notranslate"><span class="pre">nLoop</span></code>: number of loops of optimization to perform;</li>
+<li><code class="code docutils literal notranslate"><span class="pre">penalty</span></code>: &gt;0 to penalize selected spectra more than 3 sigma
+from the target at any period, =0 otherwise;</li>
+<li><code class="code docutils literal notranslate"><span class="pre">random_seed</span></code>: random seed number to simulate response spectra
+for initial matching;</li>
+</ul>
+</div></blockquote>
+<p><strong>Accelerogram Folders - section</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><code class="code docutils literal notranslate"><span class="pre">path_NGA_folder</span></code>: folder with NGA-Wes2 recordings;</li>
+<li><code class="code docutils literal notranslate"><span class="pre">path_ESM_folder</span></code>: folder with ESM recordings (it can be empty);</li>
+</ul>
+</div></blockquote>
+<p><strong>Output Folder - section</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><code class="code docutils literal notranslate"><span class="pre">output_folder</span></code>: path to the output folder.</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">haselREC</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="haselrec.html">haselREC</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Input data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="selection_module.html">Selection Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scaling_module.html">Scaling Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="check_module.html">Check Module</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="haselrec.html">haselREC</a><ul>
+      <li>Previous: <a href="haselrec.html" title="previous chapter">haselREC</a></li>
+      <li>Next: <a href="selection_module.html" title="next chapter">Selection Module</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020-2021, Elisa Zuccolo, EUCENTRE Foundation.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/input_data.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

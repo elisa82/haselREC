@@ -1,0 +1,187 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>haselREC &#8212; haselREC  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Input data" href="input_data.html" />
+    <link rel="prev" title="Welcome to haselREC’s documentation!" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="haselrec">
+<h1>haselREC<a class="headerlink" href="#haselrec" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="input_data.html">Input data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="selection_module.html">Selection Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="compute_conditioning_value.html">Compute conditioning value</a></li>
+<li class="toctree-l2"><a class="reference internal" href="screen_database.html">Screen Database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulate_spectra.html">Simulate Spectra</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inizialize_GMM.html">Input GMM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compute_cs.html">Compute CS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="find_ground_motion.html">Find Ground Motion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimize_ground_motion.html">Optimize Ground Motion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_final_selection.html">Output files: plots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="create_output_files.html">Output files: txt</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="scaling_module.html">Scaling Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="scale_acc.html">Scaled accelerograms</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="create_esm_acc.html">ESM</a></li>
+<li class="toctree-l3"><a class="reference internal" href="create_nga_acc.html">NGA-West2</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="check_module.html">Check Module</a></li>
+</ul>
+</div>
+<span class="target" id="module-haselrec.__main__"></span><p>haselREC (HAzard-based SELection of RECords)
+It is a useful open-source tool for OpenQuake users, able to select and scale
+recorded accelerograms to be used for dynamic analyses.</p>
+<p>It is described in:
+Zuccolo E, Poggi V, O’Reilly G, Monteiro R (2021).
+haselREC: an automated open-source ground motion record selection tool
+compatible with OpenQuake. Under review</p>
+<p>haselREC can be launched with the following command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">haselrec</span> <span class="o">&lt;</span><span class="n">input_file</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">mode</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>Four modes are permitted:</p>
+<blockquote>
+<div><ul class="simple">
+<li><code class="code docutils literal notranslate"><span class="pre">--run-selection</span></code>: it performs record selection only</li>
+<li><dl class="first docutils">
+<dt><code class="code docutils literal notranslate"><span class="pre">--run-scaling</span></code>: it performs record scaling only (requires to have run</dt>
+<dd>mode <code class="code docutils literal notranslate"><span class="pre">--run-selection</span></code> in advance)</dd>
+</dl>
+</li>
+<li><code class="code docutils literal notranslate"><span class="pre">--run-complete</span></code>: it performs both record selection and scaling</li>
+<li><dl class="first docutils">
+<dt><code class="code docutils literal notranslate"><span class="pre">--check-NGArec</span></code>: it identifies NGA-West2 record IDs not already stored</dt>
+<dd>on the computer (it requires to have run mode <code class="code docutils literal notranslate"><span class="pre">--run-selection</span></code> in
+advance)</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<p>The output files are store in a folder, which has the following name structure:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">IM</span><span class="o">&gt;-</span><span class="n">site_</span><span class="o">&lt;</span><span class="n">num_site</span><span class="o">&gt;-</span><span class="n">poe</span><span class="o">-&lt;</span><span class="n">num_poe</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>where:</dt>
+<dd><ul class="first last simple">
+<li><cite>&lt;IM&gt;</cite> is the required intensity measure</li>
+<li><cite>&lt;num_site&gt;</cite> is the site number</li>
+<li><cite>&lt;num_poe&gt;</cite> is the probability of exceedance number</li>
+</ul>
+</dd>
+</dl>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">haselREC</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">haselREC</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="input_data.html">Input data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="selection_module.html">Selection Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scaling_module.html">Scaling Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="check_module.html">Check Module</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Welcome to haselREC’s documentation!</a></li>
+      <li>Next: <a href="input_data.html" title="next chapter">Input data</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020-2021, Elisa Zuccolo, EUCENTRE Foundation.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/haselrec.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

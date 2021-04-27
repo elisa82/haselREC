@@ -1,0 +1,336 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>haselrec.input_GMPE &#8212; haselREC  documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for haselrec.input_GMPE</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (C) 2020-2021 Elisa Zuccolo, Eucentre Foundation</span>
+<span class="c1">#</span>
+<span class="c1"># HaselREC is free software: you can redistribute it and/or modify it</span>
+<span class="c1"># under the terms of the GNU Affero General Public License as published</span>
+<span class="c1"># by the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># HaselREC is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU Affero General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU Affero General Public License</span>
+<span class="c1"># along with HaselREC. If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="k">def</span> <span class="nf">inizialize_gmm</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">gmpe_input</span><span class="p">,</span> <span class="n">rjb</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">z_hyp_input</span><span class="p">,</span> <span class="n">dip_input</span><span class="p">,</span> <span class="n">rake</span><span class="p">,</span>
+                   <span class="n">upper_sd_input</span><span class="p">,</span> <span class="n">lower_sd_input</span><span class="p">,</span> <span class="n">azimuth_input</span><span class="p">,</span> <span class="n">fhw</span><span class="p">,</span> <span class="n">vs30type</span><span class="p">,</span>
+                   <span class="n">vs30_input</span><span class="p">,</span> <span class="n">z2pt5_input</span><span class="p">,</span> <span class="n">z1pt0_input</span><span class="p">):</span>
+
+    <span class="kn">import</span> <span class="nn">sys</span>
+    <span class="kn">from</span> <span class="nn">openquake.hazardlib</span> <span class="kn">import</span> <span class="n">gsim</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+    <span class="n">bgmpe</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">name_gmpe</span><span class="p">,</span> <span class="n">gmpes</span> <span class="ow">in</span> <span class="n">gsim</span><span class="o">.</span><span class="n">get_available_gsims</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">name_gmpe</span> <span class="o">==</span> <span class="n">gmpe_input</span><span class="p">:</span>
+            <span class="n">bgmpe</span> <span class="o">=</span> <span class="n">gmpes</span>
+    <span class="k">if</span> <span class="n">bgmpe</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s1">&#39;The GMM is not found&#39;</span><span class="p">)</span>
+
+    <span class="n">sctx</span> <span class="o">=</span> <span class="n">gsim</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">SitesContext</span><span class="p">()</span>
+    <span class="n">rctx</span> <span class="o">=</span> <span class="n">gsim</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">RuptureContext</span><span class="p">()</span>
+    <span class="n">dctx</span> <span class="o">=</span> <span class="n">gsim</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">DistancesContext</span><span class="p">()</span>
+
+    <span class="c1"># -----------------------------------------------------------------------------</span>
+    <span class="c1"># Initialise contexts</span>
+
+    <span class="n">dip</span><span class="p">,</span> <span class="n">z_hyp</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">ztor</span><span class="p">,</span> <span class="n">azimuth</span> <span class="o">=</span> <span class="n">compute_source_params</span><span class="p">(</span><span class="n">mag</span><span class="p">,</span> <span class="n">z_hyp_input</span><span class="p">,</span>
+                                                             <span class="n">dip_input</span><span class="p">,</span> <span class="n">rake</span><span class="p">,</span>
+                                                             <span class="n">upper_sd_input</span><span class="p">,</span>
+                                                             <span class="n">lower_sd_input</span><span class="p">,</span>
+                                                             <span class="n">azimuth_input</span><span class="p">,</span> <span class="n">fhw</span><span class="p">)</span>
+
+    <span class="p">[</span><span class="n">rx</span><span class="p">,</span> <span class="n">rrup</span><span class="p">,</span> <span class="n">ry</span><span class="p">]</span> <span class="o">=</span> <span class="n">compute_dists</span><span class="p">(</span><span class="n">rjb</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">z_hyp_input</span><span class="p">,</span> <span class="n">dip_input</span><span class="p">,</span> <span class="n">rake</span><span class="p">,</span>
+                                   <span class="n">upper_sd_input</span><span class="p">,</span>
+                                   <span class="n">lower_sd_input</span><span class="p">,</span> <span class="n">azimuth_input</span><span class="p">,</span> <span class="n">fhw</span><span class="p">)</span>
+
+    <span class="p">[</span><span class="n">vs30</span><span class="p">,</span> <span class="n">vs30measured</span><span class="p">,</span> <span class="n">z1pt0</span><span class="p">,</span> <span class="n">z2pt5</span><span class="p">]</span> <span class="o">=</span> <span class="n">compute_soil_params</span><span class="p">(</span><span class="n">vs30_input</span><span class="p">,</span>
+                                                             <span class="n">z2pt5_input</span><span class="p">,</span>
+                                                             <span class="n">z1pt0_input</span><span class="p">,</span>
+                                                             <span class="n">gmpe_input</span><span class="p">,</span>
+                                                             <span class="n">vs30type</span><span class="p">,</span>
+                                                             <span class="n">index</span><span class="p">)</span>
+
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">rctx</span><span class="p">,</span> <span class="s1">&#39;width&#39;</span><span class="p">,</span> <span class="n">width</span><span class="p">)</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">rctx</span><span class="p">,</span> <span class="s1">&#39;ztor&#39;</span><span class="p">,</span> <span class="n">ztor</span><span class="p">)</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">rctx</span><span class="p">,</span> <span class="s1">&#39;dip&#39;</span><span class="p">,</span> <span class="n">dip</span><span class="p">)</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">dctx</span><span class="p">,</span> <span class="s1">&#39;rx&#39;</span><span class="p">,</span> <span class="n">rx</span><span class="p">)</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">dctx</span><span class="p">,</span> <span class="s1">&#39;rrup&#39;</span><span class="p">,</span> <span class="n">rrup</span><span class="p">)</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">dctx</span><span class="p">,</span> <span class="s1">&#39;ry0&#39;</span><span class="p">,</span> <span class="n">ry</span><span class="p">)</span>
+    <span class="n">z1pt0</span> <span class="o">=</span> <span class="n">z1pt0</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">rjb</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">sctx</span><span class="p">,</span> <span class="s1">&#39;z1pt0&#39;</span><span class="p">,</span> <span class="n">z1pt0</span><span class="p">)</span>
+    <span class="n">z2pt5</span> <span class="o">=</span> <span class="n">z2pt5</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">rjb</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">sctx</span><span class="p">,</span> <span class="s1">&#39;z2pt5&#39;</span><span class="p">,</span> <span class="n">z2pt5</span><span class="p">)</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">sctx</span><span class="p">,</span> <span class="s1">&#39;vs30measured&#39;</span><span class="p">,</span> <span class="n">vs30measured</span><span class="p">)</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">rctx</span><span class="p">,</span> <span class="s1">&#39;mag&#39;</span><span class="p">,</span> <span class="n">mag</span><span class="p">)</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">rctx</span><span class="p">,</span> <span class="s1">&#39;hypo_depth&#39;</span><span class="p">,</span> <span class="n">z_hyp</span><span class="p">)</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">rctx</span><span class="p">,</span> <span class="s1">&#39;rake&#39;</span><span class="p">,</span> <span class="n">rake</span><span class="p">)</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">dctx</span><span class="p">,</span> <span class="s1">&#39;rjb&#39;</span><span class="p">,</span> <span class="n">rjb</span><span class="p">)</span>
+    <span class="n">vs30</span> <span class="o">=</span> <span class="n">vs30</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">rjb</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">sctx</span><span class="p">,</span> <span class="s1">&#39;vs30&#39;</span><span class="p">,</span> <span class="n">vs30</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">bgmpe</span><span class="p">,</span> <span class="n">sctx</span><span class="p">,</span> <span class="n">rctx</span><span class="p">,</span> <span class="n">dctx</span><span class="p">,</span> <span class="n">vs30</span><span class="p">,</span> <span class="n">rrup</span>
+
+
+<span class="k">def</span> <span class="nf">compute_source_params</span><span class="p">(</span><span class="n">mag</span><span class="p">,</span> <span class="n">z_hyp_input</span><span class="p">,</span> <span class="n">dip_input</span><span class="p">,</span> <span class="n">rake</span><span class="p">,</span> <span class="n">upper_sd_input</span><span class="p">,</span>
+                          <span class="n">lower_sd_input</span><span class="p">,</span> <span class="n">azimuth_input</span><span class="p">,</span> <span class="n">fhw</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+    <span class="k">if</span> <span class="n">z_hyp_input</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">-</span><span class="mi">45</span> <span class="o">&lt;=</span> <span class="n">rake</span> <span class="o">&lt;=</span> <span class="mi">45</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">rake</span> <span class="o">&gt;=</span> <span class="mi">135</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">rake</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="mi">135</span><span class="p">):</span>
+            <span class="n">z_hyp</span> <span class="o">=</span> <span class="mf">5.63</span> <span class="o">+</span> <span class="mf">0.68</span> <span class="o">*</span> <span class="n">mag</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">z_hyp</span> <span class="o">=</span> <span class="mf">11.24</span> <span class="o">-</span> <span class="mf">0.2</span> <span class="o">*</span> <span class="n">mag</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">z_hyp</span> <span class="o">=</span> <span class="n">z_hyp_input</span>
+
+    <span class="k">if</span> <span class="n">dip_input</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">-</span><span class="mi">45</span> <span class="o">&lt;=</span> <span class="n">rake</span> <span class="o">&lt;=</span> <span class="mi">45</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">rake</span> <span class="o">&gt;=</span> <span class="mi">135</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">rake</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="mi">135</span><span class="p">):</span>
+            <span class="n">dip</span> <span class="o">=</span> <span class="mi">90</span>
+        <span class="k">elif</span> <span class="n">rake</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">dip</span> <span class="o">=</span> <span class="mi">40</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dip</span> <span class="o">=</span> <span class="mi">50</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dip</span> <span class="o">=</span> <span class="n">dip_input</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="o">-</span><span class="mi">45</span> <span class="o">&lt;=</span> <span class="n">rake</span> <span class="o">&lt;=</span> <span class="mi">45</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">rake</span> <span class="o">&gt;=</span> <span class="mi">135</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">rake</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="mi">135</span><span class="p">):</span>
+        <span class="c1"># strike slip</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="mf">10.0</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.76</span> <span class="o">+</span> <span class="mf">0.27</span> <span class="o">*</span> <span class="n">mag</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">rake</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># thrust/reverse</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="mf">10.0</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.61</span> <span class="o">+</span> <span class="mf">0.41</span> <span class="o">*</span> <span class="n">mag</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># normal</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="mf">10.0</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.14</span> <span class="o">+</span> <span class="mf">0.35</span> <span class="o">*</span> <span class="n">mag</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">upper_sd_input</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">upper_sd</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">upper_sd</span> <span class="o">=</span> <span class="n">upper_sd_input</span>
+
+    <span class="k">if</span> <span class="n">lower_sd_input</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">lower_sd</span> <span class="o">=</span> <span class="mi">500</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">lower_sd</span> <span class="o">=</span> <span class="n">lower_sd_input</span>
+
+    <span class="n">source_vertical_width</span> <span class="o">=</span> <span class="n">width</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">dip</span><span class="p">))</span>
+    <span class="n">ztor</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">z_hyp</span> <span class="o">-</span> <span class="mf">0.6</span> <span class="o">*</span> <span class="n">source_vertical_width</span><span class="p">,</span> <span class="n">upper_sd</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">ztor</span> <span class="o">+</span> <span class="n">source_vertical_width</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">lower_sd</span><span class="p">:</span>
+        <span class="n">source_vertical_width</span> <span class="o">=</span> <span class="n">lower_sd</span> <span class="o">-</span> <span class="n">ztor</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="n">source_vertical_width</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">dip</span><span class="p">))</span>
+
+    <span class="n">azimuth</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">azimuth_input</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">fhw</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">azimuth</span> <span class="o">=</span> <span class="mi">50</span>
+        <span class="k">elif</span> <span class="n">fhw</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">azimuth</span> <span class="o">=</span> <span class="o">-</span><span class="mi">50</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">azimuth</span> <span class="o">=</span> <span class="n">azimuth_input</span>
+
+    <span class="k">return</span> <span class="n">dip</span><span class="p">,</span> <span class="n">z_hyp</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">ztor</span><span class="p">,</span> <span class="n">azimuth</span>
+
+
+<div class="viewcode-block" id="compute_dists"><a class="viewcode-back" href="../../haselrec.html#haselrec.compute_dists">[docs]</a><span class="k">def</span> <span class="nf">compute_dists</span><span class="p">(</span><span class="n">rjb</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">z_hyp_input</span><span class="p">,</span> <span class="n">dip_input</span><span class="p">,</span> <span class="n">rake</span><span class="p">,</span> <span class="n">upper_sd_input</span><span class="p">,</span>
+                  <span class="n">lower_sd_input</span><span class="p">,</span> <span class="n">azimuth_input</span><span class="p">,</span> <span class="n">fhw</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+    <span class="n">dip</span><span class="p">,</span> <span class="n">z_hyp</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">ztor</span><span class="p">,</span> <span class="n">azimuth</span> <span class="o">=</span> <span class="n">compute_source_params</span><span class="p">(</span><span class="n">mag</span><span class="p">,</span> <span class="n">z_hyp_input</span><span class="p">,</span>
+                                                             <span class="n">dip_input</span><span class="p">,</span> <span class="n">rake</span><span class="p">,</span>
+                                                             <span class="n">upper_sd_input</span><span class="p">,</span>
+                                                             <span class="n">lower_sd_input</span><span class="p">,</span>
+                                                             <span class="n">azimuth_input</span><span class="p">,</span> <span class="n">fhw</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">rjb</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">rx</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">width</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">dip</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dip</span> <span class="o">==</span> <span class="mi">90</span><span class="p">:</span>
+            <span class="n">rx</span> <span class="o">=</span> <span class="n">rjb</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">azimuth</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">azimuth</span> <span class="o">&lt;</span> <span class="mi">90</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+                    <span class="mi">90</span> <span class="o">&lt;</span> <span class="n">azimuth</span> <span class="o">&lt;=</span> <span class="mi">180</span><span class="p">):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">rjb</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">azimuth</span><span class="p">)))</span> <span class="o">&lt;=</span> <span class="n">width</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">dip</span><span class="p">))):</span>
+                    <span class="n">rx</span> <span class="o">=</span> <span class="n">rjb</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">azimuth</span><span class="p">)))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">rx</span> <span class="o">=</span> <span class="n">rjb</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">azimuth</span><span class="p">))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">azimuth</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span>
+                            <span class="n">width</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">dip</span><span class="p">))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span>
+                                <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">azimuth</span><span class="p">))</span> <span class="o">/</span> <span class="n">rjb</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">azimuth</span> <span class="o">==</span> <span class="mi">90</span><span class="p">:</span>  <span class="c1"># we assume that Rjb&gt;0</span>
+                <span class="n">rx</span> <span class="o">=</span> <span class="n">rjb</span> <span class="o">+</span> <span class="n">width</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">dip</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">rx</span> <span class="o">=</span> <span class="n">rjb</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">azimuth</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">azimuth</span> <span class="o">==</span> <span class="mi">90</span> <span class="ow">or</span> <span class="n">azimuth</span> <span class="o">==</span> <span class="o">-</span><span class="mi">90</span><span class="p">:</span>
+        <span class="n">ry</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">elif</span> <span class="n">azimuth</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">azimuth</span> <span class="o">==</span> <span class="mi">180</span> <span class="ow">or</span> <span class="n">azimuth</span> <span class="o">==</span> <span class="o">-</span><span class="mi">180</span><span class="p">:</span>
+        <span class="n">ry</span> <span class="o">=</span> <span class="n">rjb</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ry</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">rx</span> <span class="o">*</span> <span class="mf">1.</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">azimuth</span><span class="p">)))</span>
+
+    <span class="k">if</span> <span class="n">dip</span> <span class="o">==</span> <span class="mi">90</span><span class="p">:</span>
+        <span class="n">rrup</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">rjb</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">ztor</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">rrup1</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">rx</span> <span class="o">&lt;</span> <span class="n">ztor</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">dip</span><span class="p">)):</span>
+            <span class="n">rrup1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">rx</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">ztor</span><span class="p">))</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">ztor</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">dip</span><span class="p">))</span> <span class="o">&lt;=</span> <span class="n">rx</span> <span class="o">&lt;=</span> <span class="n">ztor</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">dip</span><span class="p">))</span> <span class="o">+</span> <span class="n">width</span> <span class="o">*</span> <span class="mf">1.</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">dip</span><span class="p">))):</span>
+            <span class="n">rrup1</span> <span class="o">=</span> <span class="n">rx</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">dip</span><span class="p">))</span> <span class="o">+</span> <span class="n">ztor</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">dip</span><span class="p">))</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">rx</span> <span class="o">&gt;</span> <span class="n">ztor</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">dip</span><span class="p">))</span> <span class="o">+</span> <span class="n">width</span> <span class="o">*</span> <span class="mf">1.</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">dip</span><span class="p">))):</span>
+            <span class="n">rrup1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">rx</span> <span class="o">-</span> <span class="n">width</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">dip</span><span class="p">)))</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span>
+                    <span class="n">ztor</span> <span class="o">+</span> <span class="n">width</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">dip</span><span class="p">))))</span>
+        <span class="n">rrup</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">rrup1</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">ry</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">rx</span><span class="p">,</span> <span class="n">rrup</span><span class="p">,</span> <span class="n">ry</span></div>
+
+
+<span class="k">def</span> <span class="nf">compute_soil_params</span><span class="p">(</span><span class="n">vs30_input</span><span class="p">,</span> <span class="n">z2pt5_input</span><span class="p">,</span> <span class="n">z1pt0_input</span><span class="p">,</span> <span class="n">gmpe_input</span><span class="p">,</span>
+                        <span class="n">vs30type</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+    <span class="n">vs30</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">vs30_input</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+
+    <span class="n">vs30measured</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">vs30type</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;inferred&#39;</span><span class="p">:</span>
+        <span class="n">vs30measured</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">z1pt0</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">z1pt0_input</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">gmpe_input</span> <span class="o">==</span> <span class="s1">&#39;AbrahamsonEtAl2014&#39;</span> <span class="ow">or</span> \
+                <span class="p">((</span><span class="n">gmpe_input</span> <span class="o">==</span> <span class="s1">&#39;CampbellBozorgnia2008&#39;</span> <span class="ow">or</span>
+                  <span class="n">gmpe_input</span> <span class="o">==</span> <span class="s1">&#39;CampbellBozorgnia2014&#39;</span><span class="p">)</span>
+                 <span class="ow">and</span> <span class="n">z2pt5_input</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">vs30</span> <span class="o">&lt;</span> <span class="mi">180</span><span class="p">:</span>
+                <span class="n">z1pt0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mf">6.745</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="mi">180</span> <span class="o">&lt;=</span> <span class="n">vs30</span> <span class="o">&lt;=</span> <span class="mi">500</span><span class="p">:</span>
+                <span class="n">z1pt0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mf">6.745</span> <span class="o">-</span> <span class="mf">1.35</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">vs30</span> <span class="o">/</span> <span class="mi">180</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">z1pt0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mf">5.394</span> <span class="o">-</span> <span class="mf">4.48</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">vs30</span> <span class="o">/</span> <span class="mi">500</span><span class="p">))</span>
+
+        <span class="k">elif</span> <span class="n">gmpe_input</span> <span class="o">==</span> <span class="s1">&#39;ChiouYoungs2014&#39;</span><span class="p">:</span>
+            <span class="n">z1pt0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
+                <span class="mf">28.5</span> <span class="o">-</span> <span class="mf">3.82</span> <span class="o">/</span> <span class="mi">8</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">vs30</span> <span class="o">**</span> <span class="mi">8</span> <span class="o">+</span> <span class="mf">378.7</span> <span class="o">**</span> <span class="mi">8</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">z1pt0</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">z1pt0_input</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+
+    <span class="n">z2pt5</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">gmpe_input</span> <span class="o">==</span> <span class="s1">&#39;CampbellBozorgnia2008&#39;</span> <span class="ow">or</span> \
+            <span class="n">gmpe_input</span> <span class="o">==</span> <span class="s1">&#39;CampbellBozorgnia2014&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">z2pt5_input</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">z2pt5</span> <span class="o">=</span> <span class="mi">519</span> <span class="o">+</span> <span class="mf">3.595</span> <span class="o">*</span> <span class="n">z1pt0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">z2pt5</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">z2pt5_input</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">vs30</span><span class="p">,</span> <span class="n">vs30measured</span><span class="p">,</span> <span class="n">z1pt0</span><span class="p">,</span> <span class="n">z2pt5</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">haselREC</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../haselrec.html">haselREC</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020-2021, Elisa Zuccolo, EUCENTRE Foundation.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

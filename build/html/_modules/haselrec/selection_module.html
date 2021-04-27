@@ -1,0 +1,286 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>haselrec.selection_module &#8212; haselREC  documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for haselrec.selection_module</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (C) 2020-2021 Elisa Zuccolo, Eucentre Foundation</span>
+<span class="c1">#</span>
+<span class="c1"># haselREC is free software: you can redistribute it and/or modify it</span>
+<span class="c1"># under the terms of the GNU Affero General Public License as published</span>
+<span class="c1"># by the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># haselREC is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU Affero General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU Affero General Public License</span>
+<span class="c1"># along with haselREC. If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<div class="viewcode-block" id="selection_module"><a class="viewcode-back" href="../../selection_module.html#haselrec.selection_module.selection_module">[docs]</a><span class="k">def</span> <span class="nf">selection_module</span><span class="p">(</span><span class="n">intensity_measures</span><span class="p">,</span> <span class="n">site_code</span><span class="p">,</span> <span class="n">rlz_code</span><span class="p">,</span>
+                     <span class="n">path_results_classical</span><span class="p">,</span> <span class="n">path_results_disagg</span><span class="p">,</span> <span class="n">num_disagg</span><span class="p">,</span>
+                     <span class="n">num_classical</span><span class="p">,</span> <span class="n">probability_of_exceedance_num</span><span class="p">,</span>
+                     <span class="n">probability_of_exceedance</span><span class="p">,</span> <span class="n">investigation_time</span><span class="p">,</span>
+                     <span class="n">target_periods</span><span class="p">,</span> <span class="n">tstar</span><span class="p">,</span> <span class="n">im_type</span><span class="p">,</span> <span class="n">im_type_lbl</span><span class="p">,</span> <span class="n">avg_periods</span><span class="p">,</span>
+                     <span class="n">corr_type</span><span class="p">,</span> <span class="n">gmpe_input</span><span class="p">,</span> <span class="n">rake</span><span class="p">,</span> <span class="n">vs30_input</span><span class="p">,</span> <span class="n">vs30type</span><span class="p">,</span> <span class="n">hypo_depth</span><span class="p">,</span>
+                     <span class="n">dip</span><span class="p">,</span> <span class="n">azimuth</span><span class="p">,</span> <span class="n">fhw</span><span class="p">,</span> <span class="n">z2pt5</span><span class="p">,</span> <span class="n">z1pt0</span><span class="p">,</span> <span class="n">upper_sd</span><span class="p">,</span> <span class="n">lower_sd</span><span class="p">,</span>
+                     <span class="n">database_path</span><span class="p">,</span> <span class="n">allowed_database</span><span class="p">,</span> <span class="n">allowed_recs_vs30</span><span class="p">,</span>
+                     <span class="n">allowed_ec8_code</span><span class="p">,</span> <span class="n">maxsf_input</span><span class="p">,</span> <span class="n">radius_dist_input</span><span class="p">,</span>
+                     <span class="n">radius_mag_input</span><span class="p">,</span> <span class="n">allowed_depth</span><span class="p">,</span> <span class="n">n_gm</span><span class="p">,</span> <span class="n">random_seed</span><span class="p">,</span>
+                     <span class="n">n_trials</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">n_loop</span><span class="p">,</span> <span class="n">penalty</span><span class="p">,</span> <span class="n">output_folder</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This module is called when mode :code:`--run-selection` is specified.</span>
+
+<span class="sd">    It performs record selection following these steps:</span>
+
+<span class="sd">        1) retrieve conditioning value (:code:`compute_conditioning_value` module)</span>
+<span class="sd">        2) defines all inputs necessary to apply ground motion prediction equations</span>
+<span class="sd">           (:code:`inizialize_gmm` module)</span>
+<span class="sd">        3) screening of the database of candidate ground motion</span>
+<span class="sd">           (:code:`screen_database` module)</span>
+<span class="sd">        4) computation of the target response spectrum distribution</span>
+<span class="sd">           (:code:`compute_cs` module)</span>
+<span class="sd">        5) statistical simulation of response spectra from the target</span>
+<span class="sd">           distribution</span>
+<span class="sd">           (:code:`simulate_spectra` module)</span>
+<span class="sd">        6) selection of ground motions from the database that individually match</span>
+<span class="sd">           the statistically simulated spectra</span>
+<span class="sd">           (:code:`find_ground_motion` module)</span>
+<span class="sd">        7) execution of incremental changes to the initially selected ground</span>
+<span class="sd">           motion set to further optimize its fit to the target spectrum</span>
+<span class="sd">           distribution (:code:`optimize_ground_motion` module)</span>
+<span class="sd">        8) produce output files (3 figures created by :code:`plot_final_selection`</span>
+<span class="sd">           module and 2 `.txt` files created by :code:`create_output_files` modules)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">os</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+    <span class="kn">from</span> <span class="nn">.compute_conditioning_value</span> <span class="kn">import</span> <span class="n">compute_conditioning_value</span>
+    <span class="kn">from</span> <span class="nn">.screen_database</span> <span class="kn">import</span> <span class="n">screen_database</span>
+    <span class="kn">from</span> <span class="nn">.simulate_spectra</span> <span class="kn">import</span> <span class="n">simulate_spectra</span>
+    <span class="kn">from</span> <span class="nn">.plot_final_selection</span> <span class="kn">import</span> <span class="n">plot_final_selection</span>
+    <span class="kn">from</span> <span class="nn">.input_GMPE</span> <span class="kn">import</span> <span class="n">inizialize_gmm</span>
+    <span class="kn">from</span> <span class="nn">.create_output_files</span> <span class="kn">import</span> <span class="n">create_output_files</span>
+    <span class="kn">from</span> <span class="nn">.compute_cs</span> <span class="kn">import</span> <span class="n">compute_cs</span>
+    <span class="kn">from</span> <span class="nn">.find_ground_motion</span> <span class="kn">import</span> <span class="n">find_ground_motion</span>
+    <span class="kn">from</span> <span class="nn">.optimize_ground_motion</span> <span class="kn">import</span> <span class="n">optimize_ground_motion</span>
+
+    <span class="c1"># %% Start the routine</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Inputs loaded, starting selection....&#39;</span><span class="p">)</span>
+    <span class="n">ind</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="c1"># For each site investigated</span>
+    <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">site_code</span><span class="p">)):</span>
+
+        <span class="c1"># Get the current site and realisation indices</span>
+        <span class="n">site</span> <span class="o">=</span> <span class="n">site_code</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+        <span class="n">rlz</span> <span class="o">=</span> <span class="n">rlz_code</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+
+        <span class="c1"># For each hazard of poe level investigated</span>
+        <span class="k">for</span> <span class="n">jj</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">probability_of_exceedance_num</span><span class="p">)):</span>
+
+            <span class="n">poe</span> <span class="o">=</span> <span class="n">probability_of_exceedance_num</span><span class="p">[</span><span class="n">jj</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">maxsf_input</span><span class="p">,</span> <span class="s1">&#39;__len__&#39;</span><span class="p">):</span>
+                <span class="n">maxsf</span> <span class="o">=</span> <span class="n">maxsf_input</span><span class="p">[</span><span class="n">jj</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">maxsf</span> <span class="o">=</span> <span class="n">maxsf_input</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">radius_dist_input</span><span class="p">,</span> <span class="s1">&#39;__len__&#39;</span><span class="p">):</span>
+                <span class="n">radius_dist</span> <span class="o">=</span> <span class="n">radius_dist_input</span><span class="p">[</span><span class="n">jj</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">radius_dist</span> <span class="o">=</span> <span class="n">radius_dist_input</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">radius_mag_input</span><span class="p">,</span> <span class="s1">&#39;__len__&#39;</span><span class="p">):</span>
+                <span class="n">radius_mag</span> <span class="o">=</span> <span class="n">radius_mag_input</span><span class="p">[</span><span class="n">jj</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">radius_mag</span> <span class="o">=</span> <span class="n">radius_mag_input</span>
+
+            <span class="c1"># For each intensity measure investigated</span>
+            <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">intensity_measures</span><span class="p">)):</span>
+
+                <span class="n">name</span> <span class="o">=</span> <span class="n">intensity_measures</span><span class="p">[</span><span class="n">im</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;-site_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span>
+                    <span class="n">site</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;-poe-&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">poe</span><span class="p">)</span>
+
+                <span class="c1"># Print some on screen feedback</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Processing &#39;</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; Case: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span>
+                    <span class="nb">len</span><span class="p">(</span><span class="n">site_code</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">probability_of_exceedance_num</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span>
+                        <span class="n">intensity_measures</span><span class="p">)))</span>
+                <span class="n">ind</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                <span class="p">[</span><span class="n">im_star</span><span class="p">,</span> <span class="n">rjb</span><span class="p">,</span> <span class="n">mag</span><span class="p">]</span> <span class="o">=</span> \
+                    <span class="n">compute_conditioning_value</span><span class="p">(</span><span class="n">rlz</span><span class="p">,</span> <span class="n">intensity_measures</span><span class="p">[</span><span class="n">im</span><span class="p">],</span>
+                                               <span class="n">site</span><span class="p">,</span> <span class="n">poe</span><span class="p">,</span> <span class="n">num_disagg</span><span class="p">,</span>
+                                               <span class="n">probability_of_exceedance</span><span class="p">[</span><span class="n">jj</span><span class="p">],</span>
+                                               <span class="n">num_classical</span><span class="p">,</span>
+                                               <span class="n">path_results_disagg</span><span class="p">,</span>
+                                               <span class="n">investigation_time</span><span class="p">,</span>
+                                               <span class="n">path_results_classical</span><span class="p">)</span>
+
+                <span class="p">[</span><span class="n">bgmpe</span><span class="p">,</span> <span class="n">sctx</span><span class="p">,</span> <span class="n">rctx</span><span class="p">,</span> <span class="n">dctx</span><span class="p">,</span> <span class="n">vs30</span><span class="p">,</span> <span class="n">rrup</span><span class="p">]</span> <span class="o">=</span> \
+                    <span class="n">inizialize_gmm</span><span class="p">(</span><span class="n">ii</span><span class="p">,</span> <span class="n">gmpe_input</span><span class="p">,</span> <span class="n">rjb</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">hypo_depth</span><span class="p">,</span> <span class="n">dip</span><span class="p">,</span>
+                                   <span class="n">rake</span><span class="p">,</span> <span class="n">upper_sd</span><span class="p">,</span> <span class="n">lower_sd</span><span class="p">,</span> <span class="n">azimuth</span><span class="p">,</span> <span class="n">fhw</span><span class="p">,</span>
+                                   <span class="n">vs30type</span><span class="p">,</span> <span class="n">vs30_input</span><span class="p">,</span> <span class="n">z2pt5</span><span class="p">,</span> <span class="n">z1pt0</span><span class="p">)</span>
+
+                <span class="c1"># Screen the database of available ground motions</span>
+
+                <span class="p">[</span><span class="n">sa_known</span><span class="p">,</span> <span class="n">ind_per</span><span class="p">,</span> <span class="n">tgt_per</span><span class="p">,</span> <span class="n">n_big</span><span class="p">,</span> <span class="n">allowed_index</span><span class="p">,</span> <span class="n">event_id</span><span class="p">,</span>
+                 <span class="n">station_code</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">record_sequence_number_nga</span><span class="p">,</span> <span class="n">event_mw</span><span class="p">,</span>
+                 <span class="n">event_mag</span><span class="p">,</span> <span class="n">acc_distance</span><span class="p">,</span> <span class="n">station_vs30</span><span class="p">,</span> <span class="n">station_ec8</span><span class="p">]</span> <span class="o">=</span> \
+                    <span class="n">screen_database</span><span class="p">(</span><span class="n">database_path</span><span class="p">,</span> <span class="n">allowed_database</span><span class="p">,</span>
+                                    <span class="n">allowed_recs_vs30</span><span class="p">,</span> <span class="n">radius_dist</span><span class="p">,</span> <span class="n">radius_mag</span><span class="p">,</span>
+                                    <span class="n">rjb</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">allowed_ec8_code</span><span class="p">,</span>
+                                    <span class="n">target_periods</span><span class="p">,</span> <span class="n">n_gm</span><span class="p">,</span> <span class="n">allowed_depth</span><span class="p">,</span> <span class="n">vs30</span><span class="p">)</span>
+
+                <span class="c1"># Compute the target spectrum</span>
+
+                <span class="p">[</span><span class="n">mean_req</span><span class="p">,</span> <span class="n">cov_req</span><span class="p">,</span> <span class="n">stdevs</span><span class="p">]</span> <span class="o">=</span> \
+                    <span class="n">compute_cs</span><span class="p">(</span><span class="n">tgt_per</span><span class="p">,</span> <span class="n">bgmpe</span><span class="p">,</span> <span class="n">sctx</span><span class="p">,</span> <span class="n">rctx</span><span class="p">,</span> <span class="n">dctx</span><span class="p">,</span> <span class="n">im_type</span><span class="p">[</span><span class="n">im</span><span class="p">],</span>
+                               <span class="n">tstar</span><span class="p">[</span><span class="n">im</span><span class="p">],</span> <span class="n">rrup</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">avg_periods</span><span class="p">,</span> <span class="n">corr_type</span><span class="p">,</span>
+                               <span class="n">im_star</span><span class="p">,</span> <span class="n">gmpe_input</span><span class="p">)</span>
+
+                <span class="n">simulated_spectra</span> <span class="o">=</span> <span class="n">simulate_spectra</span><span class="p">(</span><span class="n">random_seed</span><span class="p">,</span>
+                                                     <span class="n">n_trials</span><span class="p">,</span>
+                                                     <span class="n">mean_req</span><span class="p">,</span>
+                                                     <span class="n">cov_req</span><span class="p">,</span>
+                                                     <span class="n">stdevs</span><span class="p">,</span>
+                                                     <span class="n">n_gm</span><span class="p">,</span>
+                                                     <span class="n">weights</span><span class="p">)</span>
+
+                <span class="p">[</span><span class="n">sample_small</span><span class="p">,</span> <span class="n">sample_big</span><span class="p">,</span> <span class="n">id_sel</span><span class="p">,</span> <span class="n">ln_sa1</span><span class="p">,</span>
+                 <span class="n">rec_id</span><span class="p">,</span> <span class="n">im_scale_fac</span><span class="p">]</span> <span class="o">=</span> \
+                    <span class="n">find_ground_motion</span><span class="p">(</span><span class="n">tgt_per</span><span class="p">,</span> <span class="n">tstar</span><span class="p">[</span><span class="n">im</span><span class="p">],</span> <span class="n">avg_periods</span><span class="p">,</span>
+                                       <span class="n">intensity_measures</span><span class="p">[</span><span class="n">im</span><span class="p">],</span> <span class="n">n_gm</span><span class="p">,</span>
+                                       <span class="n">sa_known</span><span class="p">,</span> <span class="n">ind_per</span><span class="p">,</span> <span class="n">mean_req</span><span class="p">,</span>
+                                       <span class="n">n_big</span><span class="p">,</span> <span class="n">simulated_spectra</span><span class="p">,</span> <span class="n">maxsf</span><span class="p">)</span>
+
+                <span class="c1"># Further optimize the ground motion selection</span>
+
+                <span class="p">[</span><span class="n">final_records</span><span class="p">,</span> <span class="n">final_scale_factors</span><span class="p">,</span> <span class="n">sample_small</span><span class="p">]</span> <span class="o">=</span> \
+                    <span class="n">optimize_ground_motion</span><span class="p">(</span><span class="n">n_loop</span><span class="p">,</span> <span class="n">n_gm</span><span class="p">,</span> <span class="n">sample_small</span><span class="p">,</span> <span class="n">n_big</span><span class="p">,</span>
+                                             <span class="n">id_sel</span><span class="p">,</span> <span class="n">ln_sa1</span><span class="p">,</span> <span class="n">maxsf</span><span class="p">,</span> <span class="n">sample_big</span><span class="p">,</span>
+                                             <span class="n">tgt_per</span><span class="p">,</span> <span class="n">mean_req</span><span class="p">,</span> <span class="n">stdevs</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span>
+                                             <span class="n">penalty</span><span class="p">,</span> <span class="n">rec_id</span><span class="p">,</span>
+                                             <span class="n">im_scale_fac</span><span class="p">)</span>
+
+                <span class="c1"># Create the outputs folder</span>
+                <span class="n">folder</span> <span class="o">=</span> <span class="n">output_folder</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">name</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">folder</span><span class="p">):</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
+
+                <span class="c1"># Plot the figure</span>
+                <span class="n">plot_final_selection</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">im_type_lbl</span><span class="p">[</span><span class="n">im</span><span class="p">],</span> <span class="n">n_gm</span><span class="p">,</span> <span class="n">tgt_per</span><span class="p">,</span>
+                                     <span class="n">sample_small</span><span class="p">,</span> <span class="n">mean_req</span><span class="p">,</span> <span class="n">stdevs</span><span class="p">,</span>
+                                     <span class="n">output_folder</span><span class="p">)</span>
+
+                <span class="c1"># Collect information of the final record set</span>
+                <span class="n">rec_idx</span> <span class="o">=</span> <span class="p">[</span><span class="n">allowed_index</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">final_records</span><span class="p">]</span>
+                <span class="c1"># Create the summary file along with the file with the CS</span>
+                <span class="n">create_output_files</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">im_star</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span>
+                                    <span class="n">rjb</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">n_gm</span><span class="p">,</span> <span class="n">rec_idx</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">event_id</span><span class="p">,</span>
+                                    <span class="n">station_code</span><span class="p">,</span> <span class="n">event_mw</span><span class="p">,</span> <span class="n">acc_distance</span><span class="p">,</span>
+                                    <span class="n">station_vs30</span><span class="p">,</span> <span class="n">station_ec8</span><span class="p">,</span>
+                                    <span class="n">final_scale_factors</span><span class="p">,</span> <span class="n">tgt_per</span><span class="p">,</span> <span class="n">mean_req</span><span class="p">,</span>
+                                    <span class="n">stdevs</span><span class="p">,</span> <span class="n">record_sequence_number_nga</span><span class="p">,</span>
+                                    <span class="n">event_mag</span><span class="p">)</span>
+
+    <span class="k">return</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">haselREC</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../haselrec.html">haselREC</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020-2021, Elisa Zuccolo, EUCENTRE Foundation.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

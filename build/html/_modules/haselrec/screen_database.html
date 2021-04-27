@@ -1,0 +1,300 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>haselrec.screen_database &#8212; haselREC  documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for haselrec.screen_database</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (C) 2020-2021 Elisa Zuccolo, Eucentre Foundation</span>
+<span class="c1">#</span>
+<span class="c1"># haselREC is free software: you can redistribute it and/or modify it</span>
+<span class="c1"># under the terms of the GNU Affero General Public License as published</span>
+<span class="c1"># by the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># haselREC is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU Affero General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU Affero General Public License</span>
+<span class="c1"># along with haselREC. If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<div class="viewcode-block" id="screen_database"><a class="viewcode-back" href="../../screen_database.html#haselrec.screen_database.screen_database">[docs]</a><span class="k">def</span> <span class="nf">screen_database</span><span class="p">(</span><span class="n">database_path</span><span class="p">,</span> <span class="n">allowed_database</span><span class="p">,</span> <span class="n">allowed_recs_vs30</span><span class="p">,</span>
+                    <span class="n">radius_dist</span><span class="p">,</span> <span class="n">radius_mag</span><span class="p">,</span> <span class="n">mean_dist</span><span class="p">,</span> <span class="n">mean_mag</span><span class="p">,</span>
+                    <span class="n">allowed_ec8_code</span><span class="p">,</span> <span class="n">target_periods</span><span class="p">,</span> <span class="n">n_gm</span><span class="p">,</span> <span class="n">allowed_depth</span><span class="p">,</span>
+                    <span class="n">vs30</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Screen the database of candidate ground motion to select only appropriate</span>
+<span class="sd">    ground motions. The screening criteria are:</span>
+
+<span class="sd">        - database (NGAWest2, ESM or both); When both databases are considered,</span>
+<span class="sd">          ground motions from the NGA-West2 database are retained only if</span>
+<span class="sd">          recorded at stations located outside the geographical area covered by</span>
+<span class="sd">          the ESM database;</span>
+<span class="sd">        - magnitude range, defined as a symmetric interval around the mean</span>
+<span class="sd">          magnitude from the disaggregation analysis;</span>
+<span class="sd">        - distance range, defined as a symmetric interval around the mean</span>
+<span class="sd">          distance from the disaggregation analysis;</span>
+<span class="sd">        - range of allowed `vs30`. If not defined, it is set by the code</span>
+<span class="sd">          according to the `vs30` of the site, following the `vs30` limit values</span>
+<span class="sd">          associated to EC8 soil categories;</span>
+<span class="sd">        - range of allowed EC8 codes. If not defined, they are set according to</span>
+<span class="sd">          the vs30 of the site. If both `vs30` and EC8 soil classes criteria are</span>
+<span class="sd">          specified, preference is given to the `vs30`; therefore, EC8 soil</span>
+<span class="sd">          category criterium is considered only if the `vs30` of the station is</span>
+<span class="sd">          not specified;</span>
+<span class="sd">        - range of allowed focal depths;</span>
+<span class="sd">        - only free-field ground motions are retained.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Import libraries</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+    <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+    <span class="n">known_per</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.025</span><span class="p">,</span> <span class="mf">0.04</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.07</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span>
+         <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.35</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.45</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span>
+         <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">,</span> <span class="mf">1.4</span><span class="p">,</span> <span class="mf">1.6</span><span class="p">,</span> <span class="mf">1.8</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span>
+         <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+
+    <span class="n">dbacc</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">database_path</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;;&#39;</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;python&#39;</span><span class="p">)</span>
+
+    <span class="n">event_id</span> <span class="o">=</span> <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;event_id&#39;</span><span class="p">]</span>
+    <span class="n">event_mw</span> <span class="o">=</span> <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;Mw&#39;</span><span class="p">]</span>
+    <span class="n">event_mag</span> <span class="o">=</span> <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;M&#39;</span><span class="p">]</span>
+    <span class="n">record_sequence_number_nga</span> <span class="o">=</span> <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;record_sequence_number_NGA&#39;</span><span class="p">]</span>
+    <span class="n">station_ec8</span> <span class="o">=</span> <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;ec8_code&#39;</span><span class="p">]</span>
+    <span class="n">station_vs30</span> <span class="o">=</span> <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;vs30_m_sec&#39;</span><span class="p">]</span>
+    <span class="n">acc_distance</span> <span class="o">=</span> <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;epi_dist&#39;</span><span class="p">]</span>
+    <span class="n">station_code</span> <span class="o">=</span> <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;station_code&#39;</span><span class="p">]</span>
+    <span class="n">event_depth</span> <span class="o">=</span> <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;ev_depth_km&#39;</span><span class="p">]</span>
+    <span class="c1"># sensor_depth = dbacc[&#39;sensor_depth_m&#39;]</span>
+    <span class="n">is_free_field_esm</span> <span class="o">=</span> <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;proximity_code&#39;</span><span class="p">]</span>
+    <span class="n">is_free_field_nga</span> <span class="o">=</span> <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;GMX_first&#39;</span><span class="p">]</span>
+    <span class="n">source</span> <span class="o">=</span> <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;source&#39;</span><span class="p">]</span>
+    <span class="n">epi_lon</span> <span class="o">=</span> <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;epi_lon&#39;</span><span class="p">]</span>
+    <span class="c1"># epi_lat = dbacc[&#39;epi_lat&#39;]</span>
+
+    <span class="n">allowed_recs_d</span> <span class="o">=</span> <span class="p">[</span><span class="n">mean_dist</span> <span class="o">-</span> <span class="n">radius_dist</span><span class="p">,</span> <span class="n">mean_dist</span> <span class="o">+</span> <span class="n">radius_dist</span><span class="p">]</span>
+    <span class="n">allowed_recs_mag</span> <span class="o">=</span> <span class="p">[</span><span class="n">mean_mag</span> <span class="o">-</span> <span class="n">radius_mag</span><span class="p">,</span> <span class="n">mean_mag</span> <span class="o">+</span> <span class="n">radius_mag</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">allowed_recs_vs30</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">vs30</span> <span class="o">&gt;=</span> <span class="mf">800.0</span><span class="p">:</span>
+            <span class="n">allowed_recs_vs30</span> <span class="o">=</span> <span class="p">[</span><span class="mf">800.0</span><span class="p">,</span> <span class="mf">3000.0</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="mf">360.</span> <span class="o">&lt;</span> <span class="n">vs30</span> <span class="o">&lt;</span> <span class="mf">800.</span><span class="p">:</span>
+            <span class="n">allowed_recs_vs30</span> <span class="o">=</span> <span class="p">[</span><span class="mf">360.0</span><span class="p">,</span> <span class="mf">800.0</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">vs30</span> <span class="o">==</span><span class="mf">360.</span><span class="p">:</span>
+            <span class="n">allowed_recs_vs30</span> <span class="o">=</span> <span class="p">[</span><span class="mf">180.0</span><span class="p">,</span> <span class="mf">800.0</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="mf">180.</span> <span class="o">&lt;</span> <span class="n">vs30</span> <span class="o">&lt;</span> <span class="mf">360.</span><span class="p">:</span>
+            <span class="n">allowed_recs_vs30</span> <span class="o">=</span> <span class="p">[</span><span class="mf">180.0</span><span class="p">,</span> <span class="mf">360.0</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">vs30</span> <span class="o">==</span> <span class="mf">180.</span><span class="p">:</span>
+            <span class="n">allowed_recs_vs30</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">360.0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">allowed_recs_vs30</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">180.0</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">allowed_ec8_code</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">vs30</span> <span class="o">&gt;=</span> <span class="mf">800.0</span><span class="p">:</span>
+            <span class="n">allowed_ec8_code</span> <span class="o">=</span> <span class="s1">&#39;A&#39;</span>
+        <span class="k">elif</span> <span class="mf">360.</span> <span class="o">&lt;</span> <span class="n">vs30</span> <span class="o">&lt;</span> <span class="mf">800.</span><span class="p">:</span>
+            <span class="n">allowed_ec8_code</span> <span class="o">=</span> <span class="s1">&#39;B&#39;</span>
+        <span class="k">elif</span> <span class="n">vs30</span> <span class="o">==</span><span class="mf">360.</span><span class="p">:</span>
+            <span class="n">allowed_ec8_code</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="mf">180.</span> <span class="o">&lt;</span> <span class="n">vs30</span> <span class="o">&lt;</span> <span class="mf">360.</span><span class="p">:</span>
+            <span class="n">allowed_ec8_code</span> <span class="o">=</span> <span class="s1">&#39;C&#39;</span>
+        <span class="k">elif</span> <span class="n">vs30</span> <span class="o">==</span> <span class="mf">180.</span><span class="p">:</span>
+            <span class="n">allowed_ec8_code</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">allowed_ec8_code</span> <span class="o">=</span> <span class="s1">&#39;D&#39;</span>
+
+    <span class="c1"># Match periods (known periods and target periods for error computations) </span>
+    <span class="c1"># save the indices of the matched periods in known_per</span>
+    <span class="n">ind_per</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">target_periods</span><span class="p">),</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">target_periods</span><span class="p">)):</span>
+        <span class="n">ind_per</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">known_per</span> <span class="o">-</span> <span class="n">target_periods</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+
+    <span class="c1"># Remove any repeated values from TgtPer and redefine TgtPer as periods </span>
+    <span class="c1"># provided in databases</span>
+    <span class="n">ind_per</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">ind_per</span><span class="p">)</span>
+    <span class="n">rec_per</span> <span class="o">=</span> <span class="n">known_per</span><span class="p">[</span><span class="n">ind_per</span><span class="p">]</span>
+
+    <span class="n">sa_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">allowed_index</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">event_id</span><span class="p">)):</span>
+        <span class="n">rotd50</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_pga&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T0_010&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span>
+                           <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T0_025&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T0_040&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span>
+                           <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T0_050&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T0_070&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span>
+                           <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T0_100&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T0_150&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span>
+                           <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T0_200&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T0_250&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span>
+                           <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T0_300&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T0_350&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span>
+                           <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T0_400&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T0_450&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span>
+                           <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T0_500&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T0_600&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span>
+                           <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T0_700&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T0_750&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span>
+                           <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T0_800&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T0_900&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span>
+                           <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T1_000&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T1_200&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span>
+                           <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T1_400&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T1_600&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span>
+                           <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T1_800&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T2_000&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span>
+                           <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T2_500&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T3_000&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span>
+                           <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T3_500&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T4_000&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span>
+                           <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T5_000&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T6_000&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span>
+                           <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T7_000&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T8_000&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span>
+                           <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T9_000&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span>
+                           <span class="n">dbacc</span><span class="p">[</span><span class="s1">&#39;rotD50_T10_000&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]])</span>
+        <span class="n">sa_geo</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">source</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;ESM&#39;</span><span class="p">:</span>
+            <span class="n">sa_geo</span> <span class="o">=</span> <span class="n">rotd50</span> <span class="o">/</span> <span class="mi">981</span>  <span class="c1"># in g</span>
+        <span class="k">if</span> <span class="n">source</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;NGA-West2&#39;</span><span class="p">:</span>
+            <span class="n">sa_geo</span> <span class="o">=</span> <span class="n">rotd50</span>  <span class="c1"># already in g</span>
+        <span class="n">sa_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sa_geo</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">v</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">sa_geo</span><span class="p">):</span>
+            <span class="c1"># print(&#39;Need to test if the screening of database is ok&#39;)</span>
+            <span class="k">if</span> <span class="n">source</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="n">allowed_database</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">source</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;ESM&#39;</span> <span class="ow">and</span> <span class="n">is_free_field_esm</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> \
+                        <span class="p">(</span><span class="n">source</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;NGA-West2&#39;</span> <span class="ow">and</span>
+                         <span class="n">is_free_field_nga</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;I&quot;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="p">((</span><span class="n">source</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;ESM&#39;</span> <span class="ow">and</span>
+                         <span class="n">allowed_recs_mag</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">event_mw</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span>
+                         <span class="n">allowed_recs_mag</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="ow">or</span>
+                            <span class="p">(</span><span class="n">source</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;NGA-West2&#39;</span> <span class="ow">and</span>
+                             <span class="n">allowed_recs_mag</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">event_mag</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span>
+                             <span class="n">allowed_recs_mag</span><span class="p">[</span><span class="mi">1</span><span class="p">])):</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">allowed_depth</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">event_depth</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span>
+                                <span class="n">allowed_depth</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                            <span class="k">if</span> <span class="p">(</span><span class="n">allowed_recs_d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">acc_distance</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span>
+                                    <span class="n">allowed_recs_d</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">station_vs30</span><span class="p">[</span><span class="n">i</span><span class="p">]):</span>
+                                    <span class="k">if</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">isnull</span><span class="p">(</span><span class="n">station_ec8</span><span class="p">[</span><span class="n">i</span><span class="p">]):</span>
+                                        <span class="k">if</span> <span class="p">(</span><span class="n">station_ec8</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span>
+                                                <span class="n">allowed_ec8_code</span> <span class="ow">or</span>
+                                                <span class="n">allowed_ec8_code</span> <span class="o">==</span> <span class="s1">&#39;All&#39;</span><span class="p">):</span>
+                                            <span class="k">if</span> <span class="n">source</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;ESM&#39;</span><span class="p">:</span>
+                                                <span class="n">allowed_index</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                                            <span class="k">if</span> <span class="n">source</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;NGA-West2&#39;</span><span class="p">:</span>
+                                                <span class="k">if</span> <span class="s1">&#39;ESM&#39;</span> <span class="ow">in</span> <span class="n">allowed_database</span><span class="p">:</span>
+                                                    <span class="k">if</span> <span class="p">(</span><span class="n">epi_lon</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">31</span> <span class="ow">or</span>
+                                                            <span class="n">epi_lon</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">70</span><span class="p">):</span>
+                                                        <span class="n">allowed_index</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                                                <span class="k">else</span><span class="p">:</span>
+                                                    <span class="n">allowed_index</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="k">if</span> <span class="p">(</span><span class="n">allowed_recs_vs30</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">station_vs30</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                                            <span class="o">&lt;</span> <span class="n">allowed_recs_vs30</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                                        <span class="k">if</span> <span class="n">source</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;ESM&#39;</span><span class="p">:</span>
+                                            <span class="n">allowed_index</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                                        <span class="k">if</span> <span class="n">source</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;NGA-West2&#39;</span><span class="p">:</span>
+                                            <span class="k">if</span> <span class="s1">&#39;ESM&#39;</span> <span class="ow">in</span> <span class="n">allowed_database</span><span class="p">:</span>
+                                                <span class="k">if</span> <span class="p">(</span><span class="n">epi_lon</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">31</span> <span class="ow">or</span>
+                                                        <span class="n">epi_lon</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">70</span><span class="p">):</span>
+                                                    <span class="n">allowed_index</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                                            <span class="k">else</span><span class="p">:</span>
+                                                <span class="n">allowed_index</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+    <span class="n">sa</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">sa_list</span><span class="p">)</span>
+    <span class="n">sa_known</span> <span class="o">=</span> <span class="n">sa</span><span class="p">[</span><span class="n">allowed_index</span><span class="p">]</span>
+
+    <span class="c1"># count number of allowed spectra</span>
+    <span class="n">n_big</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">allowed_index</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">([</span><span class="s1">&#39;Number of allowed ground motions = &#39;</span><span class="p">,</span> <span class="n">n_big</span><span class="p">])</span>
+    <span class="k">assert</span> <span class="p">(</span><span class="n">n_big</span> <span class="o">&gt;=</span> <span class="n">n_gm</span><span class="p">),</span> \
+        <span class="s1">&#39;Warning: there are not enough allowable ground motions&#39;</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">sa_known</span><span class="p">,</span> <span class="n">ind_per</span><span class="p">,</span> <span class="n">rec_per</span><span class="p">,</span> <span class="n">n_big</span><span class="p">,</span> <span class="n">allowed_index</span><span class="p">,</span> <span class="n">event_id</span><span class="p">,</span>
+            <span class="n">station_code</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">record_sequence_number_nga</span><span class="p">,</span> <span class="n">event_mw</span><span class="p">,</span>
+            <span class="n">event_mag</span><span class="p">,</span> <span class="n">acc_distance</span><span class="p">,</span> <span class="n">station_vs30</span><span class="p">,</span> <span class="n">station_ec8</span><span class="p">]</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">haselREC</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../haselrec.html">haselREC</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020-2021, Elisa Zuccolo, EUCENTRE Foundation.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

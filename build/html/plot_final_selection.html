@@ -1,0 +1,159 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Output files: plots &#8212; haselREC  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Output files: txt" href="create_output_files.html" />
+    <link rel="prev" title="Optimize Ground Motion" href="optimize_ground_motion.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-haselrec.plot_final_selection">
+<span id="output-files-plots"></span><h1>Output files: plots<a class="headerlink" href="#module-haselrec.plot_final_selection" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="haselrec.plot_final_selection.plot_final_selection">
+<code class="descclassname">haselrec.plot_final_selection.</code><code class="descname">plot_final_selection</code><span class="sig-paren">(</span><em>name</em>, <em>lbl</em>, <em>n_gm</em>, <em>t_cs</em>, <em>sample_small</em>, <em>mean_req</em>, <em>stdevs</em>, <em>output_folder</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/haselrec/plot_final_selection.html#plot_final_selection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#haselrec.plot_final_selection.plot_final_selection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Three plots are generated:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span><span class="n">IM</span><span class="o">&gt;-</span><span class="n">site_</span><span class="o">&lt;</span><span class="n">num_site</span><span class="o">&gt;-</span><span class="n">poe</span><span class="o">-&lt;</span><span class="n">num_poe</span><span class="o">&gt;</span><span class="n">_spectra</span><span class="o">.</span><span class="n">pdf</span>
+<span class="mi">2</span><span class="p">)</span> <span class="o">&lt;</span><span class="n">IM</span><span class="o">&gt;-</span><span class="n">site_</span><span class="o">&lt;</span><span class="n">num_site</span><span class="o">&gt;-</span><span class="n">poe</span><span class="o">-&lt;</span><span class="n">num_poe</span><span class="o">&gt;</span><span class="n">_spectra_gms</span><span class="o">.</span><span class="n">pdf</span>
+<span class="mi">3</span><span class="p">)</span> <span class="o">&lt;</span><span class="n">IM</span><span class="o">&gt;-</span><span class="n">site_</span><span class="o">&lt;</span><span class="n">num_site</span><span class="o">&gt;-</span><span class="n">poe</span><span class="o">-&lt;</span><span class="n">num_poe</span><span class="o">&gt;</span><span class="n">_dispersion</span><span class="o">.</span><span class="n">pdf</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>where:</dt>
+<dd><ul class="first last simple">
+<li><cite>&lt;IM&gt;</cite> is the required intensity measure</li>
+<li><cite>&lt;num_site&gt;</cite> is the site number</li>
+<li><cite>&lt;num_poe&gt;</cite> is the probability of exceedance number</li>
+</ul>
+</dd>
+</dl>
+<p>The plots represent:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>the response spectra of selected ground motions (<code class="code docutils literal notranslate"><span class="pre">nGM</span></code>
+green lines) and their distribution (black lines), and the target
+conditional spectrum (red lines). Solid lines: average spectrum,
+dashed lines: average spectrum values plus and minus 2 standard
+deviations.</li>
+<li>the distribution of the response spectra of selected ground
+motions (black lines), and the target conditional spectrum
+(red lines). Solid lines: average spectrum, dashed lines: average
+spectrum values plus and minus 2 standard deviations.</li>
+<li>the dispersion of the response spectra of selected ground
+motions (black line) and the dispersion of the target conditional
+spectrum (red lines).</li>
+</ol>
+</div></blockquote>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">haselREC</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="haselrec.html">haselREC</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="input_data.html">Input data</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="selection_module.html">Selection Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scaling_module.html">Scaling Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="check_module.html">Check Module</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="haselrec.html">haselREC</a><ul>
+  <li><a href="selection_module.html">Selection Module</a><ul>
+      <li>Previous: <a href="optimize_ground_motion.html" title="previous chapter">Optimize Ground Motion</a></li>
+      <li>Next: <a href="create_output_files.html" title="next chapter">Output files: txt</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020-2021, Elisa Zuccolo, EUCENTRE Foundation.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/plot_final_selection.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,163 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Selection Module &#8212; haselREC  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Compute conditioning value" href="compute_conditioning_value.html" />
+    <link rel="prev" title="Input data" href="input_data.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="selection-module">
+<h1>Selection Module<a class="headerlink" href="#selection-module" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="compute_conditioning_value.html">Compute conditioning value</a></li>
+<li class="toctree-l1"><a class="reference internal" href="screen_database.html">Screen Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulate_spectra.html">Simulate Spectra</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inizialize_GMM.html">Input GMM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compute_cs.html">Compute CS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="find_ground_motion.html">Find Ground Motion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optimize_ground_motion.html">Optimize Ground Motion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_final_selection.html">Output files: plots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="create_output_files.html">Output files: txt</a></li>
+</ul>
+</div>
+<span class="target" id="module-haselrec.selection_module"></span><dl class="function">
+<dt id="haselrec.selection_module.selection_module">
+<code class="descclassname">haselrec.selection_module.</code><code class="descname">selection_module</code><span class="sig-paren">(</span><em>intensity_measures</em>, <em>site_code</em>, <em>rlz_code</em>, <em>path_results_classical</em>, <em>path_results_disagg</em>, <em>num_disagg</em>, <em>num_classical</em>, <em>probability_of_exceedance_num</em>, <em>probability_of_exceedance</em>, <em>investigation_time</em>, <em>target_periods</em>, <em>tstar</em>, <em>im_type</em>, <em>im_type_lbl</em>, <em>avg_periods</em>, <em>corr_type</em>, <em>gmpe_input</em>, <em>rake</em>, <em>vs30_input</em>, <em>vs30type</em>, <em>hypo_depth</em>, <em>dip</em>, <em>azimuth</em>, <em>fhw</em>, <em>z2pt5</em>, <em>z1pt0</em>, <em>upper_sd</em>, <em>lower_sd</em>, <em>database_path</em>, <em>allowed_database</em>, <em>allowed_recs_vs30</em>, <em>allowed_ec8_code</em>, <em>maxsf_input</em>, <em>radius_dist_input</em>, <em>radius_mag_input</em>, <em>allowed_depth</em>, <em>n_gm</em>, <em>random_seed</em>, <em>n_trials</em>, <em>weights</em>, <em>n_loop</em>, <em>penalty</em>, <em>output_folder</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/haselrec/selection_module.html#selection_module"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#haselrec.selection_module.selection_module" title="Permalink to this definition">¶</a></dt>
+<dd><p>This module is called when mode <code class="code docutils literal notranslate"><span class="pre">--run-selection</span></code> is specified.</p>
+<p>It performs record selection following these steps:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>retrieve conditioning value (<code class="code docutils literal notranslate"><span class="pre">compute_conditioning_value</span></code> module)</li>
+<li>defines all inputs necessary to apply ground motion prediction equations
+(<code class="code docutils literal notranslate"><span class="pre">inizialize_gmm</span></code> module)</li>
+<li>screening of the database of candidate ground motion
+(<code class="code docutils literal notranslate"><span class="pre">screen_database</span></code> module)</li>
+<li>computation of the target response spectrum distribution
+(<code class="code docutils literal notranslate"><span class="pre">compute_cs</span></code> module)</li>
+<li>statistical simulation of response spectra from the target
+distribution
+(<code class="code docutils literal notranslate"><span class="pre">simulate_spectra</span></code> module)</li>
+<li>selection of ground motions from the database that individually match
+the statistically simulated spectra
+(<code class="code docutils literal notranslate"><span class="pre">find_ground_motion</span></code> module)</li>
+<li>execution of incremental changes to the initially selected ground
+motion set to further optimize its fit to the target spectrum
+distribution (<code class="code docutils literal notranslate"><span class="pre">optimize_ground_motion</span></code> module)</li>
+<li>produce output files (3 figures created by <code class="code docutils literal notranslate"><span class="pre">plot_final_selection</span></code>
+module and 2 <cite>.txt</cite> files created by <code class="code docutils literal notranslate"><span class="pre">create_output_files</span></code> modules)</li>
+</ol>
+</div></blockquote>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">haselREC</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="haselrec.html">haselREC</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="input_data.html">Input data</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Selection Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scaling_module.html">Scaling Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="check_module.html">Check Module</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="haselrec.html">haselREC</a><ul>
+      <li>Previous: <a href="input_data.html" title="previous chapter">Input data</a></li>
+      <li>Next: <a href="compute_conditioning_value.html" title="next chapter">Compute conditioning value</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020-2021, Elisa Zuccolo, EUCENTRE Foundation.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/selection_module.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

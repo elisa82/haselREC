@@ -1,0 +1,533 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>haselrec.read_input_data &#8212; haselREC  documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for haselrec.read_input_data</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (C) 2020-2021 Elisa Zuccolo, Eucentre Foundation</span>
+<span class="c1">#</span>
+<span class="c1"># haselREC is free software: you can redistribute it and/or modify it</span>
+<span class="c1"># under the terms of the GNU Affero General Public License as published</span>
+<span class="c1"># by the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># haselREC is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU Affero General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU Affero General Public License</span>
+<span class="c1"># along with haselREC. If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<div class="viewcode-block" id="read_input_data"><a class="viewcode-back" href="../../input_data.html#haselrec.read_input_data.read_input_data">[docs]</a><span class="k">def</span> <span class="nf">read_input_data</span><span class="p">(</span><span class="n">fileini</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reads the input file for haselREC.</span>
+<span class="sd">    An example is::</span>
+
+<span class="sd">        [general]</span>
+<span class="sd">        description = Selection for Italy - AvgSA</span>
+
+<span class="sd">        [hazard parameters]</span>
+<span class="sd">        intensity_measures={AvgSA}</span>
+<span class="sd">        site_code={0,1,2,3,4,5}</span>
+<span class="sd">        rlz_code={0,0,0,0,0,0}</span>
+<span class="sd">        probability_of_exceedance_num={2}</span>
+<span class="sd">        probability_of_exceedance={0.1}</span>
+<span class="sd">        path_results_classical=output_classical_AvgSA</span>
+<span class="sd">        path_results_disagg=output_disagg_AvgSA</span>
+<span class="sd">        num_disagg=107</span>
+<span class="sd">        num_classical=108</span>
+<span class="sd">        investigation_time=50</span>
+
+<span class="sd">        [conditional spectrum parameters]</span>
+<span class="sd">        target_periods=[0.01,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.75,0.8,0.9,1,2,3,4]</span>
+<span class="sd">        corr_type=akkar</span>
+<span class="sd">        GMPE=AkkarBommer2010</span>
+<span class="sd">        avg_periods=[0.2,0.3,0.4,0.5,0.75,1.0]</span>
+<span class="sd">        rake=0.</span>
+<span class="sd">        Vs30={300,300,300,600,600,600}</span>
+<span class="sd">        vs30Type={inferred,inferred,inferred,inferred,inferred,inferred}</span>
+<span class="sd">        azimuth=50</span>
+<span class="sd">        hypo_depth=10</span>
+
+<span class="sd">        [database parameters for screening recordings]</span>
+<span class="sd">        database_path=../OpenInsel/GM-Records-Database/database_flatfile.csv</span>
+<span class="sd">        allowed_database={ESM,NGA-West2}</span>
+<span class="sd">        allowed_depth=[0,30]</span>
+<span class="sd">        radius_dist={50}</span>
+<span class="sd">        radius_mag={0.50}</span>
+<span class="sd">        maxsf={3.0}</span>
+
+<span class="sd">        [selection parameters]</span>
+<span class="sd">        nGM=30</span>
+<span class="sd">        nTrials = 10</span>
+<span class="sd">        weights={0.6,0.3,0.1}</span>
+<span class="sd">        nLoop=10</span>
+<span class="sd">        penalty=10</span>
+<span class="sd">        random_seed=333</span>
+
+<span class="sd">        [accelerogram folders]</span>
+<span class="sd">        path_NGA_folder=/rec/NGA2records</span>
+<span class="sd">        path_ESM_folder=/rec/ESM</span>
+
+<span class="sd">        [output folder]</span>
+<span class="sd">        output_folder=output_acc_AvgSA</span>
+
+<span class="sd">    The structure of the input file is similar to the structure of the input</span>
+<span class="sd">    file for OpenQuake.</span>
+
+<span class="sd">    **General - section**</span>
+<span class="sd">    It contains the description of the run. It is not used by haselREC.</span>
+
+<span class="sd">    **Hazard Parameters - section**</span>
+<span class="sd">    It contains the hazard parameters, which must be defined according to the</span>
+<span class="sd">    OpenQuake standards.</span>
+
+<span class="sd">        - :code:`intensity_measures`: list of intensity measures to consider.</span>
+<span class="sd">          They can be [`PGA`, `SA(T)` or `AvgSA`], where `T` is the spectral</span>
+<span class="sd">          ordinate;</span>
+<span class="sd">        - :code:`site_code`: list with site codes according to OpenQuake file</span>
+<span class="sd">          names;</span>
+<span class="sd">        - :code:`rlz_code`: list with realization codes according to OpenQuake</span>
+<span class="sd">          file names (one for each site, :code:`site_code`);</span>
+<span class="sd">        - :code:`probability_of_exceedance_num`: list with probability of</span>
+<span class="sd">          exceedance numbers according to OpenQuake file names;</span>
+<span class="sd">        - :code:`probability_of_exceedance`: list with the probability of</span>
+<span class="sd">          exceedance associated to :code:`probability_of_exceedance_num`;</span>
+<span class="sd">        - :code:`path_results_classical`: path to the folder containing the</span>
+<span class="sd">          results of a classical PSHA performed by OpenQuake;</span>
+<span class="sd">        - :code:`path_results_disagg`: path to the folder containing the</span>
+<span class="sd">          results of a disaggregation analysis performed by OpenQuake;</span>
+<span class="sd">        - :code:`num_disagg`: OpenQuake calculation ID containing</span>
+<span class="sd">          the disaggregation results;</span>
+<span class="sd">        - :code:`num_classical`: OpenQuake calculation ID containing</span>
+<span class="sd">          the PSHA results;</span>
+<span class="sd">        - :code:`investigation_time`: period of time (in years) used for PSHA in</span>
+<span class="sd">          OpenQuake;</span>
+
+<span class="sd">    **Conditional Spectrum Parameters - section**</span>
+
+<span class="sd">        - :code:`target_periods`: array of periods at which to compute the CS;</span>
+<span class="sd">        - :code:`corr_type`: correlation relationship to be used for the</span>
+<span class="sd">          computation of the CS. It can be [baker_jayaram or akkar];</span>
+<span class="sd">        - :code:`GMPE`: name of the GMPE to be used for the the construction of</span>
+<span class="sd">          the CS. It must be defined according to OpenQuake</span>
+<span class="sd">          (see https://docs.openquake.org/oq-engine/master/openquake.hazardlib.</span>
+<span class="sd">          gsim.html);</span>
+<span class="sd">        - :code:`avg_periods`: range of periods to be used to compute AvgSA.</span>
+<span class="sd">          It must be defined only when :code:`intensity_measures={AvgSA}`;</span>
+<span class="sd">        - :code:`rake`: fault rake;</span>
+<span class="sd">        - :code:`Vs30`: list of vs30 values (one for each target site,</span>
+<span class="sd">          :code:`site_code`);</span>
+<span class="sd">        - :code:`vs30Type`: list of vs30 sites (one for each target site,</span>
+<span class="sd">          :code:`site_code`). It can be [&quot;inferred&quot; or &quot;measured&quot;];</span>
+<span class="sd">        - :code:`azimuth`: (optional) source-to-site azimuth. It can be defined</span>
+<span class="sd">          as an alternative to :code:`fhw`. If not defined, if required,</span>
+<span class="sd">          it will be defined inside the code;</span>
+<span class="sd">        - :code:`fhw`: (optional) hanging-wall flag. It can be [`=1` or `=-1`].</span>
+<span class="sd">          If not defined, if required, it will be defined inside the code;</span>
+<span class="sd">        - :code:`hypo_depth`: (optional) hypocentral depth. If not defined, if</span>
+<span class="sd">          required, it will be defined inside the code;</span>
+<span class="sd">        - :code:`dip`: (optional) fault dip. If not defined, if</span>
+<span class="sd">          required, it will be defined inside the code;</span>
+<span class="sd">        - :code:`z1pt0`: (optional) Depth to Vs=1.0 km/s. If not defined, if</span>
+<span class="sd">          required, it will be defined inside the code;</span>
+<span class="sd">        - :code:`z2pt5`: (optional) Depth to Vs=2.5 km/s. If not defined, if</span>
+<span class="sd">          required, it will be defined inside the code;</span>
+<span class="sd">        - :code:`upper_sd`: (optional) Upper seismogenic depth. If not defined,</span>
+<span class="sd">          if required, it will be defined inside the code;</span>
+<span class="sd">        - :code:`lower_sd`: (optional) Lower seismogenic depth. If not defined,</span>
+<span class="sd">          if required, it will be defined inside the code;</span>
+<span class="sd">        - :code:`allowed_recs_vs30`: (optional) Range of allowed vs30 values.</span>
+<span class="sd">          If not defined, the vs30 range will be defined consistently withe the</span>
+<span class="sd">          vs30 of the site;</span>
+<span class="sd">        - :code:`allowed_ec8_code`: (optional). List of allowed EC8 soil class</span>
+<span class="sd">          codes. It can be [&#39;A&#39;, &#39;B&#39;, &#39;C&#39;, &#39;D&#39;, &#39;E&#39; or &#39;All&#39;]. If not defined,</span>
+<span class="sd">          the EC8 soil class will be defined consistently withe the EC8 soil</span>
+<span class="sd">          class of the site;</span>
+
+<span class="sd">    **Database Parameters For Screening Recordings - section**</span>
+
+<span class="sd">        - :code:`database_path`: path to the folder containing the strong motion</span>
+<span class="sd">          database;</span>
+<span class="sd">        - :code:`allowed_database`: list of databases to consider for record</span>
+<span class="sd">          selection. They can be [&#39;NGA-West2&#39; or &#39;ESM&#39;];</span>
+<span class="sd">        - :code:`allowed_depth`: upper and lower bound of allowable depths;</span>
+<span class="sd">        - :code:`radius_dist`: list of radius values to be used for the</span>
+<span class="sd">          definition of the allowable distance values. They must be</span>
+<span class="sd">          specified for each probability of exceedance (:code:</span>
+<span class="sd">          `probability_of_exceedance`);</span>
+<span class="sd">        - :code:`radius_mag`: list of radius values to be used for the</span>
+<span class="sd">          definition of the allowable magnitude values. They must be</span>
+<span class="sd">          specified for each probability of exceedance</span>
+<span class="sd">          (:code:`probability_of_exceedance`);</span>
+<span class="sd">        - :code:`maxsf`: list of maximum allowable scale factor. They must be</span>
+<span class="sd">          specified for each probability of exceedance (:code:`probability_of_exceedance`);</span>
+
+<span class="sd">    **Selection Parameters - section**</span>
+
+<span class="sd">        - :code:`nGM`: number of records to select;</span>
+<span class="sd">        - :code:`nTrials`: number of iterations of the initial spectral</span>
+<span class="sd">          simulation step to perform;</span>
+<span class="sd">        - :code:`weights`: {weight for error in mean, weight for error in</span>
+<span class="sd">          standard deviation, weight for error in skewness};</span>
+<span class="sd">        - :code:`nLoop`: number of loops of optimization to perform;</span>
+<span class="sd">        - :code:`penalty`: &gt;0 to penalize selected spectra more than 3 sigma</span>
+<span class="sd">          from the target at any period, =0 otherwise;</span>
+<span class="sd">        - :code:`random_seed`: random seed number to simulate response spectra</span>
+<span class="sd">          for initial matching;</span>
+
+<span class="sd">    **Accelerogram Folders - section**</span>
+
+<span class="sd">        - :code:`path_NGA_folder`: folder with NGA-Wes2 recordings;</span>
+<span class="sd">        - :code:`path_ESM_folder`: folder with ESM recordings (it can be empty);</span>
+
+<span class="sd">    **Output Folder - section**</span>
+
+<span class="sd">        - :code:`output_folder`: path to the output folder.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">import</span> <span class="nn">sys</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+    <span class="nb">input</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fileini</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">line</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="nb">input</span><span class="p">[</span><span class="n">key</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+    <span class="c1"># %% Extract input parameters</span>
+
+    <span class="c1"># Hazard parameters</span>
+    <span class="n">intensity_measures</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span>
+                          <span class="nb">input</span><span class="p">[</span><span class="s1">&#39;intensity_measures&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
+    <span class="n">site_code</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">input</span><span class="p">[</span><span class="s1">&#39;site_code&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
+    <span class="n">site_code</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">site_code</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">rlz_code</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">input</span><span class="p">[</span><span class="s1">&#39;rlz_code&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
+    <span class="n">rlz_code</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">rlz_code</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rlz_code</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">site_code</span><span class="p">):</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span>
+            <span class="s1">&#39;Error: rlz_code must be an array of the same length of site_code&#39;</span><span class="p">)</span>
+    <span class="n">path_results_classical</span> <span class="o">=</span> <span class="nb">input</span><span class="p">[</span><span class="s1">&#39;path_results_classical&#39;</span><span class="p">]</span>
+    <span class="n">path_results_disagg</span> <span class="o">=</span> <span class="nb">input</span><span class="p">[</span><span class="s1">&#39;path_results_disagg&#39;</span><span class="p">]</span>
+    <span class="n">num_disagg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">input</span><span class="p">[</span><span class="s1">&#39;num_disagg&#39;</span><span class="p">])</span>
+    <span class="n">num_classical</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">input</span><span class="p">[</span><span class="s1">&#39;num_classical&#39;</span><span class="p">])</span>
+    <span class="n">probability_of_exceedance_num</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">input</span><span class="p">[</span>
+        <span class="s1">&#39;probability_of_exceedance_num&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
+    <span class="n">probability_of_exceedance_num</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">probability_of_exceedance_num</span><span class="p">,</span>
+                                             <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">probability_of_exceedance</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span>
+                                 <span class="nb">input</span><span class="p">[</span><span class="s1">&#39;probability_of_exceedance&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span>
+                                     <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">probability_of_exceedance_num</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span>
+            <span class="n">probability_of_exceedance_num</span><span class="p">)):</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span>
+            <span class="s1">&#39;Error: probability_of_exceedance_num must be of the same size of &#39;</span>
+            <span class="s1">&#39;probability_of_exceedance&#39;</span><span class="p">)</span>
+    <span class="n">investigation_time</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">input</span><span class="p">[</span><span class="s1">&#39;investigation_time&#39;</span><span class="p">])</span>
+
+    <span class="c1"># Conditional spectrum parameters</span>
+    <span class="n">target_periods</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span>
+                      <span class="nb">input</span><span class="p">[</span><span class="s1">&#39;target_periods&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;[]&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
+    <span class="n">target_periods</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">target_periods</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+    <span class="n">tstar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">intensity_measures</span><span class="p">))</span>
+    <span class="n">im_type</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">im_type_lbl</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">avg_periods</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">intensity_measures</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">intensity_measures</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;AvgSA&#39;</span><span class="p">:</span>
+            <span class="n">im_type</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;AvgSA&#39;</span><span class="p">)</span>
+            <span class="n">im_type_lbl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;AvgSa&#39;</span><span class="p">)</span>
+            <span class="n">avg_periods</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span>
+                           <span class="nb">input</span><span class="p">[</span><span class="s1">&#39;avg_periods&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;[]&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
+            <span class="n">avg_periods</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">avg_periods</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">intensity_measures</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SA&#39;</span><span class="p">:</span>
+            <span class="n">im_type</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;SA&#39;</span><span class="p">)</span>
+            <span class="n">im_type_lbl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;Sa(T)&#39;</span><span class="p">)</span>
+            <span class="n">tstar</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">intensity_measures</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;(,),SA&#39;</span><span class="p">)</span>
+            <span class="n">tstar</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tstar</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">intensity_measures</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;PGA&#39;</span><span class="p">:</span>
+            <span class="n">im_type</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;PGA&#39;</span><span class="p">)</span>
+            <span class="n">im_type_lbl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;PGA&#39;</span><span class="p">)</span>
+            <span class="n">tstar</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s1">&#39;Error: this intensity measure type &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span>
+                <span class="n">intensity_measures</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; is not supported yet&#39;</span><span class="p">)</span>
+
+    <span class="c1"># baker_jayaram or akkar</span>
+    <span class="n">corr_type</span> <span class="o">=</span> <span class="nb">input</span><span class="p">[</span><span class="s1">&#39;corr_type&#39;</span><span class="p">]</span>
+    <span class="n">gmpe_input</span> <span class="o">=</span> <span class="nb">input</span><span class="p">[</span><span class="s1">&#39;GMPE&#39;</span><span class="p">]</span>
+    <span class="n">rake</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">input</span><span class="p">[</span><span class="s1">&#39;rake&#39;</span><span class="p">])</span>
+
+    <span class="n">vs30_input</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">input</span><span class="p">[</span><span class="s1">&#39;Vs30&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vs30_input</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">site_code</span><span class="p">):</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s1">&#39;Error: Vs30 must be an array of the same length of site_code&#39;</span><span class="p">)</span>
+
+    <span class="n">vs30type</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">input</span><span class="p">[</span><span class="s1">&#39;vs30Type&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vs30type</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">site_code</span><span class="p">):</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span>
+            <span class="s1">&#39;Error: vs30Type must be an array of the same length of site_code&#39;</span><span class="p">)</span>
+
+    <span class="n">hypo_depth</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">hypo_depth</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">input</span><span class="p">[</span><span class="s1">&#39;hypo_depth&#39;</span><span class="p">])</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s1">&#39;Warning: if used, the hypocentral depth will be defined inside&#39;</span>
+            <span class="s1">&#39; the code&#39;</span><span class="p">)</span>
+
+    <span class="n">dip</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">dip</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">input</span><span class="p">[</span><span class="s1">&#39;dip&#39;</span><span class="p">])</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Warning: if used, the dip angle will be defined inside the code&#39;</span><span class="p">)</span>
+
+    <span class="n">azimuth</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">fhw</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">azimuth</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">input</span><span class="p">[</span><span class="s1">&#39;azimuth&#39;</span><span class="p">])</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">fhw</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">input</span><span class="p">[</span><span class="s1">&#39;hanging_wall_flag&#39;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">fhw</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">fhw</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s1">&#39;Error: The hanging_wall_flag must be =1 or =-1&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span>
+                <span class="s1">&#39;Error: The azimuth or the hanging_wall_flag must be defined&#39;</span><span class="p">)</span>
+
+    <span class="n">z2pt5</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">z2pt5</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">input</span><span class="p">[</span><span class="s1">&#39;z2pt5&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">z2pt5</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">site_code</span><span class="p">):</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s1">&#39;Error: z2pt5 must be an array of the same length of&#39;</span>
+                     <span class="s1">&#39; site_code&#39;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Warning: if used, z2pt5 will be defined inside the code&#39;</span><span class="p">)</span>
+
+    <span class="n">z1pt0</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">z1pt0</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">input</span><span class="p">[</span><span class="s1">&#39;z1pt0&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">z1pt0</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">site_code</span><span class="p">):</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span>
+                <span class="s1">&#39;Error: z1pt0 must be an array of the same length of site_code&#39;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Warning: if used, z1pt0 will be defined inside the code&#39;</span><span class="p">)</span>
+
+    <span class="n">upper_sd</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">upper_sd</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">input</span><span class="p">[</span><span class="s1">&#39;upper_sd&#39;</span><span class="p">])</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Warning: the upper_sd value will be defined inside the code&#39;</span><span class="p">)</span>
+
+    <span class="n">lower_sd</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">lower_sd</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">input</span><span class="p">[</span><span class="s1">&#39;lower_sd&#39;</span><span class="p">])</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Warning: the lower_sd value will be defined inside the code&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Database parameters for screening recordings</span>
+    <span class="n">database_path</span> <span class="o">=</span> <span class="nb">input</span><span class="p">[</span><span class="s1">&#39;database_path&#39;</span><span class="p">]</span>
+    <span class="n">allowed_database</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span>
+                        <span class="nb">input</span><span class="p">[</span><span class="s1">&#39;allowed_database&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
+
+
+    <span class="n">allowed_recs_vs30</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># upper and lower bound of allowable Vs30 values</span>
+        <span class="n">allowed_recs_vs30</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span>
+                             <span class="nb">input</span><span class="p">[</span><span class="s1">&#39;allowedRecs_Vs30&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;[]&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
+        <span class="n">allowed_recs_vs30</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">allowed_recs_vs30</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Warning: the vs30 range will be defined consistently withe the &#39;</span>
+              <span class="s1">&#39;vs30 of the site&#39;</span><span class="p">)</span>
+
+    <span class="n">allowed_ec8_code</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">allowed_ec8_code</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span>
+                            <span class="nb">input</span><span class="p">[</span><span class="s1">&#39;allowedEC8code&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Warning: the EC8 soil class will be defined consistently with&#39;</span>
+              <span class="s1">&#39; the EC8 soil class of the site &#39;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">maxsf_input</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">input</span><span class="p">[</span><span class="s1">&#39;maxsf&#39;</span><span class="p">])</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="c1"># The maximum allowable scale factor. They must be specified as a</span>
+        <span class="c1"># function of probability_of_exceedance</span>
+        <span class="n">maxsf_input</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">input</span><span class="p">[</span><span class="s1">&#39;maxsf&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span>
+            <span class="s1">&#39;,&#39;</span><span class="p">)]</span>
+        <span class="n">maxsf_input</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">maxsf_input</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">probability_of_exceedance_num</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">maxsf_input</span><span class="p">):</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span>
+                <span class="s1">&#39;Error: maxsf must be of the same size of &#39;</span>
+                <span class="s1">&#39;probability_of_exceedance&#39;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">radius_dist_input</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">input</span><span class="p">[</span><span class="s1">&#39;radius_dist&#39;</span><span class="p">])</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="n">radius_dist_input</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span>
+                             <span class="nb">input</span><span class="p">[</span><span class="s1">&#39;radius_dist&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>  <span class="c1"># km</span>
+        <span class="n">radius_dist_input</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">radius_dist_input</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">probability_of_exceedance_num</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">radius_dist_input</span><span class="p">):</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s1">&#39;Error: radius_dist must be of the same size of &#39;</span>
+                     <span class="s1">&#39;probability_of_exceedance&#39;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">radius_mag_input</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">input</span><span class="p">[</span><span class="s1">&#39;radius_mag&#39;</span><span class="p">])</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="n">radius_mag_input</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span>
+                            <span class="nb">input</span><span class="p">[</span><span class="s1">&#39;radius_mag&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
+        <span class="n">radius_mag_input</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">radius_mag_input</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">probability_of_exceedance_num</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">radius_mag_input</span><span class="p">):</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span>
+                <span class="s1">&#39;Error: radius_mag must be of the same size of &#39;</span>
+                <span class="s1">&#39;probability_of_exceedance&#39;</span><span class="p">)</span>
+
+    <span class="c1"># upper and lower bound of allowable depth values</span>
+    <span class="n">allowed_depth</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span>
+                     <span class="nb">input</span><span class="p">[</span><span class="s1">&#39;allowed_depth&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;[]&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span>
+                         <span class="s1">&#39;,&#39;</span><span class="p">)]</span>
+    <span class="n">allowed_depth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">allowed_depth</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+    <span class="c1"># Selection parameters</span>
+    <span class="c1"># number of records to select ==&gt; number of records to select since the code</span>
+    <span class="c1"># search the database spectra most similar to each simulated spectrum</span>
+    <span class="n">n_gm</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">input</span><span class="p">[</span><span class="s1">&#39;nGM&#39;</span><span class="p">])</span>
+    <span class="n">random_seed</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">input</span><span class="p">[</span><span class="s1">&#39;random_seed&#39;</span><span class="p">])</span>
+    <span class="c1"># number of iterations of the initial spectral simulation step to perform</span>
+    <span class="n">n_trials</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">input</span><span class="p">[</span><span class="s1">&#39;nTrials&#39;</span><span class="p">])</span>
+    <span class="c1"># [Weights for error in mean, standard deviation and skewness] Used to find</span>
+    <span class="c1"># the simulated spectra that best match the target from the statistically</span>
+    <span class="c1"># simulated response spectra</span>
+    <span class="n">weights</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">input</span><span class="p">[</span><span class="s1">&#39;weights&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
+    <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="c1"># optimization parameters. Execution of incremental changes to the initially</span>
+    <span class="c1"># selected ground motion set to further optimise its fit to the target</span>
+    <span class="c1"># spectrum distribution.</span>
+    <span class="n">n_loop</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">input</span><span class="p">[</span><span class="s1">&#39;nLoop&#39;</span><span class="p">])</span>  <span class="c1"># Number of loops of optimization to perform</span>
+    <span class="c1"># &gt;0 to penalize selected spectra moire than 3 sigma from the target at any</span>
+    <span class="c1"># period, =0 otherwise.</span>
+    <span class="n">penalty</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">input</span><span class="p">[</span><span class="s1">&#39;penalty&#39;</span><span class="p">])</span>
+
+    <span class="c1"># Accelerogram folders</span>
+    <span class="n">path_nga_folder</span> <span class="o">=</span> <span class="nb">input</span><span class="p">[</span><span class="s1">&#39;path_NGA_folder&#39;</span><span class="p">]</span><span class="c1"># NGA recordings have to be stored</span>
+    <span class="n">path_esm_folder</span> <span class="o">=</span> <span class="nb">input</span><span class="p">[</span><span class="s1">&#39;path_ESM_folder&#39;</span><span class="p">]</span>
+
+    <span class="c1"># Output folder</span>
+    <span class="n">output_folder</span> <span class="o">=</span> <span class="nb">input</span><span class="p">[</span><span class="s1">&#39;output_folder&#39;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">intensity_measures</span><span class="p">,</span> <span class="n">site_code</span><span class="p">,</span> <span class="n">rlz_code</span><span class="p">,</span> <span class="n">path_results_classical</span><span class="p">,</span>
+            <span class="n">path_results_disagg</span><span class="p">,</span> <span class="n">num_disagg</span><span class="p">,</span> <span class="n">num_classical</span><span class="p">,</span>
+            <span class="n">probability_of_exceedance_num</span><span class="p">,</span> <span class="n">probability_of_exceedance</span><span class="p">,</span>
+            <span class="n">investigation_time</span><span class="p">,</span> <span class="n">target_periods</span><span class="p">,</span> <span class="n">tstar</span><span class="p">,</span> <span class="n">im_type</span><span class="p">,</span> <span class="n">im_type_lbl</span><span class="p">,</span>
+            <span class="n">avg_periods</span><span class="p">,</span> <span class="n">corr_type</span><span class="p">,</span> <span class="n">gmpe_input</span><span class="p">,</span> <span class="n">rake</span><span class="p">,</span> <span class="n">vs30_input</span><span class="p">,</span> <span class="n">vs30type</span><span class="p">,</span>
+            <span class="n">hypo_depth</span><span class="p">,</span> <span class="n">dip</span><span class="p">,</span> <span class="n">azimuth</span><span class="p">,</span> <span class="n">fhw</span><span class="p">,</span> <span class="n">z2pt5</span><span class="p">,</span> <span class="n">z1pt0</span><span class="p">,</span> <span class="n">upper_sd</span><span class="p">,</span> <span class="n">lower_sd</span><span class="p">,</span>
+            <span class="n">database_path</span><span class="p">,</span> <span class="n">allowed_database</span><span class="p">,</span> <span class="n">allowed_recs_vs30</span><span class="p">,</span>
+            <span class="n">allowed_ec8_code</span><span class="p">,</span> <span class="n">maxsf_input</span><span class="p">,</span> <span class="n">radius_dist_input</span><span class="p">,</span>
+            <span class="n">radius_mag_input</span><span class="p">,</span> <span class="n">allowed_depth</span><span class="p">,</span> <span class="n">n_gm</span><span class="p">,</span> <span class="n">random_seed</span><span class="p">,</span> <span class="n">n_trials</span><span class="p">,</span>
+            <span class="n">weights</span><span class="p">,</span> <span class="n">n_loop</span><span class="p">,</span> <span class="n">penalty</span><span class="p">,</span> <span class="n">path_nga_folder</span><span class="p">,</span> <span class="n">path_esm_folder</span><span class="p">,</span>
+            <span class="n">output_folder</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">haselREC</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../haselrec.html">haselREC</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020-2021, Elisa Zuccolo, EUCENTRE Foundation.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
