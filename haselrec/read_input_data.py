@@ -49,6 +49,7 @@ def read_input_data(fileini):
         allowed_database={ESM,NGA-West2}
         allowed_depth=[0,30]
         radius_dist={50}
+        dist_range=[15,200]
         radius_mag={0.50}
         maxsf={3.0}
 
@@ -151,6 +152,8 @@ def read_input_data(fileini):
           definition of the allowable distance values. They must be
           specified for each probability of exceedance (:code:
           `probability_of_exceedance`);
+        - :code:`dist_range`: minimum and maximum distance values to be used
+          when defining the distance range according to (:code:`radius_dist`)
         - :code:`radius_mag`: list of radius values to be used for the
           definition of the allowable magnitude values. They must be
           specified for each probability of exceedance
@@ -348,6 +351,7 @@ def read_input_data(fileini):
         print('Warning: the EC8 soil class will be defined consistently with'
               ' the EC8 soil class of the site ')
 
+
     try:
         maxsf_input = float(input['maxsf'])
     except ValueError:
@@ -370,6 +374,15 @@ def read_input_data(fileini):
         if len(probability_of_exceedance_num) != len(radius_dist_input):
             sys.exit('Error: radius_dist must be of the same size of '
                      'probability_of_exceedance')
+
+    dist_range_input = None
+    try:
+        #Distance range allowed
+        dist_range_input = [x.strip() for x in
+                             input['dist_range'].strip('[]').split(',')]
+        dist_range_input = np.array(dist_range_input, dtype=float)
+    except KeyError:
+        print('Warning: an ad-hoc dist range is not defined by the user. Therefore no additional contraints on the distance range will be considered. Only radius_dist will be adopted')
 
     try:
         radius_mag_input = float(input['radius_mag'])
@@ -422,7 +435,7 @@ def read_input_data(fileini):
             avg_periods, corr_type, gmpe_input, rake, vs30_input, vs30type,
             hypo_depth, dip, azimuth, fhw, z2pt5, z1pt0, upper_sd, lower_sd,
             database_path, allowed_database, allowed_recs_vs30,
-            allowed_ec8_code, maxsf_input, radius_dist_input,
+            allowed_ec8_code, maxsf_input, radius_dist_input, dist_range_input,
             radius_mag_input, allowed_depth, n_gm, random_seed, n_trials,
             weights, n_loop, penalty, path_nga_folder, path_esm_folder,
             output_folder)

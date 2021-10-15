@@ -84,7 +84,7 @@ if __name__ == '__main__':
      im_type_lbl, avg_periods, corr_type, gmpe_input, rake, vs30, vs30type,
      hypo_depth, dip, azimuth, fhw, z2pt5, z1pt0, upper_sd, lower_sd,
      database_path, allowed_database, allowed_recs_vs30, allowed_ec8_code,
-     maxsf_input, radius_dist_input, radius_mag_input, allowed_depth, n_gm,
+     maxsf_input, radius_dist_input, dist_range_input, radius_mag_input, allowed_depth, n_gm,
      random_seed, n_trials, weights, n_loop, penalty, path_nga_folder,
      path_esm_folder, output_folder] = read_input_data(fileini)
 
@@ -101,7 +101,7 @@ if __name__ == '__main__':
                          vs30type, hypo_depth, dip, azimuth, fhw, z2pt5, z1pt0,
                          upper_sd, lower_sd, database_path, allowed_database,
                          allowed_recs_vs30, allowed_ec8_code, maxsf_input,
-                         radius_dist_input, radius_mag_input, allowed_depth,
+                         radius_dist_input, dist_range_input, radius_mag_input, allowed_depth,
                          n_gm, random_seed, n_trials, weights, n_loop, penalty,
                          output_folder)
 

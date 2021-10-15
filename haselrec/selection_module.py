@@ -21,7 +21,7 @@ def selection_module(intensity_measures, site_code, rlz_code,
                      corr_type, gmpe_input, rake, vs30_input, vs30type, hypo_depth,
                      dip, azimuth, fhw, z2pt5, z1pt0, upper_sd, lower_sd,
                      database_path, allowed_database, allowed_recs_vs30,
-                     allowed_ec8_code, maxsf_input, radius_dist_input,
+                     allowed_ec8_code, maxsf_input, radius_dist_input, dist_range_input,
                      radius_mag_input, allowed_depth, n_gm, random_seed,
                      n_trials, weights, n_loop, penalty, output_folder):
     """
@@ -122,8 +122,8 @@ def selection_module(intensity_measures, site_code, rlz_code,
                  station_code, source, record_sequence_number_nga, event_mw,
                  event_mag, acc_distance, station_vs30, station_ec8] = \
                     screen_database(database_path, allowed_database,
-                                    allowed_recs_vs30, radius_dist, radius_mag,
-                                    rjb, mag, allowed_ec8_code,
+                                    allowed_recs_vs30, radius_dist, dist_range_input,
+                                    radius_mag, rjb, mag, allowed_ec8_code,
                                     target_periods, n_gm, allowed_depth, vs30)
 
                 # Compute the target spectrum
