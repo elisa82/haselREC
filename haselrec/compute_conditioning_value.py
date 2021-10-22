@@ -31,7 +31,8 @@ def compute_conditioning_value(rlz, intensity_measures, site, poe, num_disagg,
                      str(site) + '-poe-' + str(poe) + '_Mag_Dist_' + \
                      str(num_disagg) + '.csv'
 
-    probability_of_exceedance=np.float32(probability_of_exceedance)
+    probability_of_exceedance=np.float64(probability_of_exceedance)
+    print(probability_of_exceedance)
 
     selected_column = intensity_measures + '-' + str(probability_of_exceedance)
     file_with_oq_acc_value = 'hazard_map-mean_' + str(num_classical) + '.csv'
