@@ -114,7 +114,7 @@ def selection_module(intensity_measures, site_code, rlz_code,
                 [bgmpe, sctx, rctx, dctx, vs30, rrup] = \
                     inizialize_gmm(ii, gmpe_input, rjb, mag, hypo_depth, dip,
                                    rake, upper_sd, lower_sd, azimuth, fhw,
-                                   vs30type, vs30_input, z2pt5, z1pt0)
+                                   vs30type, vs30_input, z2pt5, z1pt0, site_code)
 
                 # Screen the database of available ground motions
 

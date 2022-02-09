@@ -15,7 +15,7 @@
 
 def inizialize_gmm(index, gmpe_input, rjb, mag, z_hyp_input, dip_input, rake,
                    upper_sd_input, lower_sd_input, azimuth_input, fhw, vs30type,
-                   vs30_input, z2pt5_input, z1pt0_input):
+                   vs30_input, z2pt5_input, z1pt0_input, site_code):
     """
     Defines all the parameters for the computation of a Ground Motion Model. If
     not defined by the user as input parameters, most parameters (dip,
@@ -77,9 +77,12 @@ def inizialize_gmm(index, gmpe_input, rjb, mag, z_hyp_input, dip_input, rake,
     setattr(rctx, 'mag', mag)
     setattr(rctx, 'hypo_depth', z_hyp)
     setattr(rctx, 'rake', rake)
+    setattr(rctx, 'occurrence_rate', 0.)
     setattr(dctx, 'rjb', rjb)
     vs30 = vs30 + np.zeros(rjb.shape)
     setattr(sctx, 'vs30', vs30)
+    sc = site_code[index] + np.zeros(rjb.shape)
+    setattr(sctx, 'sids', sc)
 
     return bgmpe, sctx, rctx, dctx, vs30, rrup
 
