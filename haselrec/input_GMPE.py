@@ -46,13 +46,18 @@ def inizialize_gmm(index, gmpe_input, rjb, mag, z_hyp_input, dip_input, rake,
     # -----------------------------------------------------------------------------
     # Initialise contexts
 
-    dip, z_hyp, width, ztor, azimuth = compute_source_params(mag, z_hyp_input,
+    if(bgmpe()=='[Ambraseys1996]'):
+        mw=np.exp(1.421+0.108*mag)-1.863
+    else:
+        mw=mag
+
+    dip, z_hyp, width, ztor, azimuth = compute_source_params(mw, z_hyp_input,
                                                              dip_input, rake,
                                                              upper_sd_input,
                                                              lower_sd_input,
                                                              azimuth_input, fhw)
 
-    [rx, rrup, ry] = compute_dists(rjb, mag, z_hyp_input, dip_input, rake,
+    [rx, rrup, ry] = compute_dists(rjb, mw, z_hyp_input, dip_input, rake,
                                    upper_sd_input,
                                    lower_sd_input, azimuth_input, fhw)
 

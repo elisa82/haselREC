@@ -43,6 +43,7 @@ def optimize_ground_motion(n_loop, n_gm, sample_small, n_big, id_sel, ln_sa1,
 
             # Try to add a new spectrum to the subset list
             for j in np.arange(n_big):
+
                 rec_value = np.exp(
                     sum(sample_big[j, id_sel]) / len(id_sel))
                 if rec_value == 0:

@@ -16,7 +16,7 @@
 def screen_database(database_path, allowed_database, allowed_recs_vs30,
                     radius_dist, dist_range_input, radius_mag, mean_dist, mean_mag,
                     allowed_ec8_code, target_periods, n_gm, allowed_depth,
-                    vs30):
+                    vs30, bgmpe):
     """
     Screen the database of candidate ground motion to select only appropriate
     ground motions. The screening criteria are:
@@ -72,17 +72,21 @@ def screen_database(database_path, allowed_database, allowed_recs_vs30,
         dist_range=[-99999.,99999.]
     else:
         dist_range=dist_range_input
-    if ( (mean_dist[0] - radius_dist) < dist_range[0] ):
+    if ( (mean_dist - radius_dist) < dist_range[0] ):
         dist_min_km = dist_range[0]
     else:
         dist_min_km = mean_dist - radius_dist
     if ( (mean_dist + radius_dist) > dist_range[1] ):
         dist_max_km = dist_range[1]
     else:
-        dist_max_km = mean_dist[0] + radius_dist
+        dist_max_km = mean_dist + radius_dist
 
     allowed_recs_d = [dist_min_km, dist_max_km]
-    allowed_recs_mag = [mean_mag - radius_mag, mean_mag + radius_mag]
+    if(bgmpe()=='[Ambraseys1996]'):
+        mean_mw=np.exp(1.421+0.108*mean_mag)-1.863
+    else:
+        mean_mw=mean_mag
+    allowed_recs_mag = [mean_mw - radius_mag, mean_mw + radius_mag]
 
     if allowed_recs_vs30 is None:
         if vs30 >= 800.0:

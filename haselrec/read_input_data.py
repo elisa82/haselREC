@@ -22,6 +22,7 @@ def read_input_data(fileini):
         description = Selection for Italy - AvgSA
 
         [hazard parameters]
+        hazard_mode=0
         intensity_measures={AvgSA}
         site_code={0,1,2,3,4,5}
         rlz_code={0,0,0,0,0,0}
@@ -78,6 +79,7 @@ def read_input_data(fileini):
     It contains the hazard parameters, which must be defined according to the
     OpenQuake standards.
 
+        - :code:`hazard_mode`: 0= hazard from OQ, 1= mean hazard given;
         - :code:`intensity_measures`: list of intensity measures to consider.
           They can be [`PGA`, `SA(T)` or `AvgSA`], where `T` is the spectral
           ordinate;
@@ -88,17 +90,26 @@ def read_input_data(fileini):
         - :code:`probability_of_exceedance_num`: list with probability of
           exceedance numbers according to OpenQuake file names;
         - :code:`probability_of_exceedance`: list with the probability of
-          exceedance associated to :code:`probability_of_exceedance_num`;
+          exceedance associated to :code:`probability_of_exceedance_num`
+          (only in case of :code:`hazard_mode`=0);
         - :code:`path_results_classical`: path to the folder containing the
-          results of a classical PSHA performed by OpenQuake;
+          results of a classical PSHA performed by OpenQuake
+          (only in case of :code:`hazard_mode`=0);
         - :code:`path_results_disagg`: path to the folder containing the
-          results of a disaggregation analysis performed by OpenQuake;
+          results of a disaggregation analysis performed by OpenQuake
+          (only in case of :code:`hazard_mode`=0);
         - :code:`num_disagg`: OpenQuake calculation ID containing
-          the disaggregation results;
+          the disaggregation results (only in case of :code:`hazard_mode`=0);
         - :code:`num_classical`: OpenQuake calculation ID containing
-          the PSHA results;
+          the PSHA results (only in case of :code:`hazard_mode`=0);
         - :code:`investigation_time`: period of time (in years) used for PSHA in
-          OpenQuake;
+          OpenQuake (only in case of :code:`hazard_mode`=0);
+        - :code:`meanMag_disagg`: mean magnitude from disaggregation analysis 
+          (only in case of :code:`hazard_mode`=1);
+        - :code:`meanDist_disagg`: mean distance from disaggregation analysis 
+          (only in case of :code:`hazard_mode`=1);
+        - :code:`hazard_value`: hazard value from disaggregation analysis 
+          (only in case of :code:`hazard_mode`=1)
 
     **Conditional Spectrum Parameters - section**
 
@@ -199,6 +210,7 @@ def read_input_data(fileini):
     # %% Extract input parameters
 
     # Hazard parameters
+    hazard_mode=int(input['hazard_mode'])
     intensity_measures = [x.strip() for x in
                           input['intensity_measures'].strip('{}').split(',')]
     site_code = [x.strip() for x in input['site_code'].strip('{}').split(',')]
@@ -208,23 +220,37 @@ def read_input_data(fileini):
     if len(rlz_code) != len(site_code):
         sys.exit(
             'Error: rlz_code must be an array of the same length of site_code')
-    path_results_classical = input['path_results_classical']
-    path_results_disagg = input['path_results_disagg']
-    num_disagg = int(input['num_disagg'])
-    num_classical = int(input['num_classical'])
     probability_of_exceedance_num = [x.strip() for x in input[
         'probability_of_exceedance_num'].strip('{}').split(',')]
     probability_of_exceedance_num = np.array(probability_of_exceedance_num,
                                              dtype=int)
-    probability_of_exceedance = [x.strip() for x in
-                                 input['probability_of_exceedance'].strip(
-                                     '{}').split(',')]
-    if (len(probability_of_exceedance_num) != len(
-            probability_of_exceedance_num)):
-        sys.exit(
-            'Error: probability_of_exceedance_num must be of the same size of '
-            'probability_of_exceedance')
-    investigation_time = float(input['investigation_time'])
+    if(hazard_mode==0):
+        path_results_classical = input['path_results_classical']
+        path_results_disagg = input['path_results_disagg']
+        num_disagg = int(input['num_disagg'])
+        num_classical = int(input['num_classical'])
+        probability_of_exceedance = [x.strip() for x in
+                                     input['probability_of_exceedance'].strip(
+                                         '{}').split(',')]
+        if (len(probability_of_exceedance_num) != len(
+                probability_of_exceedance_num)):
+            sys.exit(
+                'Error: probability_of_exceedance_num must be of the same size of '
+                'probability_of_exceedance')
+        investigation_time = float(input['investigation_time'])
+        meanMag_disagg=[]
+        meanDist_disagg=[]
+        hazard_value=[]
+    else:
+        meanMag_disagg=float(input['meanMag_disagg'])
+        meanDist_disagg=float(input['meanDist_disagg'])
+        hazard_value=float(input['hazard_value'])
+        path_results_classical = []
+        path_results_disagg = []
+        num_disagg = []
+        num_classical = []
+        probability_of_exceedance = [0]
+        investigation_time=[]
 
     # Conditional spectrum parameters
     target_periods = [x.strip() for x in
@@ -438,4 +464,5 @@ def read_input_data(fileini):
             allowed_ec8_code, maxsf_input, radius_dist_input, dist_range_input,
             radius_mag_input, allowed_depth, n_gm, random_seed, n_trials,
             weights, n_loop, penalty, path_nga_folder, path_esm_folder,
-            output_folder)
+            output_folder, meanMag_disagg, meanDist_disagg, hazard_value, 
+            hazard_mode)

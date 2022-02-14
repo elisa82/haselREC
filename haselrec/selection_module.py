@@ -23,7 +23,9 @@ def selection_module(intensity_measures, site_code, rlz_code,
                      database_path, allowed_database, allowed_recs_vs30,
                      allowed_ec8_code, maxsf_input, radius_dist_input, dist_range_input,
                      radius_mag_input, allowed_depth, n_gm, random_seed,
-                     n_trials, weights, n_loop, penalty, output_folder):
+                     n_trials, weights, n_loop, penalty, output_folder,
+                     meanMag_disagg, meanDist_disagg, 
+                     hazard_value, hazard_mode):
     """
     This module is called when mode :code:`--run-selection` is specified.
 
@@ -109,7 +111,9 @@ def selection_module(intensity_measures, site_code, rlz_code,
                                                num_classical,
                                                path_results_disagg,
                                                investigation_time,
-                                               path_results_classical)
+                                               path_results_classical,
+                                               meanMag_disagg, meanDist_disagg, 
+                                               hazard_value, hazard_mode)
 
                 [bgmpe, sctx, rctx, dctx, vs30, rrup] = \
                     inizialize_gmm(ii, gmpe_input, rjb, mag, hypo_depth, dip,
@@ -124,7 +128,7 @@ def selection_module(intensity_measures, site_code, rlz_code,
                     screen_database(database_path, allowed_database,
                                     allowed_recs_vs30, radius_dist, dist_range_input,
                                     radius_mag, rjb, mag, allowed_ec8_code,
-                                    target_periods, n_gm, allowed_depth, vs30)
+                                    target_periods, n_gm, allowed_depth, vs30, bgmpe)
 
                 # Compute the target spectrum
 

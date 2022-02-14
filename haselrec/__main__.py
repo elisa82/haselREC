@@ -86,7 +86,8 @@ if __name__ == '__main__':
      database_path, allowed_database, allowed_recs_vs30, allowed_ec8_code,
      maxsf_input, radius_dist_input, dist_range_input, radius_mag_input, allowed_depth, n_gm,
      random_seed, n_trials, weights, n_loop, penalty, path_nga_folder,
-     path_esm_folder, output_folder] = read_input_data(fileini)
+     path_esm_folder, output_folder, meanMag_disagg, meanDist_disagg, 
+     hazard_value, hazard_mode] = read_input_data(fileini)
 
     if calculation_mode == '--run-complete' or \
             calculation_mode == '--run-selection':
@@ -103,7 +104,8 @@ if __name__ == '__main__':
                          allowed_recs_vs30, allowed_ec8_code, maxsf_input,
                          radius_dist_input, dist_range_input, radius_mag_input, allowed_depth,
                          n_gm, random_seed, n_trials, weights, n_loop, penalty,
-                         output_folder)
+                         output_folder, meanMag_disagg, meanDist_disagg, 
+                         hazard_value, hazard_mode)
 
     if calculation_mode == '--check-NGArec':
         check_module(output_folder, site_code, probability_of_exceedance_num,

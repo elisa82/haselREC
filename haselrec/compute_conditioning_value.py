@@ -16,7 +16,8 @@
 def compute_conditioning_value(rlz, intensity_measures, site, poe, num_disagg,
                                probability_of_exceedance, num_classical,
                                path_results_disagg, investigation_time,
-                               path_results_classical):
+                               path_results_classical, meanMag_disagg, 
+                               meanDist_disagg, hazard_value, hazard_mode):
     """
     Reads 2 output files ('.csv') from OpenQuake: the file with disaggregation
     results and the map with hazard values and computes the IM value at which to
@@ -26,33 +27,39 @@ def compute_conditioning_value(rlz, intensity_measures, site, poe, num_disagg,
     import pandas as pd
     import numpy as np
 
-    # Get the name of the disaggregation file to look in
-    disagg_results = 'rlz-' + str(rlz) + '-' + intensity_measures + '-sid-' + \
-                     str(site) + '-poe-' + str(poe) + '_Mag_Dist_' + \
-                     str(num_disagg) + '.csv'
+    if(hazard_mode==0):
 
-    probability_of_exceedance=np.float64(probability_of_exceedance)
-    print(probability_of_exceedance)
+        # Get the name of the disaggregation file to look in
+        disagg_results = 'rlz-' + str(rlz) + '-' + intensity_measures + '-sid-' + \
+                         str(site) + '-poe-' + str(poe) + '_Mag_Dist_' + \
+                         str(num_disagg) + '.csv'
 
-    selected_column = intensity_measures + '-' + str(probability_of_exceedance)
-    file_with_oq_acc_value = 'hazard_map-mean_' + str(num_classical) + '.csv'
+        probability_of_exceedance=np.float64(probability_of_exceedance)
 
-    # Retrieve disaggregation results
-    df = pd.read_csv(''.join([path_results_disagg, '/', disagg_results]),
-        skiprows=1)
-    df['rate'] = -np.log(1 - df['poe']) / investigation_time
-    df['rate_norm'] = df['rate'] / df['rate'].sum()
-    # mode = df.sort_values(by='rate_norm', ascending=False)[0:1]
-    mean_mag = np.sum(df['mag'] * df['rate_norm'])
-    mean_dist = np.sum(df['dist'] * df['rate_norm'])
+        selected_column = intensity_measures + '-' + str(probability_of_exceedance)
+        file_with_oq_acc_value = 'hazard_map-mean_' + str(num_classical) + '.csv'
 
-    # Retrieve conditioning value
-    df = pd.read_csv(''.join(
-        [path_results_classical, '/', file_with_oq_acc_value]), skiprows=1)
-    output_oq = df[selected_column]
-    im_star = output_oq[site]
+        # Retrieve disaggregation results
+        df = pd.read_csv(''.join([path_results_disagg, '/', disagg_results]),
+            skiprows=1)
+        df['rate'] = -np.log(1 - df['poe']) / investigation_time
+        df['rate_norm'] = df['rate'] / df['rate'].sum()
+        # mode = df.sort_values(by='rate_norm', ascending=False)[0:1]
+        mean_mag = np.sum(df['mag'] * df['rate_norm'])
+        mean_dist = np.sum(df['dist'] * df['rate_norm'])
 
-    dist = np.array([mean_dist])
-    mag = mean_mag
+        # Retrieve conditioning value
+        df = pd.read_csv(''.join(
+            [path_results_classical, '/', file_with_oq_acc_value]), skiprows=1)
+        output_oq = df[selected_column]
+        im_star = output_oq[site]
+
+        dist = np.array([mean_dist])
+        mag = mean_mag
+
+    else:
+        mag = meanMag_disagg
+        dist = np.array([meanDist_disagg])
+        im_star = hazard_value
 
     return im_star, dist, mag
