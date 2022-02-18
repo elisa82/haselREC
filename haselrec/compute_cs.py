@@ -54,37 +54,37 @@ def compute_cs(t_cs, bgmpe, sctx, rctx, dctx, im_type, t_star, rrup, mag,
             sctx, rctx, dctx, p, s)
     sigma_im_cond = sigma_im_cond[0]
 
-    if (str(bgmpe.DEFINED_FOR_INTENSITY_MEASURE_COMPONENT) ==
-                'IMC.GREATER_OF_TWO_HORIZONTAL'):
-        if im_type == 'PGA' or im_type == 'SA':
-            from shakelib.conversions.imc.boore_kishida_2017 import \
-                BooreKishida2017
+    #if (str(bgmpe.DEFINED_FOR_INTENSITY_MEASURE_COMPONENT) ==
+    #            'IMC.GREATER_OF_TWO_HORIZONTAL'):
+    #    if im_type == 'PGA' or im_type == 'SA':
+    #        from shakelib.conversions.imc.boore_kishida_2017 import \
+    #            BooreKishida2017
 
-            if(bgmpe()=='[Ambraseys1996]'):
-                mw =np.exp(1.421+0.108*mag)-1.863
-            else:
-                mw=mag
-
-            bk17 = BooreKishida2017(const.IMC.GREATER_OF_TWO_HORIZONTAL,
-                                    const.IMC.RotD50)
-            mu_im_cond = bk17.convertAmps(p, mu_im_cond, rrup, float(mw))
-            sigma_im_cond = bk17.convertSigmas(p, sigma_im_cond[0])
-        else:
-            sys.exit('Error: conversion between intensity measures is not '
-                     'possible for AvgSA')
+    #        if(bgmpe()=='[Ambraseys1996]'):
+    #            mw =np.exp(1.421+0.108*mag)-1.863
+    #        else:
+    #            mw=mag
+    #
+    #        bk17 = BooreKishida2017(const.IMC.GREATER_OF_TWO_HORIZONTAL,
+    #                                const.IMC.RotD50)
+    #        mu_im_cond = bk17.convertAmps(p, mu_im_cond, rrup, float(mw))
+    #        sigma_im_cond = bk17.convertSigmas(p, sigma_im_cond[0])
+    #    else:
+    #        sys.exit('Error: conversion between intensity measures is not '
+    #                 'possible for AvgSA')
 
     # Compute how many standard deviations the PSHA differs from
     # the GMPE value
-    from shakelib.conversions.imc.boore_kishida_2017 import \
-                BooreKishida2017
+    #from shakelib.conversions.imc.boore_kishida_2017 import \
+    #            BooreKishida2017
 
     if(bgmpe()=='[Ambraseys1996]'):
         mw =np.exp(1.421+0.108*mag)-1.863
     else:
         mw=mag
 
-    bk17 = BooreKishida2017(const.IMC.GREATER_OF_TWO_HORIZONTAL,const.IMC.RotD50)
-    im_star = bk17.convertAmps(p, im_star, rrup, float(mw))
+    #bk17 = BooreKishida2017(const.IMC.GREATER_OF_TWO_HORIZONTAL,const.IMC.RotD50)
+    #im_star = bk17.convertAmps(p, im_star, rrup, float(mw))
             
     epsilon = (np.log(im_star) - mu_im_cond) / sigma_im_cond
 
@@ -103,22 +103,22 @@ def compute_cs(t_cs, bgmpe, sctx, rctx, dctx, im_type, t_star, rrup, mag,
         mu0, sigma0 = bgmpe().get_mean_and_stddevs(sctx, rctx, dctx, p, s)
 
 
-        if (str(bgmpe.DEFINED_FOR_INTENSITY_MEASURE_COMPONENT) ==
-                'IMC.GREATER_OF_TWO_HORIZONTAL'):
+        #if (str(bgmpe.DEFINED_FOR_INTENSITY_MEASURE_COMPONENT) ==
+        #        'IMC.GREATER_OF_TWO_HORIZONTAL'):
 
-            if im_type == 'PGA' or im_type == 'SA':
-                from shakelib.conversions.imc.boore_kishida_2017 \
-                    import BooreKishida2017
+        #    if im_type == 'PGA' or im_type == 'SA':
+        #        from shakelib.conversions.imc.boore_kishida_2017 \
+        #            import BooreKishida2017
 
-                bk17 = BooreKishida2017(const.IMC.GREATER_OF_TWO_HORIZONTAL,
-                                        const.IMC.RotD50)
+        #        bk17 = BooreKishida2017(const.IMC.GREATER_OF_TWO_HORIZONTAL,
+        #                                const.IMC.RotD50)
                 
-                if(bgmpe()=='[Ambraseys1996]'):
-                    mw = np.exp(1.421+0.108*mag)-1.863
-                else:
-                    mw = mag
-                mu0 = bk17.convertAmps(p, mu0, rrup, float(mw))
-                sigma0 = bk17.convertSigmas(p, sigma0[0])
+        #        if(bgmpe()=='[Ambraseys1996]'):
+        #            mw = np.exp(1.421+0.108*mag)-1.863
+        #        else:
+        #            mw = mag
+        #        mu0 = bk17.convertAmps(p, mu0, rrup, float(mw))
+        #        sigma0 = bk17.convertSigmas(p, sigma0[0])
 
         mu_im[i] = mu0
         sigma_im[i] = sigma0[0]

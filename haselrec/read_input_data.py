@@ -46,7 +46,7 @@ def read_input_data(fileini):
         hypo_depth=10
 
         [database parameters for screening recordings]
-        database_path=../OpenInsel/GM-Records-Database/database_flatfile.csv
+        database_path=../haselREC/GM-Records/
         allowed_database={ESM,NGA-West2}
         allowed_depth=[0,30]
         radius_dist={50}

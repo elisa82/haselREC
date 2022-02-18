@@ -15,3 +15,6 @@ haselrec/desktop.ini
 docs/desktop.ini
 docs/_templates/
 docs/_static/
+READMEshakelib.txt
+build/latex/
+complement_database.py
