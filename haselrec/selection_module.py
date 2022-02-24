@@ -25,7 +25,9 @@ def selection_module(intensity_measures, site_code, rlz_code,
                      radius_mag_input, allowed_depth, n_gm, random_seed,
                      n_trials, weights, n_loop, penalty, output_folder,
                      meanMag_disagg, meanDist_disagg, 
-                     hazard_value, hazard_mode, component, correlated_motion):
+                     hazard_value, hazard_mode, component, correlated_motion,
+                     code_spectrum_file, period_range_spectrumcompatibility, 
+                     threshold_up, threshold_low, selection_type):
     """
     This module is called when mode :code:`--run-selection` is specified.
 
@@ -63,6 +65,8 @@ def selection_module(intensity_measures, site_code, rlz_code,
     from .find_ground_motion import find_ground_motion
     from .optimize_ground_motion import optimize_ground_motion
 
+
+
     # %% Start the routine
     print('Inputs loaded, starting selection....')
     ind = 1
@@ -70,120 +74,125 @@ def selection_module(intensity_measures, site_code, rlz_code,
     # For each site investigated
     for ii in np.arange(len(site_code)):
 
-        # Get the current site and realisation indices
-        site = site_code[ii]
-        rlz = rlz_code[ii]
+        if(selection_type=='conditional-spectrum'):
 
-        # For each hazard of poe level investigated
-        for jj in np.arange(len(probability_of_exceedance_num)):
+            # Get the current site and realisation indices
+            site = site_code[ii]
+            rlz = rlz_code[ii]
 
-            poe = probability_of_exceedance_num[jj]
+            # For each hazard of poe level investigated
+            for jj in np.arange(len(probability_of_exceedance_num)):
 
-            if hasattr(maxsf_input, '__len__'):
-                maxsf = maxsf_input[jj]
-            else:
-                maxsf = maxsf_input
-            if hasattr(radius_dist_input, '__len__'):
-                radius_dist = radius_dist_input[jj]
-            else:
-                radius_dist = radius_dist_input
-            if hasattr(radius_mag_input, '__len__'):
-                radius_mag = radius_mag_input[jj]
-            else:
-                radius_mag = radius_mag_input
+                poe = probability_of_exceedance_num[jj]
 
-            # For each intensity measure investigated
-            for im in np.arange(len(intensity_measures)):
+                if hasattr(maxsf_input, '__len__'):
+                    maxsf = maxsf_input[jj]
+                else:
+                    maxsf = maxsf_input
+                if hasattr(radius_dist_input, '__len__'):
+                    radius_dist = radius_dist_input[jj]
+                else:
+                    radius_dist = radius_dist_input
+                if hasattr(radius_mag_input, '__len__'):
+                    radius_mag = radius_mag_input[jj]
+                else:
+                    radius_mag = radius_mag_input
 
-                name = intensity_measures[im] + '-site_' + str(
-                    site) + '-poe-' + str(poe)
+                # For each intensity measure investigated
+                for im in np.arange(len(intensity_measures)):
 
-                # Print some on screen feedback
-                print('Processing ' + name + ' Case: ' + str(ind) + '/' + str(
-                    len(site_code) * len(probability_of_exceedance_num) * len(
-                        intensity_measures)))
-                ind += 1
+                    name = intensity_measures[im] + '-site_' + str(
+                        site) + '-poe-' + str(poe)
 
-                [im_star, rjb, mag] = \
-                    compute_conditioning_value(rlz, intensity_measures[im],
-                                               site, poe, num_disagg,
-                                               probability_of_exceedance[jj],
-                                               num_classical,
-                                               path_results_disagg,
-                                               investigation_time,
-                                               path_results_classical,
-                                               meanMag_disagg, meanDist_disagg, 
-                                               hazard_value, hazard_mode)
+                    # Print some on screen feedback
+                    print('Processing ' + name + ' Case: ' + str(ind) + '/' + str(
+                        len(site_code) * len(probability_of_exceedance_num) * len(
+                            intensity_measures)))
+                    ind += 1
 
-                [bgmpe, sctx, rctx, dctx, vs30, rrup] = \
-                    inizialize_gmm(ii, gmpe_input, rjb, mag, hypo_depth, dip,
-                                   rake, upper_sd, lower_sd, azimuth, fhw,
-                                   vs30type, vs30_input, z2pt5, z1pt0, site_code)
+                    [im_star, rjb, mag] = \
+                        compute_conditioning_value(rlz, intensity_measures[im],
+                                                   site, poe, num_disagg,
+                                                   probability_of_exceedance[jj],
+                                                   num_classical,
+                                                   path_results_disagg,
+                                                   investigation_time,
+                                                   path_results_classical,
+                                                   meanMag_disagg, meanDist_disagg, 
+                                                   hazard_value, hazard_mode)
 
-                # Screen the database of available ground motions
+                    [bgmpe, sctx, rctx, dctx, vs30, rrup] = \
+                        inizialize_gmm(ii, gmpe_input, rjb, mag, hypo_depth, dip,
+                                       rake, upper_sd, lower_sd, azimuth, fhw,
+                                       vs30type, vs30_input, z2pt5, z1pt0, site_code)
 
-                [sa_known, ind_per, tgt_per, n_big, allowed_index, event_id,
-                 station_code, source, record_sequence_number_nga, event_mw,
-                 event_mag, acc_distance, station_vs30, station_ec8] = \
-                    screen_database(database_path, allowed_database,
-                                    allowed_recs_vs30, radius_dist, dist_range_input,
-                                    radius_mag, rjb, mag, allowed_ec8_code,
-                                    target_periods, n_gm, allowed_depth, vs30, bgmpe,
-                                    component)
+                    # Screen the database of available ground motions
 
-                # Compute the target spectrum
+                    [sa_known, ind_per, tgt_per, n_big, allowed_index, event_id,
+                     station_code, source, record_sequence_number_nga, event_mw,
+                     event_mag, acc_distance, station_vs30, station_ec8] = \
+                        screen_database(database_path, allowed_database,
+                                        allowed_recs_vs30, radius_dist, dist_range_input,
+                                        radius_mag, rjb, mag, allowed_ec8_code,
+                                        target_periods, n_gm, allowed_depth, vs30, bgmpe,
+                                        component)
 
-                [mean_req, cov_req, stdevs] = \
-                    compute_cs(tgt_per, bgmpe, sctx, rctx, dctx, im_type[im],
-                               tstar[im], rrup, mag, avg_periods, corr_type,
-                               im_star, gmpe_input)
+                    # Compute the target spectrum
 
-                simulated_spectra = simulate_spectra(random_seed,
-                                                     n_trials,
-                                                     mean_req,
-                                                     cov_req,
-                                                     stdevs,
-                                                     n_gm,
-                                                     weights)
+                    [mean_req, cov_req, stdevs] = \
+                        compute_cs(tgt_per, bgmpe, sctx, rctx, dctx, im_type[im],
+                                   tstar[im], rrup, mag, avg_periods, corr_type,
+                                   im_star, gmpe_input)
 
-                [sample_small, sample_big, id_sel, ln_sa1,
-                 rec_id, im_scale_fac] = \
-                    find_ground_motion(tgt_per, tstar[im], avg_periods,
-                                       intensity_measures[im], n_gm,
-                                       sa_known, ind_per, mean_req,
-                                       n_big, simulated_spectra, maxsf,
-                                       event_id, station_code, allowed_index,
-                                       correlated_motion)
+                    simulated_spectra = simulate_spectra(random_seed,
+                                                         n_trials,
+                                                         mean_req,
+                                                         cov_req,
+                                                         stdevs,
+                                                         n_gm,
+                                                         weights)
 
-                # Further optimize the ground motion selection
+                    [sample_small, sample_big, id_sel, ln_sa1,
+                     rec_id, im_scale_fac] = \
+                        find_ground_motion(tgt_per, tstar[im], avg_periods,
+                                           intensity_measures[im], n_gm,
+                                           sa_known, ind_per, mean_req,
+                                           n_big, simulated_spectra, maxsf,
+                                           event_id, station_code, allowed_index,
+                                           correlated_motion)
 
-                [final_records, final_scale_factors, sample_small] = \
-                    optimize_ground_motion(n_loop, n_gm, sample_small, n_big,
-                                             id_sel, ln_sa1, maxsf, sample_big,
-                                             tgt_per, mean_req, stdevs, weights,
-                                             penalty, rec_id, im_scale_fac, 
-                                             event_id, station_code, allowed_index,
-                                             correlated_motion)
+                    # Further optimize the ground motion selection
 
-                # Create the outputs folder
-                folder = output_folder + '/' + name
-                if not os.path.exists(folder):
-                    os.makedirs(folder)
+                    [final_records, final_scale_factors, sample_small] = \
+                        optimize_ground_motion(n_loop, n_gm, sample_small, n_big,
+                                                 id_sel, ln_sa1, maxsf, sample_big,
+                                                 tgt_per, mean_req, stdevs, weights,
+                                                 penalty, rec_id, im_scale_fac, 
+                                                 event_id, station_code, allowed_index,
+                                                 correlated_motion)
 
-                # Plot the figure
-                plot_final_selection(name, im_type_lbl[im], n_gm, tgt_per,
-                                     sample_small, mean_req, stdevs,
-                                     output_folder)
+                    # Create the outputs folder
+                    folder = output_folder + '/' + name
+                    if not os.path.exists(folder):
+                        os.makedirs(folder)
 
-                # Collect information of the final record set
-                rec_idx = [allowed_index[i] for i in final_records]
-                # Create the summary file along with the file with the CS
-                create_output_files(output_folder, name, im_star, mag,
-                                    rjb[0], n_gm, rec_idx, source, event_id,
-                                    station_code, event_mw, acc_distance,
-                                    station_vs30, station_ec8,
-                                    final_scale_factors, tgt_per, mean_req,
-                                    stdevs, record_sequence_number_nga,
-                                    event_mag, component)
+                    # Plot the figure
+                    plot_final_selection(name, im_type_lbl[im], n_gm, tgt_per,
+                                         sample_small, mean_req, stdevs,
+                                         output_folder)
+
+                    # Collect information of the final record set
+                    rec_idx = [allowed_index[i] for i in final_records]
+                    # Create the summary file along with the file with the CS
+                    create_output_files(output_folder, name, im_star, mag,
+                                        rjb[0], n_gm, rec_idx, source, event_id,
+                                        station_code, event_mw, acc_distance,
+                                        station_vs30, station_ec8,
+                                        final_scale_factors, tgt_per, mean_req,
+                                        stdevs, record_sequence_number_nga,
+                                        event_mag, component)
+
+        elif(selection_type=='code-spectrum'):
+            print('code-spectrum')
 
     return

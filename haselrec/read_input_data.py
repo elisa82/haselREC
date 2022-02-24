@@ -20,6 +20,7 @@ def read_input_data(fileini):
 
         [general]
         description = Selection for Italy - AvgSA
+        selection_type = conditional-spectrum
 
         [hazard parameters]
         hazard_mode=0
@@ -75,6 +76,7 @@ def read_input_data(fileini):
 
     **General - section**
     It contains the description of the run. It is not used by haselREC.
+        - :code:`selection_type`: It can be conditional-spectrum or code-spectrum;
 
     **Hazard Parameters - section**
     It contains the hazard parameters, which must be defined according to the
@@ -106,9 +108,11 @@ def read_input_data(fileini):
         - :code:`investigation_time`: period of time (in years) used for PSHA in
           OpenQuake (only in case of :code:`hazard_mode`=0);
         - :code:`meanMag_disagg`: mean magnitude from disaggregation analysis 
-          (only in case of :code:`hazard_mode`=1);
+          (only in case of :code:`hazard_mode`=1 or 
+          :code:`selection_type`=code-spectrum);
         - :code:`meanDist_disagg`: mean distance from disaggregation analysis 
-          (only in case of :code:`hazard_mode`=1);
+          (only in case of :code:`hazard_mode`=1 or;
+          :code:`selection_type`=code-spectrum);
         - :code:`hazard_value`: hazard value from disaggregation analysis 
           (only in case of :code:`hazard_mode`=1)
 
@@ -153,9 +157,25 @@ def read_input_data(fileini):
           the EC8 soil class will be defined consistently withe the EC8 soil
           class of the site;
 
+    **Code Spectrum Parameters - section**
+        - :code:`code_spectrum_file`: path to the file containing the code spectrum (in g)
+        - :code:`period_range_spectrumcompatibility`: period interval for 
+          spectrum compatibility (sec)
+        - :code:`threshold_up`: maximum threshold for the maximum positive 
+          difference (%)
+        - :code:`threshold_low`: = minimum tthreshold for the maximum negative
+          dfference (%)
+        - :code:`allowed_recs_vs30`: (optional) Range of allowed vs30 values.
+          If not defined, the vs30 range will be defined consistently withe the
+          vs30 of the site;
+        - :code:`allowed_ec8_code`: (optional). List of allowed EC8 soil class
+          codes. It can be ['A', 'B', 'C', 'D', 'E' or 'All']. If not defined,
+          the EC8 soil class will be defined consistently withe the EC8 soil
+          class of the site;
+
     **Database Parameters For Screening Recordings - section**
 
-        - :code:`component`: It can be single-component or two-component
+        - :code:`component`: it can be single-component or two-component
         - :code:`database_path`: path to the folder containing the strong motion
           database;
         - :code:`allowed_database`: list of databases to consider for record
@@ -213,158 +233,198 @@ def read_input_data(fileini):
                 input[key.strip()] = value.strip()
             line = fp.readline()
 
+    selection_type = input['selection_type']
+
     # %% Extract input parameters
 
     # Hazard parameters
-    hazard_mode=int(input['hazard_mode'])
-    intensity_measures = [x.strip() for x in
-                          input['intensity_measures'].strip('{}').split(',')]
-    site_code = [x.strip() for x in input['site_code'].strip('{}').split(',')]
-    site_code = np.array(site_code, dtype=int)
-    rlz_code = [x.strip() for x in input['rlz_code'].strip('{}').split(',')]
-    rlz_code = np.array(rlz_code, dtype=int)
-    if len(rlz_code) != len(site_code):
-        sys.exit(
-            'Error: rlz_code must be an array of the same length of site_code')
-    probability_of_exceedance_num = [x.strip() for x in input[
-        'probability_of_exceedance_num'].strip('{}').split(',')]
-    probability_of_exceedance_num = np.array(probability_of_exceedance_num,
-                                             dtype=int)
-    if(hazard_mode==0):
-        path_results_classical = input['path_results_classical']
-        path_results_disagg = input['path_results_disagg']
-        num_disagg = int(input['num_disagg'])
-        num_classical = int(input['num_classical'])
-        probability_of_exceedance = [x.strip() for x in
-                                     input['probability_of_exceedance'].strip(
-                                         '{}').split(',')]
-        if (len(probability_of_exceedance_num) != len(
-                probability_of_exceedance_num)):
+
+    if( selection_type == 'conditional-spectrum'): 
+        hazard_mode=int(input['hazard_mode'])
+        intensity_measures = [x.strip() for x in
+                              input['intensity_measures'].strip('{}').split(',')]
+        site_code = [x.strip() for x in input['site_code'].strip('{}').split(',')]
+        site_code = np.array(site_code, dtype=int)
+        rlz_code = [x.strip() for x in input['rlz_code'].strip('{}').split(',')]
+        rlz_code = np.array(rlz_code, dtype=int)
+        if len(rlz_code) != len(site_code):
             sys.exit(
-                'Error: probability_of_exceedance_num must be of the same size of '
-                'probability_of_exceedance')
-        investigation_time = float(input['investigation_time'])
-        meanMag_disagg=[]
-        meanDist_disagg=[]
-        hazard_value=[]
-    else:
+                'Error: rlz_code must be an array of the same length of site_code')
+        probability_of_exceedance_num = [x.strip() for x in input[
+            'probability_of_exceedance_num'].strip('{}').split(',')]
+        probability_of_exceedance_num = np.array(probability_of_exceedance_num,
+                                                 dtype=int)
+        if(hazard_mode==0):
+            path_results_classical = input['path_results_classical']
+            path_results_disagg = input['path_results_disagg']
+            num_disagg = int(input['num_disagg'])
+            num_classical = int(input['num_classical'])
+            probability_of_exceedance = [x.strip() for x in
+                                         input['probability_of_exceedance'].strip(
+                                             '{}').split(',')]
+            if (len(probability_of_exceedance_num) != len(
+                    probability_of_exceedance_num)):
+                sys.exit(
+                    'Error: probability_of_exceedance_num must be of the same size of '
+                    'probability_of_exceedance')
+            investigation_time = float(input['investigation_time'])
+            meanMag_disagg=[]
+            meanDist_disagg=[]
+            hazard_value=[]
+        else:
+            meanMag_disagg=float(input['meanMag_disagg'])
+            meanDist_disagg=float(input['meanDist_disagg'])
+            hazard_value=float(input['hazard_value'])
+            path_results_classical = []
+            path_results_disagg = []
+            num_disagg = []
+            num_classical = []
+            probability_of_exceedance = [0]
+            investigation_time=[]
+    elif( selection_type == 'conditional-spectrum'): 
         meanMag_disagg=float(input['meanMag_disagg'])
         meanDist_disagg=float(input['meanDist_disagg'])
-        hazard_value=float(input['hazard_value'])
-        path_results_classical = []
-        path_results_disagg = []
-        num_disagg = []
-        num_classical = []
-        probability_of_exceedance = [0]
-        investigation_time=[]
+        hazard_mode=[]
+        intensity_measures = []
+        site_code = [x.strip() for x in input['site_code'].strip('{}').split(',')]
+        site_code = np.array(site_code, dtype=int)
+        rlz_code = []
+    else:
+        sys.exit('Error: this selection type ' + str(selection_type) 
+                + ' is not supported')
 
-    # Conditional spectrum parameters
-    target_periods = [x.strip() for x in
-                      input['target_periods'].strip('[]').split(',')]
-    target_periods = np.array(target_periods, dtype=float)
+    #Spectrum parameters 
 
-    tstar = np.zeros(len(intensity_measures))
+    target_periods = []
+    tstar = []
     im_type = []
     im_type_lbl = []
     avg_periods = []
-
-    for i in np.arange(len(intensity_measures)):
-        if intensity_measures[i] == 'AvgSA':
-            im_type.append('AvgSA')
-            im_type_lbl.append(r'AvgSa')
-            avg_periods = [x.strip() for x in
-                           input['avg_periods'].strip('[]').split(',')]
-            avg_periods = np.array(avg_periods, dtype=float)
-        elif intensity_measures[i][0:2] == 'SA':
-            im_type.append('SA')
-            im_type_lbl.append(r'Sa(T)')
-            tstar[i] = intensity_measures[i].strip('(,),SA')
-            tstar[i] = float(tstar[i])
-        elif intensity_measures[i][0:3] == 'PGA':
-            im_type.append('PGA')
-            im_type_lbl.append(r'PGA')
-            tstar[i] = 0.0
-        else:
-            sys.exit('Error: this intensity measure type ' + str(
-                intensity_measures[i]) + ' is not supported yet')
-
-    # baker_jayaram or akkar
-    corr_type = input['corr_type']
-    gmpe_input = input['GMPE']
-    rake = float(input['rake'])
-
-    vs30_input = [x.strip() for x in input['Vs30'].strip('{}').split(',')]
-    if len(vs30_input) != len(site_code):
-        sys.exit('Error: Vs30 must be an array of the same length of site_code')
-
-    vs30type = [x.strip() for x in input['vs30Type'].strip('{}').split(',')]
-    if len(vs30type) != len(site_code):
-        sys.exit(
-            'Error: vs30Type must be an array of the same length of site_code')
-
+    rake = None
+    gmpe_input = None
+    corr_type = None
+    vs30_input = []
+    vs30type = []
     hypo_depth = None
-    try:
-        hypo_depth = float(input['hypo_depth'])
-    except KeyError:
-        print(
-            'Warning: if used, the hypocentral depth will be defined inside'
-            ' the code')
-
     dip = None
-    try:
-        dip = float(input['dip'])
-    except KeyError:
-        print('Warning: if used, the dip angle will be defined inside the code')
-
     azimuth = None
     fhw = None
-    try:
-        azimuth = float(input['azimuth'])
-    except KeyError:
-        try:
-            fhw = int(input['hanging_wall_flag'])
-            if fhw != 1 and fhw != -1:
-                sys.exit('Error: The hanging_wall_flag must be =1 or =-1')
-        except KeyError:
-            sys.exit(
-                'Error: The azimuth or the hanging_wall_flag must be defined')
-
     z2pt5 = None
-    try:
-        z2pt5 = [x.strip() for x in input['z2pt5'].strip('{}').split(',')]
-        if len(z2pt5) != len(site_code):
-            sys.exit('Error: z2pt5 must be an array of the same length of'
-                     ' site_code')
-    except KeyError:
-        print('Warning: if used, z2pt5 will be defined inside the code')
-
     z1pt0 = None
-    try:
-        z1pt0 = [x.strip() for x in input['z1pt0'].strip('{}').split(',')]
-        if len(z1pt0) != len(site_code):
-            sys.exit(
-                'Error: z1pt0 must be an array of the same length of site_code')
-    except KeyError:
-        print('Warning: if used, z1pt0 will be defined inside the code')
-
     upper_sd = None
-    try:
-        upper_sd = float(input['upper_sd'])
-    except KeyError:
-        print('Warning: the upper_sd value will be defined inside the code')
-
     lower_sd = None
-    try:
-        lower_sd = float(input['lower_sd'])
-    except KeyError:
-        print('Warning: the lower_sd value will be defined inside the code')
+    threshold_up = None
+    threshold_low = None
+    code_spectrum_file = None
+    period_range_spectrumcompatibility = []
 
+    if( selection_type == 'conditional-spectrum'):
+
+    # Conditional spectrum parameters
+        target_periods = [x.strip() for x in
+                          input['target_periods'].strip('[]').split(',')]
+        target_periods = np.array(target_periods, dtype=float)
+
+        tstar = np.zeros(len(intensity_measures))
+
+        for i in np.arange(len(intensity_measures)):
+            if intensity_measures[i] == 'AvgSA':
+                im_type.append('AvgSA')
+                im_type_lbl.append(r'AvgSa')
+                avg_periods = [x.strip() for x in
+                               input['avg_periods'].strip('[]').split(',')]
+                avg_periods = np.array(avg_periods, dtype=float)
+            elif intensity_measures[i][0:2] == 'SA':
+                im_type.append('SA')
+                im_type_lbl.append(r'Sa(T)')
+                tstar[i] = intensity_measures[i].strip('(,),SA')
+                tstar[i] = float(tstar[i])
+            elif intensity_measures[i][0:3] == 'PGA':
+                im_type.append('PGA')
+                im_type_lbl.append(r'PGA')
+                tstar[i] = 0.0
+            else:
+                sys.exit('Error: this intensity measure type ' + str(
+                    intensity_measures[i]) + ' is not supported yet')
+
+        # baker_jayaram or akkar
+        corr_type = input['corr_type']
+        gmpe_input = input['GMPE']
+        rake = float(input['rake'])
+
+        vs30_input = [x.strip() for x in input['Vs30'].strip('{}').split(',')]
+        if len(vs30_input) != len(site_code):
+            sys.exit('Error: Vs30 must be an array of the same length of site_code')
+
+        vs30type = [x.strip() for x in input['vs30Type'].strip('{}').split(',')]
+        if len(vs30type) != len(site_code):
+            sys.exit(
+                'Error: vs30Type must be an array of the same length of site_code')
+
+        try:
+            hypo_depth = float(input['hypo_depth'])
+        except KeyError:
+            print(
+                'Warning: if used, the hypocentral depth will be defined inside'
+                ' the code')
+
+        try:
+            dip = float(input['dip'])
+        except KeyError:
+            print('Warning: if used, the dip angle will be defined inside the code')
+
+        try:
+            azimuth = float(input['azimuth'])
+        except KeyError:
+            try:
+                fhw = int(input['hanging_wall_flag'])
+                if fhw != 1 and fhw != -1:
+                    sys.exit('Error: The hanging_wall_flag must be =1 or =-1')
+            except KeyError:
+                sys.exit(
+                    'Error: The azimuth or the hanging_wall_flag must be defined')
+
+        try:
+            z2pt5 = [x.strip() for x in input['z2pt5'].strip('{}').split(',')]
+            if len(z2pt5) != len(site_code):
+                sys.exit('Error: z2pt5 must be an array of the same length of'
+                         ' site_code')
+        except KeyError:
+            print('Warning: if used, z2pt5 will be defined inside the code')
+
+        try:
+            z1pt0 = [x.strip() for x in input['z1pt0'].strip('{}').split(',')]
+            if len(z1pt0) != len(site_code):
+                sys.exit(
+                    'Error: z1pt0 must be an array of the same length of site_code')
+        except KeyError:
+            print('Warning: if used, z1pt0 will be defined inside the code')
+
+        try:
+            upper_sd = float(input['upper_sd'])
+        except KeyError:
+            print('Warning: the upper_sd value will be defined inside the code')
+
+        try:
+            lower_sd = float(input['lower_sd'])
+        except KeyError:
+            print('Warning: the lower_sd value will be defined inside the code')
+
+    # Code spectrum parameters
+    if( selection_type == 'code-spectrum'):
+        code_spectrum_file = input['code_spectrum_file']
+        period_range_spectrumcompatibility = [x.strip() for x in
+            input['period_range_spectrumcompatibility'].strip('[]').split(
+                         ',')]
+        period_range_spectrumcompatibility = np.array(period_range_spectrumcompatibility, dtype=float)
+        threshold_up = float(input['threshold_up'])
+        threshold_low = float(input['threshold_low'])
+        
     # Database parameters for screening recordings
     component = input['component']
     database_path = input['database_path']
     allowed_database = [x.strip() for x in
                         input['allowed_database'].strip('{}').split(',')]
-
 
     allowed_recs_vs30 = None
     try:
@@ -383,7 +443,6 @@ def read_input_data(fileini):
     except KeyError:
         print('Warning: the EC8 soil class will be defined consistently with'
               ' the EC8 soil class of the site ')
-
 
     try:
         maxsf_input = float(input['maxsf'])
@@ -479,4 +538,7 @@ def read_input_data(fileini):
             radius_mag_input, allowed_depth, n_gm, random_seed, n_trials,
             weights, n_loop, penalty, path_nga_folder, path_esm_folder,
             output_folder, meanMag_disagg, meanDist_disagg, hazard_value, 
-            hazard_mode, component, correlated_motion)
+            hazard_mode, component, correlated_motion, code_spectrum_file,
+            period_range_spectrumcompatibility, threshold_up, threshold_low,
+            selection_type)
+

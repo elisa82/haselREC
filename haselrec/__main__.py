@@ -87,7 +87,9 @@ if __name__ == '__main__':
      maxsf_input, radius_dist_input, dist_range_input, radius_mag_input, allowed_depth, n_gm,
      random_seed, n_trials, weights, n_loop, penalty, path_nga_folder,
      path_esm_folder, output_folder, meanMag_disagg, meanDist_disagg, 
-     hazard_value, hazard_mode, component, correlated_motion] = read_input_data(fileini)
+     hazard_value, hazard_mode, component, correlated_motion,
+     code_spectrum_file, period_range_spectrumcompatibility, 
+     threshold_up, threshold_low, selection_type] = read_input_data(fileini)
 
     if calculation_mode == '--run-complete' or \
             calculation_mode == '--run-selection':
@@ -105,7 +107,9 @@ if __name__ == '__main__':
                          radius_dist_input, dist_range_input, radius_mag_input, allowed_depth,
                          n_gm, random_seed, n_trials, weights, n_loop, penalty,
                          output_folder, meanMag_disagg, meanDist_disagg, 
-                         hazard_value, hazard_mode, component, correlated_motion)
+                         hazard_value, hazard_mode, component, correlated_motion,
+                         code_spectrum_file, period_range_spectrumcompatibility,
+                         threshold_up, threshold_low, selection_type)
 
     if calculation_mode == '--check-NGArec':
         check_module(output_folder, site_code, probability_of_exceedance_num,
