@@ -46,6 +46,7 @@ def read_input_data(fileini):
         hypo_depth=10
 
         [database parameters for screening recordings]
+        component=single-component
         database_path=../haselREC/GM-Records/
         allowed_database={ESM,NGA-West2}
         allowed_depth=[0,30]
@@ -154,6 +155,7 @@ def read_input_data(fileini):
 
     **Database Parameters For Screening Recordings - section**
 
+        - :code:`component`: It can be single-component or two-component
         - :code:`database_path`: path to the folder containing the strong motion
           database;
         - :code:`allowed_database`: list of databases to consider for record
@@ -171,6 +173,10 @@ def read_input_data(fileini):
           (:code:`probability_of_exceedance`);
         - :code:`maxsf`: list of maximum allowable scale factor. They must be
           specified for each probability of exceedance (:code:`probability_of_exceedance`);
+        - :code:`correlated_motion`: it can be yes or no. If no, 
+          exclude ground motions from the same stations and earthquake. The 
+          default is yes (i.e. consider also recordings from same stations and 
+          earthquakes)
 
     **Selection Parameters - section**
 
@@ -354,6 +360,7 @@ def read_input_data(fileini):
         print('Warning: the lower_sd value will be defined inside the code')
 
     # Database parameters for screening recordings
+    component = input['component']
     database_path = input['database_path']
     allowed_database = [x.strip() for x in
                         input['allowed_database'].strip('{}').split(',')]
@@ -390,6 +397,13 @@ def read_input_data(fileini):
             sys.exit(
                 'Error: maxsf must be of the same size of '
                 'probability_of_exceedance')
+
+    correlated_motion='yes'
+    try:
+        correlated_motion = input['correlated_motion']
+    except KeyError:
+         print('The selection could include recordings associated to not '
+                 'unique stations and earthquakes')
 
     try:
         radius_dist_input = float(input['radius_dist'])
@@ -465,4 +479,4 @@ def read_input_data(fileini):
             radius_mag_input, allowed_depth, n_gm, random_seed, n_trials,
             weights, n_loop, penalty, path_nga_folder, path_esm_folder,
             output_folder, meanMag_disagg, meanDist_disagg, hazard_value, 
-            hazard_mode)
+            hazard_mode, component, correlated_motion)

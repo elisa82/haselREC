@@ -15,7 +15,8 @@
 
 def optimize_ground_motion(n_loop, n_gm, sample_small, n_big, id_sel, ln_sa1,
                              maxsf, sample_big, tgt_per, mean_req, stdevs,
-                             weights, penalty, rec_id, im_scale_fac):
+                             weights, penalty, rec_id, im_scale_fac, event,
+                             station, allowed_index, correlated_motion):
     """
     Executes incremental changes to the initially selected ground motion set to
     further optimize its fit to the target spectrum distribution. From:
@@ -73,7 +74,23 @@ def optimize_ground_motion(n_loop, n_gm, sample_small, n_big, id_sel, ln_sa1,
 
                 if scale_fac[j] > maxsf or scale_fac[j] < 1. / maxsf:
                     dev_total = dev_total + 1000000
-
+                
+                if(correlated_motion=='no'):
+                    rec_idx_j = allowed_index[j]
+                    if(rec_idx_j==-9999999999):
+                        rec_idx_j = 0
+                    else:
+                        rec_idx_j = np.abs(rec_idx_j)
+                    for l in range(i):
+                        rec_idx_l = allowed_index[rec_id[l]]
+                        if(rec_idx_l==-9999999999):
+                            rec_idx_l = 0
+                        else:
+                            rec_idx_l = np.abs(rec_idx_l)
+                        if(station[rec_idx_j]==station[rec_idx_l] or
+                                event[rec_idx_j]==event[rec_idx_l]):
+                            dev_total = dev_total + 1000000
+                        
                 # Should cause improvement and record should not
                 # be repeated
                 if dev_total < min_dev and not any(rec_id == j):

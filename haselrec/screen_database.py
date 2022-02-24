@@ -13,10 +13,12 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with haselREC. If not, see <http://www.gnu.org/licenses/>.
 
+
+
 def screen_database(database_path, allowed_database, allowed_recs_vs30,
                     radius_dist, dist_range_input, radius_mag, mean_dist, mean_mag,
                     allowed_ec8_code, target_periods, n_gm, allowed_depth,
-                    vs30, bgmpe):
+                    vs30, bgmpe, comp):
     """
     Screen the database of candidate ground motion to select only appropriate
     ground motions. The screening criteria are:
@@ -49,6 +51,14 @@ def screen_database(database_path, allowed_database, allowed_recs_vs30,
          0.3, 0.35, 0.4, 0.45, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9,
          1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.5, 3.0, 3.5, 4.0, 5.0, 6.0, 7.0, 8.0,
          9.0, 10])
+    if(comp=='two-component'):
+        sa_geo_list = []
+    elif(comp=='single-component'):
+        sa_hor1_list = []
+        sa_hor2_list = []
+        if 'NGA-West2' in allowed_database:
+            known_per=known_per[1:]
+    allowed_index = []
 
     # Match periods (known periods and target periods for error computations) 
     # save the indices of the matched periods in known_per
@@ -109,10 +119,6 @@ def screen_database(database_path, allowed_database, allowed_recs_vs30,
         else:
             allowed_ec8_code = 'D'
 
-    sa_geo_list = []
-    sa_hor1_list = []
-    sa_hor2_list = []
-    allowed_index = []
 
     event_id_tot = []
     station_code_tot = []
@@ -151,76 +157,78 @@ def screen_database(database_path, allowed_database, allowed_recs_vs30,
             source_tot.append('ESM')
             record_sequence_number_nga_tot.append(np.nan)
 
-            rotd50 = np.array([dbacc['rotD50_pga'][i], dbacc['rotD50_T0_010'][i],
-                               dbacc['rotD50_T0_025'][i], dbacc['rotD50_T0_040'][i],
-                               dbacc['rotD50_T0_050'][i], dbacc['rotD50_T0_070'][i],
-                               dbacc['rotD50_T0_100'][i], dbacc['rotD50_T0_150'][i],
-                               dbacc['rotD50_T0_200'][i], dbacc['rotD50_T0_250'][i],
-                               dbacc['rotD50_T0_300'][i], dbacc['rotD50_T0_350'][i],
-                               dbacc['rotD50_T0_400'][i], dbacc['rotD50_T0_450'][i],
-                               dbacc['rotD50_T0_500'][i], dbacc['rotD50_T0_600'][i],
-                               dbacc['rotD50_T0_700'][i], dbacc['rotD50_T0_750'][i],
-                               dbacc['rotD50_T0_800'][i], dbacc['rotD50_T0_900'][i],
-                               dbacc['rotD50_T1_000'][i], dbacc['rotD50_T1_200'][i],
-                               dbacc['rotD50_T1_400'][i], dbacc['rotD50_T1_600'][i],
-                               dbacc['rotD50_T1_800'][i], dbacc['rotD50_T2_000'][i],
-                               dbacc['rotD50_T2_500'][i], dbacc['rotD50_T3_000'][i],
-                               dbacc['rotD50_T3_500'][i], dbacc['rotD50_T4_000'][i],
-                               dbacc['rotD50_T5_000'][i], dbacc['rotD50_T6_000'][i],
-                               dbacc['rotD50_T7_000'][i], dbacc['rotD50_T8_000'][i],
-                               dbacc['rotD50_T9_000'][i],
-                               dbacc['rotD50_T10_000'][i]])
+            if(comp=='two-component'):
+                sa_entry = np.array([dbacc['rotD50_pga'][i], dbacc['rotD50_T0_010'][i],
+                                   dbacc['rotD50_T0_025'][i], dbacc['rotD50_T0_040'][i],
+                                   dbacc['rotD50_T0_050'][i], dbacc['rotD50_T0_070'][i],
+                                   dbacc['rotD50_T0_100'][i], dbacc['rotD50_T0_150'][i],
+                                   dbacc['rotD50_T0_200'][i], dbacc['rotD50_T0_250'][i],
+                                   dbacc['rotD50_T0_300'][i], dbacc['rotD50_T0_350'][i],
+                                   dbacc['rotD50_T0_400'][i], dbacc['rotD50_T0_450'][i],
+                                   dbacc['rotD50_T0_500'][i], dbacc['rotD50_T0_600'][i],
+                                   dbacc['rotD50_T0_700'][i], dbacc['rotD50_T0_750'][i],
+                                   dbacc['rotD50_T0_800'][i], dbacc['rotD50_T0_900'][i],
+                                   dbacc['rotD50_T1_000'][i], dbacc['rotD50_T1_200'][i],
+                                   dbacc['rotD50_T1_400'][i], dbacc['rotD50_T1_600'][i],
+                                   dbacc['rotD50_T1_800'][i], dbacc['rotD50_T2_000'][i],
+                                   dbacc['rotD50_T2_500'][i], dbacc['rotD50_T3_000'][i],
+                                   dbacc['rotD50_T3_500'][i], dbacc['rotD50_T4_000'][i],
+                                   dbacc['rotD50_T5_000'][i], dbacc['rotD50_T6_000'][i],
+                                   dbacc['rotD50_T7_000'][i], dbacc['rotD50_T8_000'][i],
+                                   dbacc['rotD50_T9_000'][i], dbacc['rotD50_T10_000'][i]])
+                sa_geo = None
+                sa_geo = sa_entry / 981  # in g
+                sa_geo_list.append(sa_geo)
+            elif(comp=='single-component'):
+                sa_entry = np.array([dbacc['U_pga'][i], dbacc['U_T0_010'][i],
+                                   dbacc['U_T0_025'][i], dbacc['U_T0_040'][i],
+                                   dbacc['U_T0_050'][i], dbacc['U_T0_070'][i],
+                                   dbacc['U_T0_100'][i], dbacc['U_T0_150'][i],
+                                   dbacc['U_T0_200'][i], dbacc['U_T0_250'][i],
+                                   dbacc['U_T0_300'][i], dbacc['U_T0_350'][i],
+                                   dbacc['U_T0_400'][i], dbacc['U_T0_450'][i],
+                                   dbacc['U_T0_500'][i], dbacc['U_T0_600'][i],
+                                   dbacc['U_T0_700'][i], dbacc['U_T0_750'][i],
+                                   dbacc['U_T0_800'][i], dbacc['U_T0_900'][i],
+                                   dbacc['U_T1_000'][i], dbacc['U_T1_200'][i],
+                                   dbacc['U_T1_400'][i], dbacc['U_T1_600'][i],
+                                   dbacc['U_T1_800'][i], dbacc['U_T2_000'][i],
+                                   dbacc['U_T2_500'][i], dbacc['U_T3_000'][i],
+                                   dbacc['U_T3_500'][i], dbacc['U_T4_000'][i],
+                                   dbacc['U_T5_000'][i], dbacc['U_T6_000'][i],
+                                   dbacc['U_T7_000'][i], dbacc['U_T8_000'][i],
+                                   dbacc['U_T9_000'][i], dbacc['U_T10_000'][i]])
 
-            hor1 = np.array([dbacc['U_pga'][i], dbacc['U_T0_010'][i],
-                               dbacc['U_T0_025'][i], dbacc['U_T0_040'][i],
-                               dbacc['U_T0_050'][i], dbacc['U_T0_070'][i],
-                               dbacc['U_T0_100'][i], dbacc['U_T0_150'][i],
-                               dbacc['U_T0_200'][i], dbacc['U_T0_250'][i],
-                               dbacc['U_T0_300'][i], dbacc['U_T0_350'][i],
-                               dbacc['U_T0_400'][i], dbacc['U_T0_450'][i],
-                               dbacc['U_T0_500'][i], dbacc['U_T0_600'][i],
-                               dbacc['U_T0_700'][i], dbacc['U_T0_750'][i],
-                               dbacc['U_T0_800'][i], dbacc['U_T0_900'][i],
-                               dbacc['U_T1_000'][i], dbacc['U_T1_200'][i],
-                               dbacc['U_T1_400'][i], dbacc['U_T1_600'][i],
-                               dbacc['U_T1_800'][i], dbacc['U_T2_000'][i],
-                               dbacc['U_T2_500'][i], dbacc['U_T3_000'][i],
-                               dbacc['U_T3_500'][i], dbacc['U_T4_000'][i],
-                               dbacc['U_T5_000'][i], dbacc['U_T6_000'][i],
-                               dbacc['U_T7_000'][i], dbacc['U_T8_000'][i],
-                               dbacc['U_T9_000'][i],
-                               dbacc['U_T10_000'][i]])
+                sa_entry2 = np.array([dbacc['V_pga'][i], dbacc['V_T0_010'][i],
+                                   dbacc['V_T0_025'][i], dbacc['V_T0_040'][i],
+                                   dbacc['V_T0_050'][i], dbacc['V_T0_070'][i],
+                                   dbacc['V_T0_100'][i], dbacc['V_T0_150'][i],
+                                   dbacc['V_T0_200'][i], dbacc['V_T0_250'][i],
+                                   dbacc['V_T0_300'][i], dbacc['V_T0_350'][i],
+                                   dbacc['V_T0_400'][i], dbacc['V_T0_450'][i],
+                                   dbacc['V_T0_500'][i], dbacc['V_T0_600'][i],
+                                   dbacc['V_T0_700'][i], dbacc['V_T0_750'][i],
+                                   dbacc['V_T0_800'][i], dbacc['V_T0_900'][i],
+                                   dbacc['V_T1_000'][i], dbacc['V_T1_200'][i],
+                                   dbacc['V_T1_400'][i], dbacc['V_T1_600'][i],
+                                   dbacc['V_T1_800'][i], dbacc['V_T2_000'][i],
+                                   dbacc['V_T2_500'][i], dbacc['V_T3_000'][i],
+                                   dbacc['V_T3_500'][i], dbacc['V_T4_000'][i],
+                                   dbacc['V_T5_000'][i], dbacc['V_T6_000'][i],
+                                   dbacc['V_T7_000'][i], dbacc['V_T8_000'][i],
+                                   dbacc['V_T9_000'][i], dbacc['V_T10_000'][i]])
 
-            hor2 = np.array([dbacc['V_pga'][i], dbacc['V_T0_010'][i],
-                               dbacc['V_T0_025'][i], dbacc['V_T0_040'][i],
-                               dbacc['V_T0_050'][i], dbacc['V_T0_070'][i],
-                               dbacc['V_T0_100'][i], dbacc['V_T0_150'][i],
-                               dbacc['V_T0_200'][i], dbacc['V_T0_250'][i],
-                               dbacc['V_T0_300'][i], dbacc['V_T0_350'][i],
-                               dbacc['V_T0_400'][i], dbacc['V_T0_450'][i],
-                               dbacc['V_T0_500'][i], dbacc['V_T0_600'][i],
-                               dbacc['V_T0_700'][i], dbacc['V_T0_750'][i],
-                               dbacc['V_T0_800'][i], dbacc['V_T0_900'][i],
-                               dbacc['V_T1_000'][i], dbacc['V_T1_200'][i],
-                               dbacc['V_T1_400'][i], dbacc['V_T1_600'][i],
-                               dbacc['V_T1_800'][i], dbacc['V_T2_000'][i],
-                               dbacc['V_T2_500'][i], dbacc['V_T3_000'][i],
-                               dbacc['V_T3_500'][i], dbacc['V_T4_000'][i],
-                               dbacc['V_T5_000'][i], dbacc['V_T6_000'][i],
-                               dbacc['V_T7_000'][i], dbacc['V_T8_000'][i],
-                               dbacc['V_T9_000'][i],
-                               dbacc['V_T10_000'][i]])
+                if 'NGA-West2' in allowed_database:
+                    sa_entry=sa_entry[1:]
+                    sa_entry2=sa_entry2[1:]
 
-            sa_geo_ESM = None
-            sa_hor1_ESM = None
-            sa_hor2_ESM = None
-            sa_geo_ESM = rotd50 / 981  # in g
-            sa_hor1_ESM = hor1 / 981  # in g
-            sa_hor2_ESM = hor2 / 981  # in g
-            sa_geo_list.append(sa_geo_ESM)
-            sa_hor1_list.append(sa_hor1_ESM)
-            sa_hor2_list.append(sa_hor2_ESM)
-            if all(v > 0 for v in sa_geo_ESM):
+                sa_hor1 = None
+                sa_hor2 = None
+                sa_hor1 = sa_entry / 981  # in g
+                sa_hor2 = sa_entry2 / 981  # in g
+                sa_hor1_list.append(sa_hor1)
+                sa_hor2_list.append(sa_hor2)
+            if all(v > 0 for v in sa_entry):
                 if (is_free_field[i] == 0):
                     if (allowed_recs_mag[0] <= event_mw[i] <= allowed_recs_mag[1]):
                         if (allowed_depth[0] <= event_depth[i] <= allowed_depth[1]):
@@ -255,7 +263,7 @@ def screen_database(database_path, allowed_database, allowed_recs_vs30,
         epi_lon = dbacc['Hypocenter Longitude (deg)']
         epi_lat = dbacc['Hypocenter Latitude (deg)']
 
-        for i in np.arange(index0_database,index0_database+len(event_id)):
+        for i in np.arange(len(event_id)):
             event_id_tot.append(event_id[i])
             station_code_tot.append(station_code[i])
             event_mw_tot.append(np.nan)
@@ -265,30 +273,73 @@ def screen_database(database_path, allowed_database, allowed_recs_vs30,
             station_ec8_tot.append(np.nan)
             source_tot.append('NGA-West2')
             record_sequence_number_nga_tot.append(record_sequence_number_nga[i])
-            rotd50 = np.array([dbacc['PGA (g)'][i], dbacc['T0.010S'][i],
-                               dbacc['T0.025S'][i], dbacc['T0.040S'][i],
-                               dbacc['T0.050S'][i], dbacc['T0.070S'][i],
-                               dbacc['T0.100S'][i], dbacc['T0.150S'][i],
-                               dbacc['T0.200S'][i], dbacc['T0.250S'][i],
-                               dbacc['T0.300S'][i], dbacc['T0.350S'][i],
-                               dbacc['T0.400S'][i], dbacc['T0.450S'][i],
-                               dbacc['T0.500S'][i], dbacc['T0.600S'][i],
-                               dbacc['T0.700S'][i], dbacc['T0.750S'][i],
-                               dbacc['T0.800S'][i], dbacc['T0.900S'][i],
-                               dbacc['T1.000S'][i], dbacc['T1.200S'][i],
-                               dbacc['T1.400S'][i], dbacc['T1.600S'][i],
-                               dbacc['T1.800S'][i], dbacc['T2.000S'][i],
-                               dbacc['T2.500S'][i], dbacc['T3.000S'][i],
-                               dbacc['T3.500S'][i], dbacc['T4.000S'][i],
-                               dbacc['T5.000S'][i], dbacc['T6.000S'][i],
-                               dbacc['T7.000S'][i], dbacc['T8.000S'][i],
-                               dbacc['T9.000S'][i],
-                               dbacc['T10.000S'][i]])
+            if(comp=='two-component'):
+                sa_entry = np.array([dbacc['PGA (g)'][i], dbacc['T0.010S'][i],
+                                   dbacc['T0.025S'][i], dbacc['T0.040S'][i],
+                                   dbacc['T0.050S'][i], dbacc['T0.070S'][i],
+                                   dbacc['T0.100S'][i], dbacc['T0.150S'][i],
+                                   dbacc['T0.200S'][i], dbacc['T0.250S'][i],
+                                   dbacc['T0.300S'][i], dbacc['T0.350S'][i],
+                                   dbacc['T0.400S'][i], dbacc['T0.450S'][i],
+                                   dbacc['T0.500S'][i], dbacc['T0.600S'][i],
+                                   dbacc['T0.700S'][i], dbacc['T0.750S'][i],
+                                   dbacc['T0.800S'][i], dbacc['T0.900S'][i],
+                                   dbacc['T1.000S'][i], dbacc['T1.200S'][i],
+                                   dbacc['T1.400S'][i], dbacc['T1.600S'][i],
+                                   dbacc['T1.800S'][i], dbacc['T2.000S'][i],
+                                   dbacc['T2.500S'][i], dbacc['T3.000S'][i],
+                                   dbacc['T3.500S'][i], dbacc['T4.000S'][i],
+                                   dbacc['T5.000S'][i], dbacc['T6.000S'][i],
+                                   dbacc['T7.000S'][i], dbacc['T8.000S'][i],
+                                   dbacc['T9.000S'][i], dbacc['T10.000S'][i]])
+                sa_geo = None
+                sa_geo = sa_entry # already in g
+                sa_geo_list.append(sa_geo)
+            elif(comp=='single-component'):
+                sa_entry = np.array([dbacc['Sa1_T0.010S'][i],
+                                   dbacc['Sa1_T0.025S'][i], dbacc['Sa1_T0.040S'][i],
+                                   dbacc['Sa1_T0.050S'][i], dbacc['Sa1_T0.070S'][i],
+                                   dbacc['Sa1_T0.100S'][i], dbacc['Sa1_T0.150S'][i],
+                                   dbacc['Sa1_T0.200S'][i], dbacc['Sa1_T0.250S'][i],
+                                   dbacc['Sa1_T0.300S'][i], dbacc['Sa1_T0.350S'][i],
+                                   dbacc['Sa1_T0.400S'][i], dbacc['Sa1_T0.450S'][i],
+                                   dbacc['Sa1_T0.500S'][i], dbacc['Sa1_T0.600S'][i],
+                                   dbacc['Sa1_T0.700S'][i], dbacc['Sa1_T0.750S'][i],
+                                   dbacc['Sa1_T0.800S'][i], dbacc['Sa1_T0.900S'][i],
+                                   dbacc['Sa1_T1.000S'][i], dbacc['Sa1_T1.200S'][i],
+                                   dbacc['Sa1_T1.400S'][i], dbacc['Sa1_T1.600S'][i],
+                                   dbacc['Sa1_T1.800S'][i], dbacc['Sa1_T2.000S'][i],
+                                   dbacc['Sa1_T2.500S'][i], dbacc['Sa1_T3.000S'][i],
+                                   dbacc['Sa1_T3.500S'][i], dbacc['Sa1_T4.000S'][i],
+                                   dbacc['Sa1_T5.000S'][i], dbacc['Sa1_T6.000S'][i],
+                                   dbacc['Sa1_T7.000S'][i], dbacc['Sa1_T8.000S'][i],
+                                   dbacc['Sa1_T9.000S'][i], dbacc['Sa1_T10.000S'][i]])
+                sa_entry2 = np.array([dbacc['Sa2_T0.010S'][i],
+                                   dbacc['Sa2_T0.025S'][i], dbacc['Sa2_T0.040S'][i],
+                                   dbacc['Sa2_T0.050S'][i], dbacc['Sa2_T0.070S'][i],
+                                   dbacc['Sa2_T0.100S'][i], dbacc['Sa2_T0.150S'][i],
+                                   dbacc['Sa2_T0.200S'][i], dbacc['Sa2_T0.250S'][i],
+                                   dbacc['Sa2_T0.300S'][i], dbacc['Sa2_T0.350S'][i],
+                                   dbacc['Sa2_T0.400S'][i], dbacc['Sa2_T0.450S'][i],
+                                   dbacc['Sa2_T0.500S'][i], dbacc['Sa2_T0.600S'][i],
+                                   dbacc['Sa2_T0.700S'][i], dbacc['Sa2_T0.750S'][i],
+                                   dbacc['Sa2_T0.800S'][i], dbacc['Sa2_T0.900S'][i],
+                                   dbacc['Sa2_T1.000S'][i], dbacc['Sa2_T1.200S'][i],
+                                   dbacc['Sa2_T1.400S'][i], dbacc['Sa2_T1.600S'][i],
+                                   dbacc['Sa2_T1.800S'][i], dbacc['Sa2_T2.000S'][i],
+                                   dbacc['Sa2_T2.500S'][i], dbacc['Sa2_T3.000S'][i],
+                                   dbacc['Sa2_T3.500S'][i], dbacc['Sa2_T4.000S'][i],
+                                   dbacc['Sa2_T5.000S'][i], dbacc['Sa2_T6.000S'][i],
+                                   dbacc['Sa2_T7.000S'][i], dbacc['Sa2_T8.000S'][i],
+                                   dbacc['Sa2_T9.000S'][i], dbacc['Sa2_T10.000S'][i]])
+                sa_hor1 = None
+                sa_hor2 = None
+                sa_hor1 = sa_entry
+                sa_hor2 = sa_entry2
+                sa_hor1_list.append(sa_entry)
+                sa_hor2_list.append(sa_entry2)
 
-            sa_geo_NGAW2 = None
-            sa_geo_NGAW2 = rotd50 # already in g
-            sa_geo_list.append(sa_geo_NGAW2)
-            if all(v > 0 for v in sa_geo_NGAW2):
+            if all(v > 0 for v in sa_entry):
                 if(is_free_field[i] == "I"):
                     if(allowed_recs_mag[0] <= event_mag[i] <= allowed_recs_mag[1]):
                         if (allowed_depth[0] <= event_depth[i] <= allowed_depth[1]):
@@ -296,12 +347,32 @@ def screen_database(database_path, allowed_database, allowed_recs_vs30,
                                 if (allowed_recs_vs30[0] <= station_vs30[i] < allowed_recs_vs30[1]):
                                     if 'ESM' in allowed_database:
                                         if (epi_lon[i] < -31 or epi_lon[i] > 70):
-                                            allowed_index.append(i)
+                                            allowed_index.append(i+index0_database)
                                     else:
-                                        allowed_index.append(i)
+                                        allowed_index.append(i+index0_database)
 
-    sa = np.vstack(sa_geo_list)
-    sa_known = sa[allowed_index]
+    if(comp=='two-component'):
+        sa = np.vstack(sa_geo_list)
+        sa_known = sa[allowed_index]
+    elif(comp=='single-component'):
+        sa1=np.vstack(sa_hor1_list)
+        sa2=np.vstack(sa_hor2_list)
+        sa=np.vstack((sa1,sa2))
+        allowed_index2=[]
+        sa_known=[]
+        for kk in range(len(allowed_index)):
+            sa_known.append(sa1[allowed_index[kk]])
+        for kk in range(len(allowed_index)):
+            sa_known.append(sa2[allowed_index[kk]])
+        for kk in range(len(allowed_index)):
+            if(allowed_index[kk]>0):
+                allowed_index2.append(-allowed_index[kk])
+            else:
+                allowed_index2.append(-9999999999)
+        allowed_index=allowed_index+allowed_index2
+
+    sa_known = np.asarray(sa_known)
+
 
     # count number of allowed spectra
     n_big = len(allowed_index)

@@ -9,3 +9,5 @@ echo 'demo 4'
 python -m haselrec demo/job_selection_2.ini --run-scaling
 echo 'demo 5'
 python -m haselrec demo/job_selection_3.ini --run-complete
+echo 'demo 6'
+python -m haselrec demo/job_selection_4.ini --run-selection

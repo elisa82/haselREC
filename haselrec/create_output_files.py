@@ -17,7 +17,7 @@ def create_output_files(output_folder, name, im_star, mean_mag, mean_dist, n_gm,
                         rec_idx, source, event_id, station_code, event_mw,
                         acc_distance, station_vs30, station_ec8,
                         final_scale_factors, tgt_per, mean_req, stdevs,
-                        record_sequence_number_nga, event_mag):
+                        record_sequence_number_nga, event_mag, comp):
     """
     Two `.txt` files are generated::
 
@@ -82,27 +82,39 @@ def create_output_files(output_folder, name, im_star, mean_mag, mean_dist, n_gm,
         f.write("{} {}\n".format('mean_mag_disag = ', mean_mag))
         f.write("{} {}\n".format('mean_dist_disag = ', mean_dist))
         f.write(
-            "num source event_id_ESM station_code_ESM recID_NGA "
-            "magnitude distance vs30 EC8 scale_factor\n")
+            "num source event_id station_code recID_NGA "
+            "component magnitude distance vs30 EC8 scale_factor\n")
         for i in np.arange(n_gm):
             elemento = rec_idx[i]
+            if(comp=='two-component'):
+                comp_sel=blank
+            elif(comp=='single-component'):
+                if(elemento>=0):
+                    comp_sel=1
+                else:
+                    comp_sel=2
+                if(rec_idx[i]==-9999999999):
+                    elemento = 0
+                else:
+                    elemento = np.abs(rec_idx[i])
             if source[elemento] == 'ESM':
                 f.write(
-                    "{} {} {} {} {} {} {} {} {} {:4.2f}\n".format(
+                    "{} {} {} {} {} {} {} {} {} {} {:4.2f}\n".format(
                         i + 1, source[elemento],
                         event_id[elemento],
                         station_code[elemento], blank,
-                        event_mw[elemento],
+                        comp_sel, event_mw[elemento],
                         acc_distance[elemento],
                         station_vs30[elemento],
                         station_ec8[elemento],
                         final_scale_factors[i]))
             if source[elemento] == 'NGA-West2':
-                val = int(record_sequence_number_nga[elemento])
                 f.write(
-                    "{} {} {} {} {} {} {} {} {} {:4.2f}\n".format(
-                        i + 1, source[elemento], blank, blank,
-                        val, event_mag[elemento],
+                    "{} {} {} {} {} {} {} {} {} {} {:4.2f}\n".format(
+                        i + 1, source[elemento], event_id[elemento],
+                        station_code[elemento],
+                        int(record_sequence_number_nga[elemento]), 
+                        comp_sel, event_mag[elemento],
                         acc_distance[elemento],
                         station_vs30[elemento],
                         station_ec8[elemento],

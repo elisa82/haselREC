@@ -15,7 +15,7 @@
 
 def find_ground_motion(tgt_per, tstar, avg_periods, intensity_measures, n_gm,
                        sa_known, ind_per, mean_req, n_big, simulated_spectra,
-                       maxsf):
+                       maxsf, event, station, allowed_index, correlated_motion):
     """
     Select ground motions from the database that individually match the
     statistically simulated spectra. From:
@@ -36,6 +36,8 @@ def find_ground_motion(tgt_per, tstar, avg_periods, intensity_measures, n_gm,
         id_sel = np.array(id_sel)
     else:
         id_sel = np.where(tgt_per == tstar)
+    if(len(id_sel[0]) == 0):
+        sys.exit('Error: tstar not included in tgt_per',tstar,tgt_per)
     ln_sa1 = np.mean(mean_req[id_sel])
 
     rec_id = np.zeros(n_gm, dtype=int)
@@ -62,9 +64,28 @@ def find_ground_motion(tgt_per, tstar, avg_periods, intensity_measures, n_gm,
 
         # exclude previously-selected ground motions
         err[rec_id[0:i - 1]] = 1000000
+        if(correlated_motion=='no'):
+        # exclude ground motions from the same stations and earthquake of 
+        # previously-selected ground motions
+            for l in range(i):
+                rec_idx_l = allowed_index[rec_id[l]]
+                if(rec_idx_l==-9999999999):
+                    rec_idx_l = 0
+                else:
+                    rec_idx_l = np.abs(rec_idx_l)
+                for j in np.arange(n_big):
+                    rec_idx_j = allowed_index[j]
+                    if(rec_idx_j==-9999999999):
+                        rec_idx_j = 0
+                    else:
+                        rec_idx_j = np.abs(rec_idx_j)
+                    if(station[rec_idx_j]==station[rec_idx_l] or
+                                event[rec_idx_j]==event[rec_idx_l]):
+                        err[j]=1000000
         # exclude ground motions requiring too large SF
         err[scale_fac > maxsf] = 1000000
         # exclude ground motions requiring too large SF
+        err[scale_fac < 1. / maxsf] = 1000000
         err[scale_fac < 1. / maxsf] = 1000000
 
         # find minimum-error ground motion

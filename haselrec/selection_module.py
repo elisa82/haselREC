@@ -25,7 +25,7 @@ def selection_module(intensity_measures, site_code, rlz_code,
                      radius_mag_input, allowed_depth, n_gm, random_seed,
                      n_trials, weights, n_loop, penalty, output_folder,
                      meanMag_disagg, meanDist_disagg, 
-                     hazard_value, hazard_mode):
+                     hazard_value, hazard_mode, component, correlated_motion):
     """
     This module is called when mode :code:`--run-selection` is specified.
 
@@ -128,7 +128,8 @@ def selection_module(intensity_measures, site_code, rlz_code,
                     screen_database(database_path, allowed_database,
                                     allowed_recs_vs30, radius_dist, dist_range_input,
                                     radius_mag, rjb, mag, allowed_ec8_code,
-                                    target_periods, n_gm, allowed_depth, vs30, bgmpe)
+                                    target_periods, n_gm, allowed_depth, vs30, bgmpe,
+                                    component)
 
                 # Compute the target spectrum
 
@@ -150,7 +151,9 @@ def selection_module(intensity_measures, site_code, rlz_code,
                     find_ground_motion(tgt_per, tstar[im], avg_periods,
                                        intensity_measures[im], n_gm,
                                        sa_known, ind_per, mean_req,
-                                       n_big, simulated_spectra, maxsf)
+                                       n_big, simulated_spectra, maxsf,
+                                       event_id, station_code, allowed_index,
+                                       correlated_motion)
 
                 # Further optimize the ground motion selection
 
@@ -158,8 +161,9 @@ def selection_module(intensity_measures, site_code, rlz_code,
                     optimize_ground_motion(n_loop, n_gm, sample_small, n_big,
                                              id_sel, ln_sa1, maxsf, sample_big,
                                              tgt_per, mean_req, stdevs, weights,
-                                             penalty, rec_id,
-                                             im_scale_fac)
+                                             penalty, rec_id, im_scale_fac, 
+                                             event_id, station_code, allowed_index,
+                                             correlated_motion)
 
                 # Create the outputs folder
                 folder = output_folder + '/' + name
@@ -180,6 +184,6 @@ def selection_module(intensity_measures, site_code, rlz_code,
                                     station_vs30, station_ec8,
                                     final_scale_factors, tgt_per, mean_req,
                                     stdevs, record_sequence_number_nga,
-                                    event_mag)
+                                    event_mag, component)
 
     return
