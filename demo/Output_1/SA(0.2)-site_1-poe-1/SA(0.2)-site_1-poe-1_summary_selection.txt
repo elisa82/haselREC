@@ -1,14 +1,14 @@
 reference hazard value =  1.3569
 mean_mag_disag =  6.313808493750058
 mean_dist_disag =  18.010191283740124
-num source event_id station_code recID_NGA component magnitude distance vs30 EC8 scale_factor
-1 NGA-West2 50 6610 191 - 6.53 43.9 242.05 nan 1.32
-2 NGA-West2 64 6621 266 - 6.33 36.67 242.05 nan 2.76
-3 NGA-West2 50 1136 170 - 6.53 29.07 192.05 nan 1.27
-4 NGA-West2 50 958 183 - 6.53 28.09 206.08 nan 0.86
-5 NGA-West2 50 5158 181 - 6.53 27.47 203.22 nan 0.94
-6 NGA-West2 50 6621 165 - 6.53 18.88 242.05 nan 1.40
-7 NGA-West2 50 1336 171 - 6.53 19.44 264.57 nan 2.49
-8 NGA-West2 30 994 65 - 6.61 49.83 308.35 nan 3.65
-9 NGA-West2 50 5165 184 - 6.53 27.23 202.26 nan 0.90
-10 NGA-West2 50 952 180 - 6.53 27.8 205.63 nan 1.14
+num source event_id station_code recID component magnitude distance vs30 EC8 scale_factor flowNS2 fhighNS2 flonwEW2 fhighEW2
+1 NGA-West2 50 6610 191 - 6.53 43.9 242.05 nan 1.32 nan nan nan nan
+2 NGA-West2 64 6621 266 - 6.33 36.67 242.05 nan 2.76 nan nan nan nan
+3 NGA-West2 50 1136 170 - 6.53 29.07 192.05 nan 1.27 nan nan nan nan
+4 NGA-West2 50 958 183 - 6.53 28.09 206.08 nan 0.86 nan nan nan nan
+5 NGA-West2 50 5158 181 - 6.53 27.47 203.22 nan 0.94 nan nan nan nan
+6 NGA-West2 50 6621 165 - 6.53 18.88 242.05 nan 1.40 nan nan nan nan
+7 NGA-West2 50 1336 171 - 6.53 19.44 264.57 nan 2.49 nan nan nan nan
+8 NGA-West2 30 994 65 - 6.61 49.83 308.35 nan 3.65 nan nan nan nan
+9 NGA-West2 50 5165 184 - 6.53 27.23 202.26 nan 0.90 nan nan nan nan
+10 NGA-West2 50 952 180 - 6.53 27.8 205.63 nan 1.14 nan nan nan nan

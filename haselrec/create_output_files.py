@@ -17,7 +17,8 @@ def create_output_files(output_folder, name, im_star, mean_mag, mean_dist, n_gm,
                         rec_idx, source, event_id, station_code, event_mw,
                         acc_distance, station_vs30, station_ec8,
                         final_scale_factors, tgt_per, mean_req, stdevs,
-                        record_sequence_number_nga, event_mag, comp):
+                        record_sequence_number, event_mag, comp, comp_idx,
+                        fminNS2, fmaxNS2, fminEW2, fmaxEW2):
     """
     Two `.txt` files are generated::
 
@@ -48,7 +49,7 @@ def create_output_files(output_folder, name, im_star, mean_mag, mean_dist, n_gm,
            the disaggregation analysis + :code:`nGM` rows (one for each record)
            with the following information: sequential number used to identify
            recordings from the selection, source database, event ID and station
-           code (for ESM recordings) or recording ID (for NGA-West2 recordings),
+           code (for ESM recordings) or recording ID (for KiK-net and NGA-West2 recordings),
            magnitude of the earthquake, source-to-station distance,
            `vs30` of the station, EC8 soil category, applied scale factor.
 
@@ -57,7 +58,7 @@ def create_output_files(output_folder, name, im_star, mean_mag, mean_dist, n_gm,
             reference hazard value =  0.5879783000000001
             mean_mag_disag =  6.347683361014376
             mean_dist_disag =  15.909873748773544
-            num source event_id_ESM station_code_ESM recID_NGA magnitude distance vs30 EC8 scale_factor
+            num source event_id_ESM station_code_ESM recID magnitude distance vs30 EC8 scale_factor
             1 NGA-West2 - - 170 6.53 29.07 192.05 nan 2.62
             2 NGA-West2 - - 171 6.53 19.44 264.57 nan 1.88
             3 NGA-West2 - - 179 6.53 27.13 208.91 nan 1.54
@@ -73,7 +74,6 @@ def create_output_files(output_folder, name, im_star, mean_mag, mean_dist, n_gm,
     import numpy as np
 
     # Output results to a text file
-    blank = '-'
     name_summary = (output_folder + '/' + name + '/' + name +
                     "_summary_selection.txt")
     with open(name_summary, "w") as f:
@@ -82,43 +82,30 @@ def create_output_files(output_folder, name, im_star, mean_mag, mean_dist, n_gm,
         f.write("{} {}\n".format('mean_mag_disag = ', mean_mag))
         f.write("{} {}\n".format('mean_dist_disag = ', mean_dist))
         f.write(
-            "num source event_id station_code recID_NGA "
-            "component magnitude distance vs30 EC8 scale_factor\n")
+            "num source event_id station_code recID "
+            "component magnitude distance vs30 EC8 scale_factor "
+            "flowNS2 fhighNS2 flonwEW2 fhighEW2\n")
         for i in np.arange(n_gm):
             elemento = rec_idx[i]
-            if(comp=='two-component'):
-                comp_sel=blank
-            elif(comp=='single-component'):
-                if(elemento>=0):
-                    comp_sel=1
-                else:
-                    comp_sel=2
-                if(rec_idx[i]==-9999999999):
-                    elemento = 0
-                else:
-                    elemento = np.abs(rec_idx[i])
-            if source[elemento] == 'ESM':
-                f.write(
-                    "{} {} {} {} {} {} {} {} {} {} {:4.2f}\n".format(
-                        i + 1, source[elemento],
-                        event_id[elemento],
-                        station_code[elemento], blank,
-                        comp_sel, event_mw[elemento],
-                        acc_distance[elemento],
-                        station_vs30[elemento],
-                        station_ec8[elemento],
-                        final_scale_factors[i]))
-            if source[elemento] == 'NGA-West2':
-                f.write(
-                    "{} {} {} {} {} {} {} {} {} {} {:4.2f}\n".format(
-                        i + 1, source[elemento], event_id[elemento],
-                        station_code[elemento],
-                        int(record_sequence_number_nga[elemento]), 
-                        comp_sel, event_mag[elemento],
-                        acc_distance[elemento],
-                        station_vs30[elemento],
-                        station_ec8[elemento],
-                        final_scale_factors[i]))
+            comp_sel = comp_idx[i]
+            if(comp_sel == 0):
+                comp_sel = '-'
+            if(source[elemento]=='ESM'):
+                mag=event_mw[elemento]
+            else:
+                mag=event_mag[elemento]
+            f.write(
+                    "{} {} {} {} {} {} {} {} {} {} {:4.2f} {} {} {} {}\n".format(
+                    i + 1, source[elemento],
+                    event_id[elemento],
+                    station_code[elemento], record_sequence_number[elemento],
+                    comp_sel, mag,
+                    acc_distance[elemento],
+                    station_vs30[elemento],
+                    station_ec8[elemento],
+                    final_scale_factors[i],
+                    fminNS2[elemento], fmaxNS2[elemento], 
+                    fminEW2[elemento], fmaxEW2[elemento]))
 
     # Output conditional spectrum to a text file
     name_cs = output_folder + '/' + name + '/' + name + "_CS.txt"

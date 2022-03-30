@@ -15,7 +15,8 @@
 
 def find_ground_motion(tgt_per, tstar, avg_periods, intensity_measures, n_gm,
                        sa_known, ind_per, mean_req, n_big, simulated_spectra,
-                       maxsf, event, station, allowed_index, correlated_motion):
+                       maxsf, event, station, allowed_index, correlated_motion,
+                       selection_type, period_range):
     """
     Select ground motions from the database that individually match the
     statistically simulated spectra. From:
@@ -24,21 +25,34 @@ def find_ground_motion(tgt_per, tstar, avg_periods, intensity_measures, n_gm,
     Variance. Earthq Spectra 2011;27:797-815. https://doi.org/10.1193/1.3608002.
     """
     import numpy as np
+    import sys
 
     sample_big = np.log(sa_known[:, ind_per])
 
     id_sel = []
-    if intensity_measures == 'AvgSA':
-        id_sel_bool = np.isin(tgt_per, avg_periods)
-        for i in np.arange(len(tgt_per)):
-            if id_sel_bool[i]:
-                id_sel.append(i)
+    if(selection_type=='conditional-spectrum'):
+        if intensity_measures == 'AvgSA':
+            id_sel_bool = np.isin(tgt_per, avg_periods)
+            for i in np.arange(len(tgt_per)):
+                if id_sel_bool[i]:
+                    id_sel.append(i)
+            id_sel = np.array(id_sel)
+        else:
+            id_sel = np.where(tgt_per == tstar)
+        if(len(id_sel[0]) == 0):
+            sys.exit('Error: tstar not included in tgt_per',tstar,tgt_per)
+        ln_sa1 = np.mean(mean_req[id_sel])
+        w = []
+    elif(selection_type=='code-spectrum'):
+        w=np.zeros(len(tgt_per))
+        for itp in range(len(tgt_per)):
+            if tgt_per[itp] >= 0.   and tgt_per[itp] <= 0.01:
+                w[itp]=1
+        for itp in range(len(tgt_per)):
+            if tgt_per[itp] >= period_range[0] and tgt_per[itp] <= period_range[1]:
+                id_sel.append(itp)
         id_sel = np.array(id_sel)
-    else:
-        id_sel = np.where(tgt_per == tstar)
-    if(len(id_sel[0]) == 0):
-        sys.exit('Error: tstar not included in tgt_per',tstar,tgt_per)
-    ln_sa1 = np.mean(mean_req[id_sel])
+        ln_sa1 = []
 
     rec_id = np.zeros(n_gm, dtype=int)
     sample_small = []
@@ -50,35 +64,39 @@ def find_ground_motion(tgt_per, tstar, avg_periods, intensity_measures, n_gm,
         # compute scale factors and errors for each candidate
         # ground motion
         for j in np.arange(n_big):
-            rec_value = np.exp(
-                sum(sample_big[j, id_sel]) / len(id_sel))
-            # rec_value=rec_value[0]
-            if rec_value == 0:
-                scale_fac[j] = 1000000
-            else:
-                scale_fac[j] = np.exp(ln_sa1) / rec_value
-            err[j] = sum(
-                (np.log(
-                    np.exp(sample_big[j, :]) * scale_fac[j]) - np.log(
-                    simulated_spectra[i, :])) ** 2)
+            if(selection_type=='conditional-spectrum'):
+                rec_value = np.exp(
+                    sum(sample_big[j, id_sel]) / len(id_sel))
+                # rec_value=rec_value[0]
+                if rec_value == 0:
+                    scale_fac[j] = 1000000
+                else:
+                    scale_fac[j] = np.exp(ln_sa1) / rec_value
+                err[j] = sum(
+                    (np.log(
+                        np.exp(sample_big[j, :]) * scale_fac[j]) - np.log(
+                        simulated_spectra[i, :])) ** 2)
+            elif(selection_type=='code-spectrum'):
+                if sum(sample_big[j, id_sel])==0:
+                    scale_fac[j] = 1000000
+                else:
+                    scale_fac[j]=sum( w * np.log(np.exp(mean_req) / np.exp(sample_big[j, :]))) / sum(w) 
+                    scale_fac[j]=np.exp(scale_fac[j])
+                #Computed Mean Squared Error (MSE) of the selected record with respect to
+                #the target spectrum
+                err[j] = sum(w*
+                    (mean_req-np.log(np.exp(sample_big[j, :]) * scale_fac[j])) ** 2)/sum(w)
 
         # exclude previously-selected ground motions
-        err[rec_id[0:i - 1]] = 1000000
+        if(i>0):
+            err[rec_id[0:i - 1]] = 1000000
         if(correlated_motion=='no'):
         # exclude ground motions from the same stations and earthquake of 
         # previously-selected ground motions
             for l in range(i):
                 rec_idx_l = allowed_index[rec_id[l]]
-                if(rec_idx_l==-9999999999):
-                    rec_idx_l = 0
-                else:
-                    rec_idx_l = np.abs(rec_idx_l)
                 for j in np.arange(n_big):
                     rec_idx_j = allowed_index[j]
-                    if(rec_idx_j==-9999999999):
-                        rec_idx_j = 0
-                    else:
-                        rec_idx_j = np.abs(rec_idx_j)
                     if(station[rec_idx_j]==station[rec_idx_l] or
                                 event[rec_idx_j]==event[rec_idx_l]):
                         err[j]=1000000
@@ -92,7 +110,7 @@ def find_ground_motion(tgt_per, tstar, avg_periods, intensity_measures, n_gm,
         rec_id[i] = np.argmin(err)
         min_err = np.min(err)
         assert (min_err < 1000), (
-            'Warning: problem with simulated spectrum. '
+            'Warning: problem with target spectrum. '
             'No good matches found')
         im_scale_fac[i] = scale_fac[rec_id[i]]  # store scale factor
         sample_small.append(
@@ -100,4 +118,4 @@ def find_ground_motion(tgt_per, tstar, avg_periods, intensity_measures, n_gm,
                 rec_id[i]]))  # store scaled log spectrum
 
     return (sample_small, sample_big, id_sel, ln_sa1, rec_id,
-            im_scale_fac)
+            im_scale_fac, w)

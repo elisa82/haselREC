@@ -14,7 +14,8 @@
 # along with haselREC. If not, see <http://www.gnu.org/licenses/>.
 
 def plot_final_selection(name, lbl, n_gm, t_cs, sample_small, mean_req, stdevs,
-                         output_folder):
+                         output_folder, selection_type, period_range,
+                         up, low):
     """
     Three plots are generated::
 
@@ -87,21 +88,27 @@ def plot_final_selection(name, lbl, n_gm, t_cs, sample_small, mean_req, stdevs,
         for j in indexes:
             sample_small_gt0.append(sample_small[i, j])
         plt.loglog(t_cs_gt0, np.exp(sample_small_gt0), 'g', linewidth=.5)
-    plt.loglog(t_cs_gt0, np.exp(mean_req_gt0), 'r', label='CMS', linewidth=1.0)
-    plt.loglog(t_cs_gt0, np.exp(mean_req_gt0 + 2 * stdevs_gt0), '--r',
-               label=r'CMS $\pm 2\sigma$', linewidth=1.0)
-    plt.loglog(t_cs_gt0, np.exp(mean_req_gt0 - 2 * stdevs_gt0), '--r',
-               linewidth=1.0)
-    plt.loglog(t_cs_gt0, meanrecorded_gt0, 'k', label='Selected', linewidth=1.0)
-    plt.loglog(t_cs_gt0, meanrecorded_p2sigma_gt0, '--k',
-               label=r'Selected $\pm 2\sigma$', linewidth=1.0)
-    plt.loglog(t_cs_gt0, meanrecorded_n2sigma_gt0, '--k', linewidth=1.0)
+    if(selection_type=='conditional-spectrum'):
+        plt.loglog(t_cs_gt0, np.exp(mean_req_gt0), 'r', label='CMS', linewidth=1.0)
+        plt.loglog(t_cs_gt0, np.exp(mean_req_gt0 + 2 * stdevs_gt0), '--r',
+                   label=r'CMS $\pm 2\sigma$', linewidth=1.0)
+        plt.loglog(t_cs_gt0, np.exp(mean_req_gt0 - 2 * stdevs_gt0), '--r',
+                   linewidth=1.0)
+        plt.loglog(t_cs_gt0, meanrecorded_gt0, 'k', label='Selected', linewidth=1.0)
+        plt.loglog(t_cs_gt0, meanrecorded_p2sigma_gt0, '--k',
+                   label=r'Selected $\pm 2\sigma$', linewidth=1.0)
+        plt.loglog(t_cs_gt0, meanrecorded_n2sigma_gt0, '--k', linewidth=1.0)
+    elif(selection_type=='code-spectrum'):
+        plt.loglog(t_cs_gt0, np.exp(mean_req_gt0), 'r', label='Code', linewidth=1.0)
+        plt.loglog(t_cs_gt0, np.exp(mean_req_gt0) + up/100. * np.exp(mean_req_gt0), '--r',
+                   linewidth=1.0)
+        plt.loglog(t_cs_gt0, np.exp(mean_req_gt0) - low/100. * np.exp(mean_req_gt0), '--r',
+                   linewidth=1.0)
+        plt.plot(t_cs_gt0, meanrecorded_gt0, 'k', label='Selected', linewidth=1.0)
     plt.xlabel('Period [s]')
     plt.ylabel('Acceleration [g]')
     plt.xlim(min(t_cs_gt0), max(t_cs_gt0))
     plt.ylim(1e-2, 1e1)
-    plt.yscale('log')
-    plt.xscale('log')
     #number=int(name[11])+1 #per AvgSA
     #number = int(name[9]) + 1 #per PGA
     #plt.title('site '+str(number)+' - '+lbl)

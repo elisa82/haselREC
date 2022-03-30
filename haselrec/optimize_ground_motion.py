@@ -16,7 +16,8 @@
 def optimize_ground_motion(n_loop, n_gm, sample_small, n_big, id_sel, ln_sa1,
                              maxsf, sample_big, tgt_per, mean_req, stdevs,
                              weights, penalty, rec_id, im_scale_fac, event,
-                             station, allowed_index, correlated_motion):
+                             station, allowed_index, correlated_motion, 
+                             selection_type, period_range, up, low, w):
     """
     Executes incremental changes to the initially selected ground motion set to
     further optimize its fit to the target spectrum distribution. From:
@@ -44,23 +45,54 @@ def optimize_ground_motion(n_loop, n_gm, sample_small, n_big, id_sel, ln_sa1,
 
             # Try to add a new spectrum to the subset list
             for j in np.arange(n_big):
+                if(selection_type=='conditional-spectrum'):
+                    rec_value = np.exp(
+                        sum(sample_big[j, id_sel]) / len(id_sel))
+                    if rec_value == 0:
+                        scale_fac[j] = 1000000
+                    else:
+                        scale_fac[j] = np.exp(ln_sa1) / rec_value
+                elif(selection_type=='code-spectrum'):
+                    if sum(sample_big[j, id_sel])==0:
+                        scale_fac[j] = 1000000
+                    else:
+                        scale_fac[j]=sum( w * np.log(np.exp(mean_req) / np.exp(sample_big[j, :]))) / sum(w)
+                        scale_fac[j]=np.exp(scale_fac[j])
 
-                rec_value = np.exp(
-                    sum(sample_big[j, id_sel]) / len(id_sel))
-                if rec_value == 0:
-                    scale_fac[j] = 1000000
-                else:
-                    scale_fac[j] = np.exp(ln_sa1) / rec_value
                 added1 = np.reshape(
                     (sample_big[j, :] + np.log(scale_fac[j])),
                     (1, len(tgt_per)))
                 sample_small = np.concatenate(
                     (sample_small, added1))  # add candidate to set
+
                 # Compute deviations from target
-                dev_mean = np.mean(sample_small, axis=0) - mean_req
-                dev_sig = np.std(sample_small, axis=0) - stdevs
-                dev_total = weights[0] * sum(dev_mean ** 2) + weights[
-                    1] * sum(dev_sig ** 2)
+                if(selection_type=='conditional-spectrum'):
+                    dev_mean = np.mean(sample_small, axis=0) - mean_req
+                    dev_sig = np.std(sample_small, axis=0) - stdevs
+                    dev_total = weights[0] * sum(dev_mean ** 2) + weights[
+                            1] * sum(dev_sig ** 2)
+
+                elif(selection_type=='code-spectrum'):
+                    ratio=np.mean(np.exp(sample_small[:,id_sel]),axis=0)/np.exp(mean_req[id_sel])
+                    if np.min(ratio)<(100-low)/100.:
+                        dev1 = (100-low)/100-np.min(ratio) 
+                    else:
+                        dev1 = 0
+
+                    if np.max(ratio)>(100+up)/100:
+                        dev2 = np.max(ratio)-(100+up)/100 
+                    else:
+                        dev2 = 0
+
+                    if dev1==0 and dev2==0:
+                        dev_total=np.sqrt(np.mean((np.mean(sample_small[:,id_sel],axis=0)-mean_req[id_sel])**2))
+                    else:
+                        dev_total = dev1 + dev2
+
+#                if(sa_mean[0]>=sa_ref[0]):
+#                    dev=0
+#                else:
+#                    dev=1
 
                 # Penalize bad spectra
                 # (set penalty to zero if this is not required)
@@ -77,16 +109,8 @@ def optimize_ground_motion(n_loop, n_gm, sample_small, n_big, id_sel, ln_sa1,
                 
                 if(correlated_motion=='no'):
                     rec_idx_j = allowed_index[j]
-                    if(rec_idx_j==-9999999999):
-                        rec_idx_j = 0
-                    else:
-                        rec_idx_j = np.abs(rec_idx_j)
                     for l in range(i):
                         rec_idx_l = allowed_index[rec_id[l]]
-                        if(rec_idx_l==-9999999999):
-                            rec_idx_l = 0
-                        else:
-                            rec_idx_l = np.abs(rec_idx_l)
                         if(station[rec_idx_j]==station[rec_idx_l] or
                                 event[rec_idx_j]==event[rec_idx_l]):
                             dev_total = dev_total + 1000000

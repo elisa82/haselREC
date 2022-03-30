@@ -89,7 +89,8 @@ if __name__ == '__main__':
      path_esm_folder, output_folder, meanMag_disagg, meanDist_disagg, 
      hazard_value, hazard_mode, component, correlated_motion,
      code_spectrum_file, period_range_spectrumcompatibility, 
-     threshold_up, threshold_low, selection_type] = read_input_data(fileini)
+     threshold_up, threshold_low, selection_type, path_kiknet_folder,
+     radius_dist_type_input, radius_mag_type_input] = read_input_data(fileini)
 
     if calculation_mode == '--run-complete' or \
             calculation_mode == '--run-selection':
@@ -109,7 +110,9 @@ if __name__ == '__main__':
                          output_folder, meanMag_disagg, meanDist_disagg, 
                          hazard_value, hazard_mode, component, correlated_motion,
                          code_spectrum_file, period_range_spectrumcompatibility,
-                         threshold_up, threshold_low, selection_type)
+                         threshold_up, threshold_low, selection_type,
+                         radius_dist_type_input, radius_mag_type_input)
+                        
 
     if calculation_mode == '--check-NGArec':
         check_module(output_folder, site_code, probability_of_exceedance_num,
@@ -121,6 +124,10 @@ if __name__ == '__main__':
             os.makedirs(path_nga_folder)
         if not os.path.exists(path_esm_folder):
             os.makedirs(path_esm_folder)
+        if not os.path.exists(path_kiknet_folder):
+            os.makedirs(path_kiknet_folder)
+            
         scaling_module(site_code, probability_of_exceedance_num,
                        intensity_measures, output_folder, n_gm,
-                       path_nga_folder, path_esm_folder)
+                       path_nga_folder, path_esm_folder, path_kiknet_folder,
+                       selection_type)

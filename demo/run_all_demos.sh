@@ -11,3 +11,5 @@ echo 'demo 5'
 python -m haselrec demo/job_selection_3.ini --run-complete
 echo 'demo 6'
 python -m haselrec demo/job_selection_4.ini --run-selection
+echo 'demo 7'
+python -m haselrec demo/job_selection_5.ini --run-selection

@@ -244,7 +244,6 @@ def create_esm_acc(folder, event, station, num):
 def to_utc_date_time(value):
     """
     """
-    # Import libraries
     from obspy.core import UTCDateTime
 
     try:
@@ -346,9 +345,170 @@ def create_nga_acc(num_rec, path_nga_folder):
                 for value in data:
                     a = float(value)
                     acc_data.append(a)
-                    if i == 1:
-                        inp_acc1 = np.asarray(acc_data)
-                    if i == 2:
-                        inp_acc2 = np.asarray(acc_data)
             counter = counter + 1
+        
+        if i == 1:
+            inp_acc1 = np.asarray(acc_data)
+        if i == 2:
+            inp_acc2 = np.asarray(acc_data)
+
+    return time1, time2, inp_acc1, inp_acc2, npts1, npts2
+
+def create_kiknet_acc(recid, path_kiknet_folder, 
+        fminNS2, fmaxNS2, fminEW2, fmaxEW2):
+
+    """
+    KiK-net acc are stored within Database_small.hdf5 file
+    """
+
+    # Import libraries
+    import numpy as np
+    from obspy.core import Trace,UTCDateTime
+    import re
+    from obspy.signal import filter
+
+    # desc1 = ""
+    # desc2 = ""
+    time1 = []
+    time2 = []
+    inp_acc1 = []
+    inp_acc2 = []
+    npts1 = []
+    npts2 = []
+    for i in range(1, 3):
+        if i==1:
+            comp = 'EW2'
+            fmin = fminEW2
+            fmax = fmaxEW2
+        elif i==2:
+            comp = 'NS2'
+            fmin = fminNS2
+            fmax = fmaxNS2
+
+        file_acc = path_kiknet_folder + '/' + str(recid) + '/' + str(recid) + '.' + comp
+        hdrnames = ['Origin Time', 'Lat.', 'Long.', 'Depth. (km)', 'Mag.',
+                    'Station Code', 'Station Lat.', 'Station Long.',
+                    'Station Height(m)', 'Record Time', 'Sampling Freq(Hz)',
+                    'Duration Time(s)', 'Dir.', 'Scale Factor', 'Max. Acc. (gal)',
+                    'Last Correction', 'Memo.']
+        acc_data = []
+        time = []
+        with open(file_acc, 'r') as f:
+            content = f.readlines()
+        counter = 0
+        for line in content:
+            if counter < 17:
+                if not line.startswith(hdrnames[counter]):
+                    sys.exit("Expected line to start with %s but got %s "
+                                % (hdrnames[counter], line))
+                else:
+                    flds=line.split()
+
+            if(counter==0):
+                origin_time = flds[2] + ' ' + flds[3]
+                origin_time = UTCDateTime.strptime(origin_time, '%Y/%m/%d %H:%M:%S')
+                # All times are in Japanese standard time which is 9 hours ahead of UTC
+                origin_time -= 9 * 3600.
+
+            elif(counter==1):
+                lat = float(flds[1])
+            
+            elif(counter==2):
+                lon = float(flds[1])
+
+            elif(counter==3):
+                dp = float(flds[2])
+
+            elif(counter==4):
+                mag = float(flds[1])
+
+            elif(counter==5):
+                stnm = flds[2]
+
+            elif(counter==6):
+                stla = float(flds[2])
+
+            elif(counter==7):
+                stlo = float(flds[2])
+
+            elif(counter==8):
+                stel = float(flds[2])
+
+            elif(counter==9):
+                record_time = flds[2] + ' ' + flds[3]
+                # A 15 s delay is added to the record time by the
+                # the K-NET and KiK-Net data logger
+                record_time = UTCDateTime.strptime(record_time, '%Y/%m/%d %H:%M:%S') - 15.0
+                # All times are in Japanese standard time which is 9 hours ahead of UTC
+                record_time -= 9 * 3600.
+
+            elif(counter==10):
+                freqstr = flds[2]
+                m = re.search('[0-9]*', freqstr)
+                freq = int(m.group())
+
+            elif(counter==11):
+                duration = float(flds[2])
+
+            elif(counter==12):
+                channel = flds[1].replace('-', '')
+                kiknetcomps = {'1': 'NS1', '2': 'EW1', '3': 'UD1',
+                       '4': 'NS2', '5': 'EW2', '6': 'UD2'}
+                if channel.strip() in kiknetcomps.keys():  # kiknet directions are 1-6
+                    channel = kiknetcomps[channel.strip()]
+
+            elif(counter==13):
+                eqn = flds[2]
+                num, denom = eqn.split('/')
+                num = float(re.search('[0-9]*', num).group())
+                denom = float(denom)
+                # convert the calibration from gal to m/s^2
+                calib = 0.01 * num / denom
+
+            elif(counter==14):
+                accmax = float(flds[3])
+
+            elif(counter==15):
+                last_correction=flds[2] + ' ' + flds[3]
+                last_correction = UTCDateTime.strptime(last_correction, '%Y/%m/%d %H:%M:%S')
+                # All times are in Japanese standard time which is 9 hours ahead of UTC
+                last_correction -= 9 * 3600.
+
+            elif counter > 16:
+                data = str(line).split()
+                for value in data:
+                    a = float(value)
+                    acc_data.append(a)
+            counter = counter + 1
+
+        data = np.array(acc_data)
+        tr = Trace(data)
+        tr.detrend("linear")
+        tr.taper(max_percentage=0.05, type='cosine', side='both')
+        filter_order=4
+        pad = np.zeros(int(round(1.5*filter_order/fmin*freq)))
+        tr.data = np.concatenate([pad, tr.data, pad])
+        fN = freq/2
+        if fmax < fN:
+            tr.data=filter.bandpass(tr.data,freqmin=fmin, freqmax=fmax, df=freq, corners=4, zerophase=True )
+        else:
+            tr.data=filter.highpass(tr.data,freq=fmin, df=freq, corners=4, zerophase=True )
+        tr.data = tr.data[len(pad):len(tr.data)-len(pad)]
+        tr.data = tr.data * calib / 9.81 #in g
+
+        npts=len(tr.data)
+
+        time = []
+        for j in range(0, npts):
+            t = j * 1/freq
+            time.append(t)
+        time=np.asarray(time)
+        if i == 1:
+            inp_acc1 = tr.data
+            npts1 = npts
+            time1 = time
+        if i == 2:
+            inp_acc2 = tr.data
+            npts2 = npts
+            time2 = time
     return time1, time2, inp_acc1, inp_acc2, npts1, npts2

@@ -13,8 +13,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with haselREC. If not, see <http://www.gnu.org/licenses/>.
 
-def scale_acc(n_gm, nga, path_nga, path_esm, source, event, station, name,
-              output_folder, sf, comp):
+def scale_acc(n_gm, recid, path_nga, path_esm, source, event, station, name,
+              output_folder, sf, comp, path_kiknet, 
+              fminNS2, fmaxNS2, fminEW2, fmaxEW2):
 
     """
 
@@ -36,6 +37,7 @@ def scale_acc(n_gm, nga, path_nga, path_esm, source, event, station, name,
     import numpy as np
     from .create_acc import create_nga_acc
     from .create_acc import create_esm_acc
+    from .create_acc import create_kiknet_acc
 
 
     # Read accelerograms, save them and apply scaling factor
@@ -48,7 +50,7 @@ def scale_acc(n_gm, nga, path_nga, path_esm, source, event, station, name,
         npts2 = 0
 
         if source[i] == 'NGA-West2':
-            val = int(nga[i])
+            val = int(recid[i])
             [time1, time2, inp_acc1, inp_acc2, npts1, npts2] = \
             create_nga_acc(val, path_nga)
 
@@ -56,6 +58,12 @@ def scale_acc(n_gm, nga, path_nga, path_esm, source, event, station, name,
             folder_esm = path_esm + '/' + event[i] + '-' + station[i]
             [time1, time2, inp_acc1, inp_acc2, npts1, npts2] = \
             create_esm_acc(folder_esm,event[i],station[i],i)
+
+        if source[i] == 'KiK-net':
+            val = str(recid[i])
+            [time1, time2, inp_acc1, inp_acc2, npts1, npts2] = \
+            create_kiknet_acc(val, path_kiknet, 
+                    fminNS2[i], fmaxNS2[i], fminEW2[i], fmaxEW2[i])
 
         if(comp[i]=='-'):
         # Create the filenames

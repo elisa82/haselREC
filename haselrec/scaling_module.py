@@ -15,7 +15,8 @@
 
 def scaling_module(site_code, probability_of_exceedance_num,
                    intensity_measures, output_folder, n_gm,
-                   path_nga_folder, path_esm_folder):
+                   path_nga_folder, path_esm_folder, path_kiknet_folder,
+                   selection_type):
 
     """
     This module is called when mode :code:`--run-scaling` is specified.
@@ -35,15 +36,20 @@ def scaling_module(site_code, probability_of_exceedance_num,
         for jj in np.arange(len(probability_of_exceedance_num)):
             poe = probability_of_exceedance_num[jj]
             for im in np.arange(len(intensity_measures)):
-                name = intensity_measures[im] + '-site_' + str(
-                    site) + '-poe-' + str(poe)
+                if(selection_type=='conditional-spectrum'):
+                    name = intensity_measures[im] + '-site_' + str(
+                        site) + '-poe-' + str(poe)
+                elif(selection_type=='code-spectrum'):
+                    name = 'site_' + str(site) + '-poe-' + str(poe)
 
                 name_summary = (output_folder + '/' + name + '/' + name +
                                 "_summary_selection.txt")
 
                 summary = pd.read_csv(name_summary, sep=' ', skiprows=3)
-                scale_acc(n_gm, summary.recID_NGA, path_nga_folder,
+                scale_acc(n_gm, summary.recID, path_nga_folder,
                           path_esm_folder, summary.source,
                           summary.event_id, summary.station_code, name,
-                          output_folder, summary.scale_factor, summary.component)
+                          output_folder, summary.scale_factor, summary.component,
+                          path_kiknet_folder, summary.flowNS2, summary.fhighNS2,
+                          summary.flonwEW2, summary.fhighEW2)
     return

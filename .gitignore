@@ -17,4 +17,6 @@ docs/_templates/
 docs/_static/
 READMEshakelib.txt
 build/latex/
-complement_database.py
+GM-Records/kiknet/
+GM-Records/Database_small.hdf5
+GM-Records/attributes.csv

@@ -49,7 +49,7 @@ def read_input_data(fileini):
         [database parameters for screening recordings]
         component=single-component
         database_path=../haselREC/GM-Records/
-        allowed_database={ESM,NGA-West2}
+        allowed_database={ESM,NGA-West2,KiK-net}
         allowed_depth=[0,30]
         radius_dist={50}
         dist_range=[15,200]
@@ -67,6 +67,7 @@ def read_input_data(fileini):
         [accelerogram folders]
         path_NGA_folder=/rec/NGA2records
         path_ESM_folder=/rec/ESM
+        path_kiknet_folder=/rec/KikNET
 
         [output folder]
         output_folder=output_acc_AvgSA
@@ -179,7 +180,7 @@ def read_input_data(fileini):
         - :code:`database_path`: path to the folder containing the strong motion
           database;
         - :code:`allowed_database`: list of databases to consider for record
-          selection. They can be ['NGA-West2' or 'ESM'];
+          selection. They can be ['NGA-West2' or 'ESM' or 'KiK-net'];
         - :code:`allowed_depth`: upper and lower bound of allowable depths;
         - :code:`radius_dist`: list of radius values to be used for the
           definition of the allowable distance values. They must be
@@ -191,6 +192,16 @@ def read_input_data(fileini):
           definition of the allowable magnitude values. They must be
           specified for each probability of exceedance
           (:code:`probability_of_exceedance`);
+        - :code:`radius_mag_type`: list of radius types to be used for the
+          definition of the allowable magnitude values. They must be
+          specified for each probability of exceedance. They can be "both",
+          "left", "right" and they indicate if the radius should be applied
+          in both directions or only in one direction.
+        - :code:`radius_dist_type`: list of radius types to be used for the
+          definition of the allowable magnitude values. They must be
+          specified for each probability of exceedance. They can be "both",
+          "left", "right" and they indicate if the radius should be applied
+          in both directions or only in one direction.
         - :code:`maxsf`: list of maximum allowable scale factor. They must be
           specified for each probability of exceedance (:code:`probability_of_exceedance`);
         - :code:`correlated_motion`: it can be yes or no. If no, 
@@ -215,6 +226,7 @@ def read_input_data(fileini):
 
         - :code:`path_NGA_folder`: folder with NGA-Wes2 recordings;
         - :code:`path_ESM_folder`: folder with ESM recordings (it can be empty);
+        - :code:`path_kiknet_folder`: folder with KiK-net recordings (it can be empty);
 
     **Output Folder - section**
 
@@ -239,12 +251,13 @@ def read_input_data(fileini):
 
     # Hazard parameters
 
+    site_code = [x.strip() for x in input['site_code'].strip('{}').split(',')]
+    site_code = np.array(site_code, dtype=int)
+
     if( selection_type == 'conditional-spectrum'): 
         hazard_mode=int(input['hazard_mode'])
         intensity_measures = [x.strip() for x in
                               input['intensity_measures'].strip('{}').split(',')]
-        site_code = [x.strip() for x in input['site_code'].strip('{}').split(',')]
-        site_code = np.array(site_code, dtype=int)
         rlz_code = [x.strip() for x in input['rlz_code'].strip('{}').split(',')]
         rlz_code = np.array(rlz_code, dtype=int)
         if len(rlz_code) != len(site_code):
@@ -279,16 +292,25 @@ def read_input_data(fileini):
             path_results_disagg = []
             num_disagg = []
             num_classical = []
-            probability_of_exceedance = [0]
+            probability_of_exceedance = []
             investigation_time=[]
-    elif( selection_type == 'conditional-spectrum'): 
+    elif( selection_type == 'code-spectrum'): 
         meanMag_disagg=float(input['meanMag_disagg'])
         meanDist_disagg=float(input['meanDist_disagg'])
         hazard_mode=[]
-        intensity_measures = []
-        site_code = [x.strip() for x in input['site_code'].strip('{}').split(',')]
-        site_code = np.array(site_code, dtype=int)
-        rlz_code = []
+        intensity_measures = [0.0]
+        hazard_value=[]
+        path_results_classical = []
+        path_results_disagg = []
+        num_disagg = []
+        num_classical = []
+        probability_of_exceedance = [0]
+        probability_of_exceedance = np.array(probability_of_exceedance)
+        probability_of_exceedance_num=[1]
+        probability_of_exceedance_num = np.array(probability_of_exceedance_num)
+        investigation_time=[]
+        rlz_code=[0]
+        rlz_code=np.array(rlz_code)
     else:
         sys.exit('Error: this selection type ' + str(selection_type) 
                 + ' is not supported')
@@ -296,7 +318,6 @@ def read_input_data(fileini):
     #Spectrum parameters 
 
     target_periods = []
-    tstar = []
     im_type = []
     im_type_lbl = []
     avg_periods = []
@@ -317,6 +338,7 @@ def read_input_data(fileini):
     threshold_low = None
     code_spectrum_file = None
     period_range_spectrumcompatibility = []
+    tstar = np.zeros(len(intensity_measures))
 
     if( selection_type == 'conditional-spectrum'):
 
@@ -324,8 +346,6 @@ def read_input_data(fileini):
         target_periods = [x.strip() for x in
                           input['target_periods'].strip('[]').split(',')]
         target_periods = np.array(target_periods, dtype=float)
-
-        tstar = np.zeros(len(intensity_measures))
 
         for i in np.arange(len(intensity_measures)):
             if intensity_measures[i] == 'AvgSA':
@@ -412,6 +432,8 @@ def read_input_data(fileini):
 
     # Code spectrum parameters
     if( selection_type == 'code-spectrum'):
+        tstar[0]=0.01
+        im_type_lbl.append(r'None')
         code_spectrum_file = input['code_spectrum_file']
         period_range_spectrumcompatibility = [x.strip() for x in
             input['period_range_spectrumcompatibility'].strip('[]').split(
@@ -473,6 +495,14 @@ def read_input_data(fileini):
         if len(probability_of_exceedance_num) != len(radius_dist_input):
             sys.exit('Error: radius_dist must be of the same size of '
                      'probability_of_exceedance')
+    try:
+        radius_dist_type_input = input['radius_dist_type']
+    except ValueError:
+        radius_dist_type_input = [x.strip() for x in
+                             input['radius_dist_type'].strip('{}').split(',')]
+        if len(probability_of_exceedance_num) != len(radius_dist_input):
+                sys.exit('Error: radius_dist_type must be of the same size of '
+                         'radius_dist')
 
     dist_range_input = None
     try:
@@ -493,6 +523,15 @@ def read_input_data(fileini):
             sys.exit(
                 'Error: radius_mag must be of the same size of '
                 'probability_of_exceedance')
+
+    try:
+        radius_mag_type_input = input['radius_mag_type']
+    except ValueError:
+        radius_mag_type_input = [x.strip() for x in
+                             input['radius_mag_type'].strip('{}').split(',')]
+        if len(probability_of_exceedance_num) != len(radius_mag_input):
+            sys.exit('Error: radius_mag_type must be of the same size of '
+                    'radius_mag')
 
     # upper and lower bound of allowable depth values
     allowed_depth = [x.strip() for x in
@@ -523,6 +562,7 @@ def read_input_data(fileini):
     # Accelerogram folders
     path_nga_folder = input['path_NGA_folder']# NGA recordings have to be stored
     path_esm_folder = input['path_ESM_folder']
+    path_kiknet_folder = input['path_kiknet_folder']
 
     # Output folder
     output_folder = input['output_folder']
@@ -540,5 +580,6 @@ def read_input_data(fileini):
             output_folder, meanMag_disagg, meanDist_disagg, hazard_value, 
             hazard_mode, component, correlated_motion, code_spectrum_file,
             period_range_spectrumcompatibility, threshold_up, threshold_low,
-            selection_type)
+            selection_type, path_kiknet_folder, 
+            radius_dist_type_input, radius_mag_type_input)
 

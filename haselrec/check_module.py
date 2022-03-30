@@ -69,14 +69,14 @@ def check_module(output_folder, site_code, probability_of_exceedance_num,
                 summary = pd.read_csv(name_summary, sep=' ', skiprows=3)
                 for i in np.arange(n_gm):
                     if summary.source[i] == 'NGA-West2':
-                        start_string = 'RSN' + str(summary.recID_NGA[i]) +\
+                        start_string = 'RSN' + str(summary.recID[i]) +\
                                        '_'
                         if not os.path.isfile(
                                 path_nga_folder + '/' + start_string +
                                 '1.AT2') or not \
                                 os.path.isfile(path_nga_folder + '/' +
                                                start_string + '2.AT2'):
-                                    missing_ID.append(summary.recID_NGA[i])
+                                    missing_ID.append(summary.recID[i])
     IDs=np.unique(np.asarray(missing_ID))
     with open(missing_file, "w") as f:
         f.write("Missing NGA-West2 IDrecords\n")
