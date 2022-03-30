@@ -199,7 +199,7 @@ def selection_module(intensity_measures, site_code, rlz_code,
                     im_star=0
 
                 [sample_small, sample_big, id_sel, ln_sa1,
-                 rec_id, im_scale_fac, w] = \
+                 rec_id, im_scale_fac, w, id_spectrum_compatibility] = \
                     find_ground_motion(tgt_per, tstar[im], avg_periods,
                                        intensity_measures[im], n_gm,
                                        sa_known, ind_per, mean_req,
@@ -218,7 +218,8 @@ def selection_module(intensity_measures, site_code, rlz_code,
                                              event_id, station_code, allowed_index,
                                              correlated_motion, selection_type,
                                              period_range_spectrumcompatibility,
-                                             threshold_up, threshold_low, w)
+                                             threshold_up, threshold_low, w, 
+                                             id_spectrum_compatibility)
 
                 # Create the outputs folder
                 folder = output_folder + '/' + name

@@ -17,7 +17,8 @@ def optimize_ground_motion(n_loop, n_gm, sample_small, n_big, id_sel, ln_sa1,
                              maxsf, sample_big, tgt_per, mean_req, stdevs,
                              weights, penalty, rec_id, im_scale_fac, event,
                              station, allowed_index, correlated_motion, 
-                             selection_type, period_range, up, low, w):
+                             selection_type, period_range, up, low, w, 
+                             id_spectrum_compatibility):
     """
     Executes incremental changes to the initially selected ground motion set to
     further optimize its fit to the target spectrum distribution. From:
@@ -53,7 +54,9 @@ def optimize_ground_motion(n_loop, n_gm, sample_small, n_big, id_sel, ln_sa1,
                     else:
                         scale_fac[j] = np.exp(ln_sa1) / rec_value
                 elif(selection_type=='code-spectrum'):
-                    if sum(sample_big[j, id_sel])==0:
+                    rec_value = np.exp(
+                        sum(sample_big[j, id_sel]) / len(id_sel))
+                    if rec_value == 0:
                         scale_fac[j] = 1000000
                     else:
                         scale_fac[j]=sum( w * np.log(np.exp(mean_req) / np.exp(sample_big[j, :]))) / sum(w)
@@ -73,7 +76,7 @@ def optimize_ground_motion(n_loop, n_gm, sample_small, n_big, id_sel, ln_sa1,
                             1] * sum(dev_sig ** 2)
 
                 elif(selection_type=='code-spectrum'):
-                    ratio=np.mean(np.exp(sample_small[:,id_sel]),axis=0)/np.exp(mean_req[id_sel])
+                    ratio=np.mean(np.exp(sample_small[:,id_spectrum_compatibility]),axis=0)/np.exp(mean_req[id_spectrum_compatibility])
                     if np.min(ratio)<(100-low)/100.:
                         dev1 = (100-low)/100-np.min(ratio) 
                     else:
@@ -85,7 +88,7 @@ def optimize_ground_motion(n_loop, n_gm, sample_small, n_big, id_sel, ln_sa1,
                         dev2 = 0
 
                     if dev1==0 and dev2==0:
-                        dev_total=np.sqrt(np.mean((np.mean(sample_small[:,id_sel],axis=0)-mean_req[id_sel])**2))
+                        dev_total=np.sqrt(np.mean((np.mean(sample_small[:,id_spectrum_compatibility],axis=0)-mean_req[id_spectrum_compatibility])**2))
                     else:
                         dev_total = dev1 + dev2
 

@@ -432,7 +432,8 @@ def read_input_data(fileini):
 
     # Code spectrum parameters
     if( selection_type == 'code-spectrum'):
-        tstar[0]=0.01
+        scaling_period=float(input['scaling_period'])
+        tstar[0]=scaling_period
         im_type_lbl.append(r'None')
         code_spectrum_file = input['code_spectrum_file']
         period_range_spectrumcompatibility = [x.strip() for x in

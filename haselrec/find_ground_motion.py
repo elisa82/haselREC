@@ -30,6 +30,7 @@ def find_ground_motion(tgt_per, tstar, avg_periods, intensity_measures, n_gm,
     sample_big = np.log(sa_known[:, ind_per])
 
     id_sel = []
+    id_spectrum_compatibility=[]
     if(selection_type=='conditional-spectrum'):
         if intensity_measures == 'AvgSA':
             id_sel_bool = np.isin(tgt_per, avg_periods)
@@ -45,14 +46,15 @@ def find_ground_motion(tgt_per, tstar, avg_periods, intensity_measures, n_gm,
         w = []
     elif(selection_type=='code-spectrum'):
         w=np.zeros(len(tgt_per))
-        for itp in range(len(tgt_per)):
-            if tgt_per[itp] >= 0.   and tgt_per[itp] <= 0.01:
-                w[itp]=1
+        id_sel = np.where(tgt_per == tstar)
+        if(len(id_sel[0]) == 0):
+            sys.exit('Error: tstar not included in tgt_per',tstar,tgt_per)
+        w[id_sel] = 1
         for itp in range(len(tgt_per)):
             if tgt_per[itp] >= period_range[0] and tgt_per[itp] <= period_range[1]:
-                id_sel.append(itp)
-        id_sel = np.array(id_sel)
+                id_spectrum_compatibility.append(itp)
         ln_sa1 = []
+    id_spectrum_compatibility = np.array(id_spectrum_compatibility)
 
     rec_id = np.zeros(n_gm, dtype=int)
     sample_small = []
@@ -77,7 +79,9 @@ def find_ground_motion(tgt_per, tstar, avg_periods, intensity_measures, n_gm,
                         np.exp(sample_big[j, :]) * scale_fac[j]) - np.log(
                         simulated_spectra[i, :])) ** 2)
             elif(selection_type=='code-spectrum'):
-                if sum(sample_big[j, id_sel])==0:
+                rec_value = np.exp(
+                    sum(sample_big[j, id_sel]) / len(id_sel))
+                if rec_value == 0:
                     scale_fac[j] = 1000000
                 else:
                     scale_fac[j]=sum( w * np.log(np.exp(mean_req) / np.exp(sample_big[j, :]))) / sum(w) 
@@ -118,4 +122,4 @@ def find_ground_motion(tgt_per, tstar, avg_periods, intensity_measures, n_gm,
                 rec_id[i]]))  # store scaled log spectrum
 
     return (sample_small, sample_big, id_sel, ln_sa1, rec_id,
-            im_scale_fac, w)
+            im_scale_fac, w, id_spectrum_compatibility)
