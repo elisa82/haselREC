@@ -110,10 +110,10 @@ def read_input_data(fileini):
           OpenQuake (only in case of :code:`hazard_mode`=0);
         - :code:`meanMag_disagg`: mean magnitude from disaggregation analysis 
           (only in case of :code:`hazard_mode`=1 or 
-          :code:`selection_type`=code-spectrum);
+          :code:`selection_type`=code-spectrum. One value per site has to be specified);
         - :code:`meanDist_disagg`: mean distance from disaggregation analysis 
           (only in case of :code:`hazard_mode`=1 or;
-          :code:`selection_type`=code-spectrum);
+          :code:`selection_type`=code-spectrum. One value per site has to be specified);
         - :code:`hazard_value`: hazard value from disaggregation analysis 
           (only in case of :code:`hazard_mode`=1)
 
@@ -159,7 +159,8 @@ def read_input_data(fileini):
           class of the site;
 
     **Code Spectrum Parameters - section**
-        - :code:`code_spectrum_file`: path to the file containing the code spectrum (in g)
+        - :code:`code_spectrum_file`: path to the files containing the code spectrum (in g).
+          The number of files should be equal to the number of sites
         - :code:`period_range_spectrumcompatibility`: period interval for 
           spectrum compatibility (sec)
         - :code:`threshold_up`: maximum threshold for the maximum positive 
@@ -221,6 +222,8 @@ def read_input_data(fileini):
           from the target at any period, =0 otherwise;
         - :code:`random_seed`: random seed number to simulate response spectra
           for initial matching;
+        - :code:`scaling_vertical_component`: decide if the vertical component has to 
+          be scaled or not. It can be "yes" or "no"
 
     **Accelerogram Folders - section**
 
@@ -253,6 +256,10 @@ def read_input_data(fileini):
 
     site_code = [x.strip() for x in input['site_code'].strip('{}').split(',')]
     site_code = np.array(site_code, dtype=int)
+    probability_of_exceedance_num = [x.strip() for x in input[
+        'probability_of_exceedance_num'].strip('{}').split(',')]
+    probability_of_exceedance_num = np.array(probability_of_exceedance_num,
+                                             dtype=int)
 
     if( selection_type == 'conditional-spectrum'): 
         hazard_mode=int(input['hazard_mode'])
@@ -263,10 +270,6 @@ def read_input_data(fileini):
         if len(rlz_code) != len(site_code):
             sys.exit(
                 'Error: rlz_code must be an array of the same length of site_code')
-        probability_of_exceedance_num = [x.strip() for x in input[
-            'probability_of_exceedance_num'].strip('{}').split(',')]
-        probability_of_exceedance_num = np.array(probability_of_exceedance_num,
-                                                 dtype=int)
         if(hazard_mode==0):
             path_results_classical = input['path_results_classical']
             path_results_disagg = input['path_results_disagg']
@@ -285,8 +288,10 @@ def read_input_data(fileini):
             meanDist_disagg=[]
             hazard_value=[]
         else:
-            meanMag_disagg=float(input['meanMag_disagg'])
-            meanDist_disagg=float(input['meanDist_disagg'])
+            meanMag_disagg = [x.strip() for x in input['meanMag_disagg'].strip('{}').split(',')]
+            meanMag_disagg = np.array(meanMag_disagg, dtype=float)
+            meanDist_disagg = [x.strip() for x in input['meanDist_disagg'].strip('{}').split(',')]
+            meanDist_disagg = np.array(meanDist_disagg, dtype=float)
             hazard_value=float(input['hazard_value'])
             path_results_classical = []
             path_results_disagg = []
@@ -294,9 +299,11 @@ def read_input_data(fileini):
             num_classical = []
             probability_of_exceedance = []
             investigation_time=[]
-    elif( selection_type == 'code-spectrum'): 
-        meanMag_disagg=float(input['meanMag_disagg'])
-        meanDist_disagg=float(input['meanDist_disagg'])
+    elif(selection_type == 'code-spectrum'): 
+        meanMag_disagg = [x.strip() for x in input['meanMag_disagg'].strip('{}').split(',')]
+        meanMag_disagg = np.array(meanMag_disagg, dtype=float)
+        meanDist_disagg = [x.strip() for x in input['meanDist_disagg'].strip('{}').split(',')]
+        meanDist_disagg = np.array(meanDist_disagg, dtype=float)
         hazard_mode=[]
         intensity_measures = [0.0]
         hazard_value=[]
@@ -306,11 +313,8 @@ def read_input_data(fileini):
         num_classical = []
         probability_of_exceedance = [0]
         probability_of_exceedance = np.array(probability_of_exceedance)
-        probability_of_exceedance_num=[1]
-        probability_of_exceedance_num = np.array(probability_of_exceedance_num)
         investigation_time=[]
-        rlz_code=[0]
-        rlz_code=np.array(rlz_code)
+        rlz_code=np.zeros((len(site_code)))
     else:
         sys.exit('Error: this selection type ' + str(selection_type) 
                 + ' is not supported')
@@ -435,7 +439,10 @@ def read_input_data(fileini):
         scaling_period=float(input['scaling_period'])
         tstar[0]=scaling_period
         im_type_lbl.append(r'None')
-        code_spectrum_file = input['code_spectrum_file']
+        code_spectrum_file = [x.strip() for x in input['code_spectrum_file'].strip('{}').split(',')]
+        if len(code_spectrum_file) != len(site_code):
+            sys.exit(
+                'Error: code_spectrum_file must be an array of the same length of site_code')
         period_range_spectrumcompatibility = [x.strip() for x in
             input['period_range_spectrumcompatibility'].strip('[]').split(
                          ',')]
@@ -560,6 +567,11 @@ def read_input_data(fileini):
     # period, =0 otherwise.
     penalty = float(input['penalty'])
 
+    try:
+        vertical_component = str(input['scaling_vertical_component'])
+    except ValueError:
+        vertical_component = 'no' 
+
     # Accelerogram folders
     path_nga_folder = input['path_NGA_folder']# NGA recordings have to be stored
     path_esm_folder = input['path_ESM_folder']
@@ -582,5 +594,5 @@ def read_input_data(fileini):
             hazard_mode, component, correlated_motion, code_spectrum_file,
             period_range_spectrumcompatibility, threshold_up, threshold_low,
             selection_type, path_kiknet_folder, 
-            radius_dist_type_input, radius_mag_type_input)
+            radius_dist_type_input, radius_mag_type_input, vertical_component)
 

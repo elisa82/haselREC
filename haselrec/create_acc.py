@@ -70,19 +70,25 @@ def create_esm_acc(folder, event, station, num):
 
     time1 = []
     time2 = []
+    time3 = []
     inp_acc1 = []
     inp_acc2 = []
+    inp_acc3 = []
     npts1 = []
     npts2 = []
+    npts3 = []
 
     filename_in = ''
-    for i in range(1, 3):
+    for i in range(1, 4):
         if folder.find('ESM/GR') > -1:
             file_ew = folder + '/*2.D.*'
             file_ns = folder + '/*3.D.*'
         else:
             file_ew = folder + '/*E.D.*'
             file_ns = folder + '/*N.D.*'
+            file_vert = folder + '/*Z.D.*'
+        if i == 3:
+            filename_in = glob.glob(file_vert)[0]
         if i == 1:
             filename_in = glob.glob(file_ew)[0]
         if i == 2:
@@ -227,6 +233,11 @@ def create_esm_acc(folder, event, station, num):
             t = j * header['delta']
             time.append(t)
 
+        if i == 3:
+            inp_acc3 = np.asarray(acc_data) / 981  # in g
+            # comp2=header['channel']
+            npts3 = header['npts']
+            time3 = time
         if i == 1:
             inp_acc1 = np.asarray(acc_data) / 981  # in g
             # comp1=header['channel']
@@ -238,7 +249,7 @@ def create_esm_acc(folder, event, station, num):
             npts2 = header['npts']
             time2 = time
 
-    return time1, time2, inp_acc1, inp_acc2, npts1, npts2
+    return time1, time2, time3, inp_acc1, inp_acc2, inp_acc3, npts1, npts2, npts3
 
 
 def to_utc_date_time(value):
@@ -303,11 +314,14 @@ def create_nga_acc(num_rec, path_nga_folder):
     # desc2 = ""
     time1 = []
     time2 = []
+    time3 = []
     inp_acc1 = []
     inp_acc2 = []
+    inp_acc3 = []
     npts1 = []
     npts2 = []
-    for i in range(1, 3):
+    npts3 = []
+    for i in range(1, 4):
         file_acc = path_nga_folder + '/RSN' + str(num_rec) + '_' + str(
             i) + '.AT2'
         acc_data = []
@@ -332,6 +346,8 @@ def create_nga_acc(num_rec, path_nga_folder):
                     npts1 = npts
                 if i == 2:
                     npts2 = npts
+                if i == 3:
+                    npts3 = npts
                 dt = float(val[3])
                 for j in range(0, npts):
                     t = j * dt
@@ -340,6 +356,8 @@ def create_nga_acc(num_rec, path_nga_folder):
                     time1 = time
                 if i == 2:
                     time2 = time
+                if i == 3:
+                    time3 = time
             elif counter > 3:
                 data = str(x).split()
                 for value in data:
@@ -351,8 +369,10 @@ def create_nga_acc(num_rec, path_nga_folder):
             inp_acc1 = np.asarray(acc_data)
         if i == 2:
             inp_acc2 = np.asarray(acc_data)
+        if i == 3:
+            inp_acc3 = np.asarray(acc_data)
 
-    return time1, time2, inp_acc1, inp_acc2, npts1, npts2
+    return time1, time2, time3, inp_acc1, inp_acc2, inp_acc3, npts1, npts2, npts3
 
 def create_kiknet_acc(recid, path_kiknet_folder, 
         fminNS2, fmaxNS2, fminEW2, fmaxEW2):
@@ -371,11 +391,14 @@ def create_kiknet_acc(recid, path_kiknet_folder,
     # desc2 = ""
     time1 = []
     time2 = []
+    time3 = []
     inp_acc1 = []
     inp_acc2 = []
+    inp_acc3 = []
     npts1 = []
     npts2 = []
-    for i in range(1, 3):
+    npts3 = []
+    for i in range(1, 4):
         if i==1:
             comp = 'EW2'
             fmin = fminEW2
@@ -384,6 +407,10 @@ def create_kiknet_acc(recid, path_kiknet_folder,
             comp = 'NS2'
             fmin = fminNS2
             fmax = fmaxNS2
+        elif i==3:
+            comp = 'UD2'
+            fmin = max(fminEW2,fminNS2)
+            fmax = min(fmaxEW2,fmaxNS2)
 
         file_acc = path_kiknet_folder + '/' + str(recid) + '/' + str(recid) + '.' + comp
         hdrnames = ['Origin Time', 'Lat.', 'Long.', 'Depth. (km)', 'Mag.',
@@ -511,4 +538,8 @@ def create_kiknet_acc(recid, path_kiknet_folder,
             inp_acc2 = tr.data
             npts2 = npts
             time2 = time
-    return time1, time2, inp_acc1, inp_acc2, npts1, npts2
+        if i == 3:
+            inp_acc3 = tr.data
+            npts3 = npts
+            time3 = time
+    return time1, time2, time3, inp_acc1, inp_acc2, inp_acc3, npts1, npts2, npts3

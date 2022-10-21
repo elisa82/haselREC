@@ -17,12 +17,13 @@ def create_output_files(output_folder, name, im_star, mean_mag, mean_dist, n_gm,
                         rec_idx, source, event_id, station_code, event_mw,
                         acc_distance, station_vs30, station_ec8,
                         final_scale_factors, tgt_per, mean_req, stdevs,
-                        record_sequence_number, event_mag, comp, comp_idx,
-                        fminNS2, fmaxNS2, fminEW2, fmaxEW2):
+                        record_sequence_number, event_mag, comp_idx,
+                        fminNS2, fmaxNS2, fminEW2, fmaxEW2, selection_type,
+                        min_misfit, max_misfit, average_misfit, sample_small):
     """
     Two `.txt` files are generated::
 
-        1) <IM>-site_<num_site>-poe-<num_poe>_CS.txt
+        1) <IM>-site_<num_site>-poe-<num_poe>_response_spectra.txt
         2) <IM>-site_<num_site>-poe-<num_poe>_summary_selection.txt
 
     where:
@@ -32,7 +33,8 @@ def create_output_files(output_folder, name, im_star, mean_mag, mean_dist, n_gm,
 
     The files contain:
 
-        1) the CS. It has 3 columns: period (s), ln(CS) (g), standard deviation
+        1) the response spectra. It has 3 columns: period (s), ln(CS) (g), standard deviation
+           along with one column for each scaled selected response spectrum
            Example::
 
             Period(s) lnCS(g) standard_deviation
@@ -72,15 +74,23 @@ def create_output_files(output_folder, name, im_star, mean_mag, mean_dist, n_gm,
 
     """
     import numpy as np
+    import pandas as pd
 
     # Output results to a text file
-    name_summary = (output_folder + '/' + name + '/' + name +
+    name_summary = (output_folder + '/' + name +
                     "_summary_selection.txt")
     with open(name_summary, "w") as f:
-        f.write(
-            "{} {}\n".format('reference hazard value = ', im_star))
-        f.write("{} {}\n".format('mean_mag_disag = ', mean_mag))
-        f.write("{} {}\n".format('mean_dist_disag = ', mean_dist))
+        if(selection_type=='conditional-spectrum'):
+            f.write(
+                "{} {}\n".format('reference hazard value = ', im_star))
+            f.write("{} {}\n".format('mean_mag_disag = ', mean_mag))
+            f.write("{} {}\n".format('mean_dist_disag = ', mean_dist))
+        if(selection_type=='code-spectrum'):
+            f.write(
+                "{} {}\n".format('max_negative_misfit (%) = ', min_misfit))
+            f.write("{} {}\n".format('max_positive_misfit (%) = ', max_misfit))
+            f.write("{} {}\n".format('average_misfit (%) = ', average_misfit))
+
         f.write(
             "num source event_id station_code recID "
             "component magnitude distance vs30 EC8 scale_factor "
@@ -108,11 +118,21 @@ def create_output_files(output_folder, name, im_star, mean_mag, mean_dist, n_gm,
                     fminEW2[elemento], fmaxEW2[elemento]))
 
     # Output conditional spectrum to a text file
-    name_cs = output_folder + '/' + name + '/' + name + "_CS.txt"
-    with open(name_cs, "w") as f:
-        f.write("Period(s) lnCS(g) standard_deviation\n")
-        for i in np.arange(len(tgt_per)):
-            f.write("{:6.2f}{:6.2f}{:6.2f} \n".format(tgt_per[i],
-                                                      mean_req[i],
-                                                      stdevs[i]))
+    name_cs = output_folder + '/' + name + "_response_spectra.csv"
+    meanrecorded = np.mean(np.exp(sample_small), axis=0)
+    keys = []
+    values = []
+    keys.append('Period(s)')
+    keys.append('target_spectrum')
+    keys.append('sigma(ln)')
+    keys.append('mean_spectrum')
+    values.append(tgt_per)
+    values.append(np.exp(mean_req))
+    values.append(stdevs)
+    values.append(meanrecorded)
+    for k in np.arange(n_gm):
+        keys.append('RS_'+str(k+1))
+        values.append(np.exp(sample_small[k,:]))
+    df = pd.DataFrame(data=dict(zip(keys, values)))
+    df.to_csv(name_cs,index=False)
     return

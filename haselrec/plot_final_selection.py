@@ -108,7 +108,7 @@ def plot_final_selection(name, lbl, n_gm, t_cs, sample_small, mean_req, stdevs,
     plt.xlabel('Period [s]')
     plt.ylabel('Acceleration [g]')
     plt.xlim(min(t_cs_gt0), max(t_cs_gt0))
-    plt.ylim(1e-2, 1e1)
+    plt.ylim(1e-4, 1e1)
     #number=int(name[11])+1 #per AvgSA
     #number = int(name[9]) + 1 #per PGA
     #plt.title('site '+str(number)+' - '+lbl)
@@ -116,7 +116,7 @@ def plot_final_selection(name, lbl, n_gm, t_cs, sample_small, mean_req, stdevs,
     plt.legend()
     #plt.savefig(output_folder + '/' + name + '/' + name + '_spectra_gms.png',
     #            bbox_inches='tight')
-    plt.savefig(output_folder + '/' + name + '/' + name + '_spectra_gms.pdf',
+    plt.savefig(output_folder + '/' + name + '_spectra_gms.pdf',
                 bbox_inches='tight')
     plt.close()
 
@@ -140,7 +140,7 @@ def plot_final_selection(name, lbl, n_gm, t_cs, sample_small, mean_req, stdevs,
     plt.xscale('log')
     plt.grid(True)
     plt.legend()
-    plt.savefig(output_folder + '/' + name + '/' + name + '_spectra.pdf',
+    plt.savefig(output_folder + '/' + name + '_spectra.pdf',
                 bbox_inches='tight')
     plt.close()
 
@@ -157,6 +157,6 @@ def plot_final_selection(name, lbl, n_gm, t_cs, sample_small, mean_req, stdevs,
     plt.xscale('log')
     plt.grid(True)
     plt.legend()
-    plt.savefig(output_folder + '/' + name + '/' + name + '_dispersion.pdf',
+    plt.savefig(output_folder + '/' + name + '_dispersion.pdf',
                 bbox_inches='tight')
     plt.close()

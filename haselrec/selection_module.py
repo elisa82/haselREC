@@ -127,7 +127,7 @@ def selection_module(intensity_measures, site_code, rlz_code,
                                                    path_results_disagg,
                                                    investigation_time,
                                                    path_results_classical,
-                                                   meanMag_disagg, meanDist_disagg, 
+                                                   meanMag_disagg[ii], meanDist_disagg[ii], 
                                                    hazard_value, hazard_mode)
 
                     [bgmpe, sctx, rctx, dctx, vs30, rrup] = \
@@ -150,12 +150,12 @@ def selection_module(intensity_measures, site_code, rlz_code,
                         len(site_code) * len(probability_of_exceedance_num)))
                     ind += 1
 
-                    code = pd.read_csv(code_spectrum_file)
+                    code = pd.read_csv(code_spectrum_file[ii])
                     target_periods = code['T'].to_numpy()
                     code_spectrum = code['Sa'].to_numpy()
 
-                    mag = meanMag_disagg
-                    rjb = np.array([meanDist_disagg])
+                    mag = meanMag_disagg[ii]
+                    rjb = np.array([meanDist_disagg[ii]])
 
                     vs30=[]
 
@@ -163,12 +163,13 @@ def selection_module(intensity_measures, site_code, rlz_code,
                 [sa_known, ind_per, tgt_per, n_big, allowed_index, event_id,
                  station_code, source, record_sequence_number_nga, event_mw,
                  event_mag, acc_distance, station_vs30, station_ec8, comp_allowed,
-                 fminNS2, fmaxNS2, fminEW2, fmaxEW2] = \
+                 fminNS2, fmaxNS2, fminEW2, fmaxEW2, cluster] = \
                     screen_database(database_path, allowed_database,
                                     allowed_recs_vs30, radius_dist, dist_range_input,
-                                    radius_mag, rjb, mag, allowed_ec8_code,
+                                    radius_mag, rjb[0], mag, allowed_ec8_code,
                                     target_periods, n_gm, allowed_depth, vs30, 
-                                    component, radius_dist_type, radius_mag_type)
+                                    component, radius_dist_type, radius_mag_type,
+                                    selection_type)
 
                 # Compute the target spectrum
 
@@ -193,6 +194,8 @@ def selection_module(intensity_measures, site_code, rlz_code,
                         ind_per_code.append(np.argmin(np.abs(target_periods - tgt_per[itp])))
                     ind_per_code=np.asarray(ind_per_code)
                     sa_ref=code_spectrum[ind_per_code]
+                    if component == 'two-component':
+                        sa_ref=code_spectrum[ind_per_code]*1.3
                     mean_req=np.log(sa_ref)
                     simulated_spectra=[]
                     stdevs=np.zeros(len(mean_req))
@@ -206,7 +209,9 @@ def selection_module(intensity_measures, site_code, rlz_code,
                                        n_big, simulated_spectra, maxsf,
                                        event_id, station_code, allowed_index,
                                        correlated_motion,selection_type,
-                                       period_range_spectrumcompatibility)
+                                       period_range_spectrumcompatibility,
+                                       cluster)
+                                      
 
                 # Further optimize the ground motion selection
 
@@ -219,8 +224,8 @@ def selection_module(intensity_measures, site_code, rlz_code,
                                              correlated_motion, selection_type,
                                              period_range_spectrumcompatibility,
                                              threshold_up, threshold_low, w, 
-                                             id_spectrum_compatibility)
-
+                                             id_spectrum_compatibility, cluster)
+                                             
                 # Create the outputs folder
                 folder = output_folder + '/' + name
                 if not os.path.exists(folder):
@@ -229,66 +234,40 @@ def selection_module(intensity_measures, site_code, rlz_code,
                 # Plot the figure
                 plot_final_selection(name, im_type_lbl[im], n_gm, tgt_per,
                                      sample_small, mean_req, stdevs,
-                                     output_folder, selection_type,
+                                     folder, selection_type,
                                      period_range_spectrumcompatibility,
                                      threshold_up, threshold_low)
 
                 # Collect information of the final record set
                 rec_idx = [allowed_index[i] for i in final_records]
                 comp_idx = [comp_allowed[i] for i in final_records]
+
+                min_misfit=[]
+                max_misfit=[]
+                average_misfit=[]
+                if(selection_type=='code-spectrum'):
+                    misfit=((np.mean(np.exp(sample_small[:,id_spectrum_compatibility]),axis=0)-np.exp(mean_req[id_spectrum_compatibility]))/np.exp(mean_req[id_spectrum_compatibility]))*100
+                    average_misfit=np.mean(np.abs(misfit))
+                    if np.min(misfit)>0:
+                        min_misfit=0
+                    else:
+                        min_misfit=np.max(np.abs(misfit[misfit<0]))
+                    if np.max(misfit) > 0:
+                        max_misfit=np.max(misfit[misfit>0])
+                    else:
+                        max_misfit = 0
+
+
                 # Create the summary file along with the file with the CS
-                create_output_files(output_folder, name, im_star, mag,
+                create_output_files(folder, name, im_star, mag,
                                     rjb[0], n_gm, rec_idx, source, event_id,
                                     station_code, event_mw, acc_distance,
                                     station_vs30, station_ec8,
                                     final_scale_factors, tgt_per, mean_req,
                                     stdevs, record_sequence_number_nga,
-                                    event_mag, component, comp_idx, 
-                                    fminNS2, fmaxNS2, fminEW2, fmaxEW2)
+                                    event_mag, comp_idx, 
+                                    fminNS2, fmaxNS2, fminEW2, fmaxEW2,
+                                    selection_type,min_misfit, max_misfit, 
+                                    average_misfit, sample_small)
                 
-#                for kk in range(n_big):
-#                    np.log(sa_ref[itp])-np.log(im_scale_fac[]*sa_known[igm])
-
-
-#                sa_mean=[]
-#                for igm in range(n_gm):
-#                    sa_mean=sa_mean+im_scale_fac[igm]*sample_small[igm]
-#                sa_mean=sa_mean/n_gm
-
-#                misfit=0
-#                for it in range(len(tgt_per)):
-#                    misfit=misfit+(np.log(sa_mean[it])-np.log(sa_ref[it]))**2
-#                misfit=np.sqrt(misfit/len(tgt_per))
-
-#                #low and upper limits set for the spectral mismatch of each individual record in relation to the target spectrum
-
-#                for igm in range(len(sa_known)):
-#                    if np.min(sa_known[igm]/sa_ref)<low:
-#                        dev=low-np.min(sa_known[igm]/sa_ref)
-#                    else:
-#                        dev=0
-
-#                    if np.max(sa_known[igm]/sa_ref)>upper:
-#                        dev=np.max(sa_known[igm]/sa_ref)-upper
-#                    else:
-#                        dev=0
-
-
-#                if np.min(sa_mean/sa_ref)<low:
-#                    dev=low-np.min(sa_mean/sa_ref)
-#                else:
-#                    dev=0
-
-#                if np.max(sa_mean/sa_ref)>upper:
-#                    dev=np.max(sa_mean/sa_ref)-upper
-#                else:
-#                    dev=0
-
-
-#                if(sa_mean[0]>=sa_ref[0]):
-#                    dev=0
-#                else:
-#                    dev=1
-
-
     return 

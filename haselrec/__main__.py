@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Copyright (C) 2020-2021 Elisa Zuccolo, Eucentre Foundation
 #
@@ -30,7 +30,7 @@ compatible with OpenQuake. Under review
 
 haselREC can be launched with the following command::
 
-    python -m haselrec <input_file> <mode>
+    python3 -m haselrec <input_file> <mode>
 
 Four modes are permitted:
 
@@ -38,11 +38,11 @@ Four modes are permitted:
     - :code:`--run-scaling`: it performs record scaling only (requires to have run
        mode :code:`--run-selection` in advance)
     - :code:`--run-complete`: it performs both record selection and scaling
-    - :code:`--check-NGArec`: it identifies NGA-West2 record IDs not already stored
+    - :code:`--check-rec`: it identifies NGA-West2 and KiK-net record IDs not already stored
        on the computer (it requires to have run mode :code:`--run-selection` in
        advance)
 
-The output files are store in a folder, which has the following name structure::
+The output files are stored in a folder, which has the following name structure::
 
     <IM>-site_<num_site>-poe-<num_poe>
 
@@ -59,6 +59,7 @@ from .read_input_data import read_input_data
 from .scaling_module import scaling_module
 from .check_module import check_module
 from .selection_module import selection_module
+from .scaling_nodes_NTC18 import scaling_nodes_NTC18
 
 if __name__ == '__main__':
 
@@ -68,12 +69,21 @@ if __name__ == '__main__':
         calculation_mode = sys.argv[2]
     except IndexError:
         sys.exit('usage:\n'
-                 'python -m haselrec #input_file [mode]' + "\n"
+                 'python3 -m haselrec #input_file [mode]' + "\n"
                  + '       [--run-complete]' + "\n"
                  + '       [--run-selection]' + "\n"
                  + '       [--run-scaling]' + "\n"
-                 + '       [--check-NGArec]')
-
+                 + '       [--check-rec]'
+                 + '       [--scaling-nodes-NTC18] [TR]')
+    if calculation_mode == '--scaling-nodes-NTC18':
+        try: 
+            TR = sys.argv[3]
+            path_to_share = sys.argv[4]
+        except IndexError:
+            sys.exit('usage:\n'
+                 'python3 -m haselrec #input_file [mode]' + "\n"
+                 + '       [--scaling-nodes-NTC18] [TR]'
+                 + 'path_to_share')
 
     # Read fileini
 
@@ -90,7 +100,7 @@ if __name__ == '__main__':
      hazard_value, hazard_mode, component, correlated_motion,
      code_spectrum_file, period_range_spectrumcompatibility, 
      threshold_up, threshold_low, selection_type, path_kiknet_folder,
-     radius_dist_type_input, radius_mag_type_input] = read_input_data(fileini)
+     radius_dist_type_input, radius_mag_type_input, vertical_component] = read_input_data(fileini)
 
     if calculation_mode == '--run-complete' or \
             calculation_mode == '--run-selection':
@@ -114,9 +124,15 @@ if __name__ == '__main__':
                          radius_dist_type_input, radius_mag_type_input)
                         
 
-    if calculation_mode == '--check-NGArec':
+    if calculation_mode == '--check-rec':
         check_module(output_folder, site_code, probability_of_exceedance_num,
-                     intensity_measures, n_gm, path_nga_folder)
+                     intensity_measures, n_gm, path_nga_folder, path_kiknet_folder,
+                     selection_type)
+
+    if calculation_mode == '--scaling-nodes-NTC18':
+        scaling_nodes_NTC18(TR, output_folder, n_gm,
+                       path_nga_folder, path_esm_folder, path_kiknet_folder,
+                       selection_type, path_to_share, component)
 
     if calculation_mode == '--run-complete' or \
             calculation_mode == '--run-scaling':
@@ -126,8 +142,8 @@ if __name__ == '__main__':
             os.makedirs(path_esm_folder)
         if not os.path.exists(path_kiknet_folder):
             os.makedirs(path_kiknet_folder)
-            
+
         scaling_module(site_code, probability_of_exceedance_num,
                        intensity_measures, output_folder, n_gm,
                        path_nga_folder, path_esm_folder, path_kiknet_folder,
-                       selection_type)
+                       selection_type, vertical_component)

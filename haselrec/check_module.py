@@ -14,13 +14,14 @@
 # along with haselREC. If not, see <http://www.gnu.org/licenses/>.
 
 def check_module(output_folder, site_code, probability_of_exceedance_num,
-                 intensity_measures, n_gm, path_nga_folder):
+                 intensity_measures, n_gm, path_nga_folder, path_kiknet_folder, 
+                 selection_type):
 
     """
 
     This module is called when mode :code:`--check-NGArec` is specified.
 
-    It identifies NGA-West2 records not already stored on the computer
+    It identifies NGA-West2 and KiK-net records not already stored on the computer
     from the list of selected IDs.
 
     It requires to have run mode :code:`--run-selection` in advance since it reads
@@ -28,12 +29,12 @@ def check_module(output_folder, site_code, probability_of_exceedance_num,
 
     It generates the file::
 
-        missing_NGArec.txt
+        missing_rec.txt
 
     which contains the list of missing NGA-West2 records.
     Example::
 
-        Missing NGA-West2 IDrecords
+        Missing IDrecords
         65
         68
         158
@@ -55,15 +56,20 @@ def check_module(output_folder, site_code, probability_of_exceedance_num,
     import numpy as np
     import pandas as pd
 
-    missing_file = output_folder + '/missing_NGArec.txt'
+    missing_file = output_folder + '/missing_rec.txt'
     missing_ID=[]
     for ii in np.arange(len(site_code)):
         site = site_code[ii]
         for jj in np.arange(len(probability_of_exceedance_num)):
             poe = probability_of_exceedance_num[jj]
             for im in np.arange(len(intensity_measures)):
-                name = intensity_measures[im] + '-site_' + str(
-                    site) + '-poe-' + str(poe)
+                if(selection_type=='conditional-spectrum'):
+                    name = intensity_measures[im] + '-site_' + str(
+                        site) + '-poe-' + str(poe)
+                elif(selection_type=='code-spectrum'):
+                    name = 'site_' + str(site) + '-poe-' + str(poe)
+                else:
+                    print('Option not considered')
                 name_summary = (output_folder + '/' + name + '/' + name +
                                 "_summary_selection.txt")
                 summary = pd.read_csv(name_summary, sep=' ', skiprows=3)
@@ -77,9 +83,18 @@ def check_module(output_folder, site_code, probability_of_exceedance_num,
                                 os.path.isfile(path_nga_folder + '/' +
                                                start_string + '2.AT2'):
                                     missing_ID.append(summary.recID[i])
+                    if summary.source[i] == 'KiK-net':
+                        start_string = str(summary.recID[i])
+                        if not os.path.isfile(
+                                path_kiknet_folder + '/' + start_string + '/' 
+                                + start_string +'.NS2') or not \
+                                os.path.isfile(path_kiknet_folder + '/' +
+                                               start_string + '/' +
+                                               start_string + '.EW2'):
+                                    missing_ID.append(summary.recID[i])
     IDs=np.unique(np.asarray(missing_ID))
     with open(missing_file, "w") as f:
-        f.write("Missing NGA-West2 IDrecords\n")
+        f.write("Missing IDrecords\n")
         for i in np.arange(len(IDs)):
             f.write("{}\n".format(IDs[i]))
     return

@@ -16,7 +16,7 @@
 def find_ground_motion(tgt_per, tstar, avg_periods, intensity_measures, n_gm,
                        sa_known, ind_per, mean_req, n_big, simulated_spectra,
                        maxsf, event, station, allowed_index, correlated_motion,
-                       selection_type, period_range):
+                       selection_type, period_range, cluster):
     """
     Select ground motions from the database that individually match the
     statistically simulated spectra. From:
@@ -94,16 +94,16 @@ def find_ground_motion(tgt_per, tstar, avg_periods, intensity_measures, n_gm,
         # exclude previously-selected ground motions
         if(i>0):
             err[rec_id[0:i - 1]] = 1000000
-        if(correlated_motion=='no'):
-        # exclude ground motions from the same stations and earthquake of 
-        # previously-selected ground motions
-            for l in range(i):
-                rec_idx_l = allowed_index[rec_id[l]]
-                for j in np.arange(n_big):
-                    rec_idx_j = allowed_index[j]
-                    if(station[rec_idx_j]==station[rec_idx_l] or
-                                event[rec_idx_j]==event[rec_idx_l]):
-                        err[j]=1000000
+            if(correlated_motion=='no'):
+            # exclude ground motions from the same stations and earthquake of 
+            # previously-selected ground motions
+                for l in range(i):
+                    rec_idx_l = allowed_index[rec_id[l]]
+                    for j in np.arange(n_big):
+                        rec_idx_j = allowed_index[j]
+                        if station[rec_idx_j]==station[rec_idx_l] or event[rec_idx_j]==event[rec_idx_l] or cluster[rec_idx_j]==cluster[rec_idx_l]:
+                            err[j] = 1000000
+
         # exclude ground motions requiring too large SF
         err[scale_fac > maxsf] = 1000000
         # exclude ground motions requiring too large SF

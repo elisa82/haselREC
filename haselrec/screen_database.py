@@ -18,7 +18,7 @@
 def screen_database(database_path, allowed_database, allowed_recs_vs30,
                     radius_dist, dist_range_input, radius_mag, mean_dist, mean_mag,
                     allowed_ec8_code, target_periods, n_gm, allowed_depth,
-                    vs30, comp, radius_dist_type, radius_mag_type):
+                    vs30, comp, radius_dist_type, radius_mag_type, selection_type):
     """
     Screen the database of candidate ground motion to select only appropriate
     ground motions. The screening criteria are:
@@ -47,6 +47,7 @@ def screen_database(database_path, allowed_database, allowed_recs_vs30,
     import pandas as pd
     import h5py
     import sys
+    from obspy.core import UTCDateTime
 
     known_per = np.array(
         [0, 0.01, 0.025, 0.04, 0.05, 0.07, 0.1, 0.15, 0.2, 0.25,
@@ -54,7 +55,7 @@ def screen_database(database_path, allowed_database, allowed_recs_vs30,
          1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.5, 3.0, 3.5, 4.0, 5.0, 6.0, 7.0, 8.0,
          9.0, 10])
     sa = []
-    if comp=='single-component':
+    if comp=='single-component' or selection_type=='code-spectrum':
         if 'NGA-West2' in allowed_database or 'KiK-net' in allowed_database:
             known_per=known_per[1:]
     allowed_index = []
@@ -75,7 +76,6 @@ def screen_database(database_path, allowed_database, allowed_recs_vs30,
         dist_range=[-99999.,99999.]
     else:
         dist_range=dist_range_input
-
 
     if ( (mean_dist - radius_dist) < dist_range[0] ):
         dist_min_km = dist_range[0]
@@ -146,6 +146,9 @@ def screen_database(database_path, allowed_database, allowed_recs_vs30,
     fmaxNS2_tot = []
     fminEW2_tot = []
     fmaxEW2_tot = []
+    epi_lon_tot = []
+    epi_lat_tot = []
+    origin_time_tot = []
 
     num_events_esm=0
     num_events_nga=0
@@ -164,6 +167,8 @@ def screen_database(database_path, allowed_database, allowed_recs_vs30,
         event_depth = dbacc['ev_depth_km']
         # sensor_depth = dbacc['sensor_depth_m']
         is_free_field = dbacc['proximity_code']
+        epi_lon = dbacc['ev_longitude'] 
+        epi_lat = dbacc['ev_latitude']
 
         for i in np.arange(len(event_id_esm)):
             event_id_tot.append(event_id_esm[i])
@@ -179,25 +184,33 @@ def screen_database(database_path, allowed_database, allowed_recs_vs30,
             fmaxNS2_tot.append(np.nan)
             fminEW2_tot.append(np.nan)
             fmaxEW2_tot.append(np.nan)
+            epi_lon_tot.append(epi_lon[i])
+            epi_lat_tot.append(epi_lat[i])
+            origin_time_tot.append(UTCDateTime(int(dbacc['event_time'][i][6:10]), int(dbacc['event_time'][i][3:5]), int(dbacc['event_time'][i][0:2]), int(dbacc['event_time'][i][11:13]), int(dbacc['event_time'][i][14:16])))
 
             rec_ok=0
-            if (is_free_field[i] == 0):
-                if (allowed_recs_mag[0] <= event_mw[i] <= allowed_recs_mag[1]):
-                    if (allowed_depth[0] <= event_depth[i] <= allowed_depth[1]):
-                        if (allowed_recs_d[0] <= acc_distance[i] <= allowed_recs_d[1]):
-                            if not np.isnan(station_vs30[i]):
-                                if (allowed_recs_vs30[0] <= station_vs30[i]
-                                        < allowed_recs_vs30[1]):
-                                    rec_ok=1
-                            else:
-                                if allowed_ec8_code and not pd.isnull(station_ec8[i]):
-                                    if (station_ec8[i][0] in
-                                        allowed_ec8_code or
-                                        allowed_ec8_code == 'All'):
-                                            rec_ok=1
+            #bad quality recording
+            if event_id_esm[i] == 'IT-2013-0003' and station_code[i] == 'PSC': 
+                rec_ok=0
+            else:
+
+                if (is_free_field[i] == 0):
+                    if (allowed_recs_mag[0] <= event_mw[i] <= allowed_recs_mag[1]):
+                        if (allowed_depth[0] <= event_depth[i] <= allowed_depth[1]):
+                            if (allowed_recs_d[0] <= acc_distance[i] <= allowed_recs_d[1]):
+                                if not np.isnan(station_vs30[i]):
+                                    if (allowed_recs_vs30[0] <= station_vs30[i]
+                                            < allowed_recs_vs30[1]):
+                                        rec_ok=1
+                                else:
+                                    if allowed_ec8_code and not pd.isnull(station_ec8[i]):
+                                        if (station_ec8[i][0] in
+                                            allowed_ec8_code or
+                                            allowed_ec8_code == 'All'):
+                                                rec_ok=1
                                             
-            if(comp=='two-component'):
-                if rec_ok==1:
+            if rec_ok==1:
+                if(comp=='two-component' and selection_type=='conditional-spectrum'):
                     sa_entry = np.array([dbacc['rotD50_pga'][i], dbacc['rotD50_T0_010'][i],
                                        dbacc['rotD50_T0_025'][i], dbacc['rotD50_T0_040'][i],
                                        dbacc['rotD50_T0_050'][i], dbacc['rotD50_T0_070'][i],
@@ -216,14 +229,14 @@ def screen_database(database_path, allowed_database, allowed_recs_vs30,
                                        dbacc['rotD50_T5_000'][i], dbacc['rotD50_T6_000'][i],
                                        dbacc['rotD50_T7_000'][i], dbacc['rotD50_T8_000'][i],
                                        dbacc['rotD50_T9_000'][i], dbacc['rotD50_T10_000'][i]])
-                    if all(v > 0 for v in sa_entry):
+
+                    if all(v>0 for v in sa_entry):
                         sa_geo = sa_entry / 981  # in g
                         comp_allowed.append(0)
                         allowed_index.append(i)
                         sa.append(sa_geo)
-            elif(comp=='single-component'):
-                if rec_ok==1:
-                    sa_entry = np.array([dbacc['U_pga'][i], dbacc['U_T0_010'][i],
+                elif(comp=='single-component' or selection_type=='code-spectrum'):
+                    sa_entry1 = np.array([np.abs(dbacc['U_pga'][i]), dbacc['U_T0_010'][i],
                                        dbacc['U_T0_025'][i], dbacc['U_T0_040'][i],
                                        dbacc['U_T0_050'][i], dbacc['U_T0_070'][i],
                                        dbacc['U_T0_100'][i], dbacc['U_T0_150'][i],
@@ -241,15 +254,8 @@ def screen_database(database_path, allowed_database, allowed_recs_vs30,
                                        dbacc['U_T5_000'][i], dbacc['U_T6_000'][i],
                                        dbacc['U_T7_000'][i], dbacc['U_T8_000'][i],
                                        dbacc['U_T9_000'][i], dbacc['U_T10_000'][i]])
-                    if all(v > 0 for v in sa_entry):
-                        sa_entry = sa_entry / 981  # in g
-                        allowed_index.append(i)
-                        comp_allowed.append(1)
-                        if 'NGA-West2' in allowed_database or 'KiK-net' in allowed_database:
-                            sa_entry=sa_entry[1:]
-                        sa.append(sa_entry)
 
-                    sa_entry = np.array([dbacc['V_pga'][i], dbacc['V_T0_010'][i],
+                    sa_entry2 = np.array([np.abs(dbacc['V_pga'][i]), dbacc['V_T0_010'][i],
                                        dbacc['V_T0_025'][i], dbacc['V_T0_040'][i],
                                        dbacc['V_T0_050'][i], dbacc['V_T0_070'][i],
                                        dbacc['V_T0_100'][i], dbacc['V_T0_150'][i],
@@ -267,14 +273,31 @@ def screen_database(database_path, allowed_database, allowed_recs_vs30,
                                        dbacc['V_T5_000'][i], dbacc['V_T6_000'][i],
                                        dbacc['V_T7_000'][i], dbacc['V_T8_000'][i],
                                        dbacc['V_T9_000'][i], dbacc['V_T10_000'][i]])
-                    if all(v > 0 for v in sa_entry):
-                        sa_entry = sa_entry / 981  # in g
-                        allowed_index.append(i)
-                        comp_allowed.append(2)
-                        if 'NGA-West2' in allowed_database or 'KiK-net' in allowed_database:
-                            sa_entry=sa_entry[1:]
-                        sa.append(sa_entry)
-
+                    if comp == 'single-component':
+                        if all(v>0 for v in sa_entry1):
+                            sa_entry1 = sa_entry1 / 981  # in g
+                            allowed_index.append(i)
+                            comp_allowed.append(1)
+                            if 'NGA-West2' in allowed_database or 'KiK-net' in allowed_database:
+                                sa_entry1=sa_entry1[1:]
+                            sa.append(sa_entry1)
+                        if all(v>0 for v in sa_entry2):
+                            sa_entry2 = sa_entry2 / 981  # in g
+                            allowed_index.append(i)
+                            comp_allowed.append(2)
+                            if 'NGA-West2' in allowed_database or 'KiK-net' in allowed_database:
+                                sa_entry2=sa_entry2[1:]
+                            sa.append(sa_entry2)
+                    elif comp == 'two-component':
+                        if all(v>0 for v in sa_entry1):
+                            sa_entry1 = sa_entry1 / 981  # in g
+                            sa_entry2 = sa_entry2 / 981  # in g
+                            allowed_index.append(i)
+                            comp_allowed.append(0)
+                            if 'NGA-West2' in allowed_database or 'KiK-net' in allowed_database:
+                                sa_entry1=sa_entry1[1:]
+                                sa_entry2=sa_entry2[1:]
+                            sa.append(np.sqrt(sa_entry1**2+sa_entry2**2))
 
     if 'NGA-West2' in allowed_database:
         index0_database=num_events_esm
@@ -302,28 +325,49 @@ def screen_database(database_path, allowed_database, allowed_recs_vs30,
             station_vs30_tot.append(station_vs30[i])
             station_ec8_tot.append(np.nan)
             source_tot.append('NGA-West2')
-            record_sequence_number_tot.append(record_sequence_number_nga[i])
+            record_sequence_number_tot.append(int(record_sequence_number_nga[i]))
             fminNS2_tot.append(np.nan)
             fmaxNS2_tot.append(np.nan)
             fminEW2_tot.append(np.nan)
             fmaxEW2_tot.append(np.nan)
+            epi_lon_tot.append(epi_lon[i])
+            epi_lat_tot.append(epi_lat[i])
+            year=str(dbacc['YEAR'][i])
+            mody=str(dbacc['MODY'][i])
+            hrmn=str(dbacc['HRMN'][i])
+            if(year=='-999'):
+                year='1000'
+            if(mody=='-999'):
+                mody='0615' #arbitrary date in the middle of the year
+            if(hrmn=='-999'):
+                hrmn='0000'
+            if(len(mody)==3):
+                mody='0'+str(dbacc['MODY'][i])
+            if(len(hrmn)==3):
+                hrmn='0'+str(dbacc['HRMN'][i])
+            elif(len(hrmn)==2):
+                hrmn='00'+str(dbacc['HRMN'][i])
+            else:
+                hrmn='000'+hrmn
+            origin_time_tot.append(UTCDateTime(int(year), int(mody[0:2]), int(mody[2:4]), int(hrmn[0:2]), int(hrmn[2:4])))
             rec_ok=0
             if(is_free_field[i] == "I"):
                 if(allowed_recs_mag[0] <= event_mag[i] <= allowed_recs_mag[1]):
                     if (allowed_depth[0] <= event_depth[i] <= allowed_depth[1]):
                         if (allowed_recs_d[0] <= acc_distance[i] <= allowed_recs_d[1]):
                             if (allowed_recs_vs30[0] <= station_vs30[i] < allowed_recs_vs30[1]):
-                                inside=0
-                                if 'ESM' in allowed_database:
-                                    if (epi_lon[i] > -9 and epi_lon[i] < 64) and (epi_lat[i] > 28 and epi_lat[i] < 52):
-                                        inside=1
-                                if 'KiK-net' in allowed_database: 
-                                    if (epi_lon[i] > 120 and epi_lon[i] < 160) and (epi_lat[i] > 18 and epi_lat[i] < 55):
-                                        inside=1
-                                if inside == 0:
-                                    rec_ok=1
+                                if (record_sequence_number_nga[i] != 789):
+                                    inside=0
+                                    if 'ESM' in allowed_database:
+                                        if (epi_lon[i] > -9 and epi_lon[i] < 64) and (epi_lat[i] > 28 and epi_lat[i] < 52):
+                                            inside=1
+                                    if 'KiK-net' in allowed_database: 
+                                        if (epi_lon[i] > 120 and epi_lon[i] < 160) and (epi_lat[i] > 18 and epi_lat[i] < 55):
+                                            inside=1
+                                    if inside == 0:
+                                        rec_ok=1
 
-            if(comp=='two-component'):
+            if comp=='two-component' and selection_type=='conditional-spectrum':
                 if rec_ok == 1:
                     sa_entry = np.array([dbacc['PGA (g)'][i], dbacc['T0.010S'][i],
                                        dbacc['T0.025S'][i], dbacc['T0.040S'][i],
@@ -343,14 +387,14 @@ def screen_database(database_path, allowed_database, allowed_recs_vs30,
                                        dbacc['T5.000S'][i], dbacc['T6.000S'][i],
                                        dbacc['T7.000S'][i], dbacc['T8.000S'][i],
                                        dbacc['T9.000S'][i], dbacc['T10.000S'][i]])
-                    if all(v > 0 for v in sa_entry):
+                    if all(v>0 for v in sa_entry):
                         sa_geo = sa_entry # already in g
                         comp_allowed.append(0)
                         allowed_index.append(i+index0_database)
                         sa.append(sa_geo)
-            elif(comp=='single-component'):
+            elif comp=='single-component' or selection_type=='code-spectrum':
                 if rec_ok == 1:
-                    sa_entry = np.array([dbacc['Sa1_T0.010S'][i],
+                    sa_entry1 = np.array([dbacc['Sa1_T0.010S'][i],
                                        dbacc['Sa1_T0.025S'][i], dbacc['Sa1_T0.040S'][i],
                                        dbacc['Sa1_T0.050S'][i], dbacc['Sa1_T0.070S'][i],
                                        dbacc['Sa1_T0.100S'][i], dbacc['Sa1_T0.150S'][i],
@@ -368,11 +412,7 @@ def screen_database(database_path, allowed_database, allowed_recs_vs30,
                                        dbacc['Sa1_T5.000S'][i], dbacc['Sa1_T6.000S'][i],
                                        dbacc['Sa1_T7.000S'][i], dbacc['Sa1_T8.000S'][i],
                                        dbacc['Sa1_T9.000S'][i], dbacc['Sa1_T10.000S'][i]])
-                    if all(v > 0 for v in sa_entry):
-                        allowed_index.append(i+index0_database)
-                        comp_allowed.append(1)
-                        sa.append(sa_entry)
-                    sa_entry = np.array([dbacc['Sa2_T0.010S'][i],
+                    sa_entry2 = np.array([dbacc['Sa2_T0.010S'][i],
                                        dbacc['Sa2_T0.025S'][i], dbacc['Sa2_T0.040S'][i],
                                        dbacc['Sa2_T0.050S'][i], dbacc['Sa2_T0.070S'][i],
                                        dbacc['Sa2_T0.100S'][i], dbacc['Sa2_T0.150S'][i],
@@ -390,10 +430,21 @@ def screen_database(database_path, allowed_database, allowed_recs_vs30,
                                        dbacc['Sa2_T5.000S'][i], dbacc['Sa2_T6.000S'][i],
                                        dbacc['Sa2_T7.000S'][i], dbacc['Sa2_T8.000S'][i],
                                        dbacc['Sa2_T9.000S'][i], dbacc['Sa2_T10.000S'][i]])
-                    if all(v > 0 for v in sa_entry):
-                        allowed_index.append(i+index0_database)
-                        comp_allowed.append(2)
-                        sa.append(sa_entry)
+
+                    if comp == 'single-component':
+                        if all(v>0 for v in sa_entry1):
+                            allowed_index.append(i+index0_database)
+                            comp_allowed.append(1)
+                            sa.append(sa_entry1)
+                        if all(v>0 for v in sa_entry2):
+                            allowed_index.append(i+index0_database)
+                            comp_allowed.append(2)
+                            sa.append(sa_entry2)
+                    elif comp == 'two-component':
+                        if all(v>0 for v in sa_entry1):
+                            allowed_index.append(i+index0_database)
+                            comp_allowed.append(0)
+                            sa.append(np.sqrt(sa_entry1**2+sa_entry2**2))
 
     if 'KiK-net' in allowed_database:
         index0_database=num_events_esm+num_events_nga
@@ -409,10 +460,12 @@ def screen_database(database_path, allowed_database, allowed_recs_vs30,
         station_code = dbacc['station']
         event_depth = dbacc['depth']
         tectonic_environment = dbacc['Tectonic_Garcia_']
-        fminNS2=dbacc['fLow_NS2']
-        fmaxNS2=dbacc['fHigh_NS2']
-        fminEW2=dbacc['fLow_EW2']
-        fmaxEW2=dbacc['fHigh_EW2']
+        fminNS2 = dbacc['fLow_NS2']
+        fmaxNS2 = dbacc['fHigh_NS2']
+        fminEW2 = dbacc['fLow_EW2']
+        fmaxEW2 = dbacc['fHigh_EW2']
+        epi_lon = dbacc['lon']
+        epi_lat = dbacc['lat']
 
         fileName = database_path+'/Database_small.hdf5'
         fn = h5py.File(fileName,'r')
@@ -433,46 +486,55 @@ def screen_database(database_path, allowed_database, allowed_recs_vs30,
             fmaxNS2_tot.append(fmaxNS2[i])
             fminEW2_tot.append(fminEW2[i])
             fmaxEW2_tot.append(fmaxEW2[i])
-            
+            epi_lon_tot.append(epi_lon[i])
+            epi_lat_tot.append(epi_lat[i])
+            origin_time_tot.append(UTCDateTime(int(dbacc['originDate'][i].split('/')[2]),int(dbacc['originDate'][i].split('/')[0]),int(dbacc['originDate'][i].split('/')[1]),int(dbacc['originTime'][i].split(':')[0]),int(dbacc['originTime'][i].split(':')[1]),int(str(dbacc['originTime'][i]).split(':')[2][0:2])))
+
             index_kiknet=[1,4,10,16,21,27,33,38,41,45,48,51,54,57,59,62,63,64,66,68,70,72,74,76,78,81,84,87,90,95,97,99,101,103,105]
             rec_ok=0
-
             if(tectonic_environment[i] == 2):
                 if(allowed_recs_mag[0] <= event_mag[i] <= allowed_recs_mag[1]):
                     if (allowed_depth[0] <= event_depth[i] <= allowed_depth[1]):
                         if (allowed_recs_d[0] <= acc_distance[i] <= allowed_recs_d[1]):
                             if (allowed_recs_vs30[0] <= station_vs30[i] < allowed_recs_vs30[1]):
-                                rec_ok=1
+                                if (record_number[i] != 'TCGH141103230712'):
+                                    rec_ok = 1
 
-            if(comp=='two-component'):
+            if comp=='two-component' and selection_type=='conditional-spectrum':
                 sys.exit('Error: KiK-net database does not have RotD50 component. The geometric mean will be added in the future')
-            elif(comp=='single-component'):
+            elif comp=='single-component' or selection_type=='code-spectrum':
                 if rec_ok == 1:
+                    sa_entry1=[]
+                    sa_entry2=[]
                     direction='EW2'
                     b = [address.iloc[i][2:-2]+ '/' + direction]
                     b.extend(list(fn[b[0]]['PSa'][:]))
                     b=np.asarray(b)
-                    sa_entry=[]
                     for kk in range(len(index_kiknet)):
-                        sa_entry.append(b[index_kiknet[kk]].astype(np.float64))
-                    sa_entry  = np.asarray(sa_entry)
-                    if all(v > 0 for v in sa_entry):
-                        allowed_index.append(i+index0_database)
-                        comp_allowed.append(1)
-                        sa.append(sa_entry)
-
+                        sa_entry1.append(b[index_kiknet[kk]].astype(np.float64))
+                    sa_entry1  = np.asarray(sa_entry1)
                     direction='NS2'
                     b = [address.iloc[i][2:-2]+ '/' + direction]
                     b.extend(list(fn[b[0]]['PSa'][:]))
                     b=np.asarray(b)
-                    sa_entry=[]
                     for kk in range(len(index_kiknet)):
-                        sa_entry.append(b[index_kiknet[kk]].astype(np.float64))
-                    sa_entry  = np.asarray(sa_entry)
-                    if all(v > 0 for v in sa_entry):
-                        allowed_index.append(i+index0_database)
-                        comp_allowed.append(2)
-                        sa.append(sa_entry)
+                        sa_entry2.append(b[index_kiknet[kk]].astype(np.float64))
+                    sa_entry2  = np.asarray(sa_entry2)
+                    if comp == 'single-component':
+                        if all(v>0 for v in sa_entry1):
+                            allowed_index.append(i+index0_database)
+                            comp_allowed.append(1)
+                            sa.append(sa_entry1)
+                        if all(v>0 for v in sa_entry2):
+                            allowed_index.append(i+index0_database)
+                            comp_allowed.append(2)
+                            sa.append(sa_entry2)
+                    elif comp == 'two-component':
+                        if all(v>0 for v in sa_entry1):
+                            allowed_index.append(i+index0_database)
+                            comp_allowed.append(0)
+                            sa.append(np.sqrt(sa_entry1**2+sa_entry2**2))
+
 
     sa_known=np.vstack(sa)
 
@@ -495,8 +557,169 @@ def screen_database(database_path, allowed_database, allowed_recs_vs30,
     fmaxNS2_tot=np.asarray(fmaxNS2_tot)
     fminEW2_tot=np.asarray(fminEW2_tot)
     fmaxEW2_tot=np.asarray(fmaxEW2_tot)
+    epi_lon_tot=np.asarray(epi_lon_tot)
+    epi_lat_tot=np.asarray(epi_lat_tot)
+    origin_time_tot=np.asarray(origin_time_tot)
 
-    return [sa_known, ind_per, rec_per, n_big, allowed_index, event_id_tot,
-            station_code_tot, source_tot, record_sequence_number_tot, event_mw_tot,
-            event_mag_tot, acc_distance_tot, station_vs30_tot, station_ec8_tot,
-            comp_allowed, fminNS2_tot, fmaxNS2_tot, fminEW2_tot, fmaxEW2_tot]
+    cluster,flagvector = declustering(event_id_tot,event_mw_tot,
+                                event_mag_tot,origin_time_tot,
+                                epi_lon_tot,epi_lat_tot)
+    return (sa_known, ind_per, rec_per, n_big, allowed_index, event_id_tot,
+           station_code_tot, source_tot, record_sequence_number_tot, event_mw_tot,
+           event_mag_tot, acc_distance_tot, station_vs30_tot, station_ec8_tot,
+           comp_allowed, fminNS2_tot, fmaxNS2_tot, fminEW2_tot, fmaxEW2_tot, cluster)
+
+def declustering(event_id_tot,event_mw_tot,event_mag_tot,origin_time_tot,epi_lon_tot,epi_lat_tot):
+
+    import numpy as np
+
+    neq = len(event_id_tot)
+    mag=np.zeros((neq))
+    sw_space=np.zeros((neq))
+    sw_time=np.zeros((neq))
+    julian_date=np.zeros((neq))
+    for i in np.arange(neq):
+        mag[i] = define_magnitude(i,event_mw_tot,event_mag_tot)
+        # Get space and time windows corresponding to each event
+        sw_space[i], sw_time[i] = GK(mag[i])
+        julian_date[i] = to_julian_date(origin_time_tot[i].year, origin_time_tot[i].month, origin_time_tot[i].day)
+    # Initial Position Identifier
+    eqid = np.arange(0, neq, 1)
+    # Pre-allocate cluster index vectors
+    vcl = np.zeros(neq, dtype=int)
+    # Sort magnitudes into descending order
+    id0 = np.flipud(np.argsort(mag, kind='heapsort'))
+    longitude = epi_lon_tot[id0]
+    latitude = epi_lat_tot[id0]
+    sw_space = sw_space[id0]
+    sw_time = sw_time[id0]
+    julian_date = julian_date[id0]
+    eqid = eqid[id0]
+    flagvector = np.zeros(neq, dtype=int)
+
+    # Begin cluster identification
+    clust_index = 0
+    for i in range(0, neq - 1):
+        if vcl[i] == 0:
+            # Find Events inside both fore- and aftershock time windows
+            dt = julian_date - julian_date[i]
+            vsel = np.logical_and(
+                vcl == 0,
+                np.logical_and(
+                    dt >= (-sw_time[i]),
+                    dt <= sw_time[i]))
+            # Of those events inside time window,
+            # find those inside distance window
+            vsel1 = haversine(longitude[vsel],
+                              latitude[vsel],
+                              longitude[i],
+                              latitude[i]) <= sw_space[i]
+            vsel[vsel] = vsel1[:, 0]
+            temp_vsel = np.copy(vsel)
+            temp_vsel[i] = False
+            if any(temp_vsel):
+                # Allocate a cluster number
+                vcl[vsel] = clust_index + 1
+                flagvector[vsel] = 1
+                # For those events in the cluster before the main event,
+                # flagvector is equal to -1
+                temp_vsel[dt >= 0.0] = False
+                flagvector[temp_vsel] = -1
+                flagvector[i] = 0
+                clust_index += 1
+
+    # Re-sort the catalog_matrix into original order
+    id1 = np.argsort(eqid, kind='heapsort')
+    eqid = eqid[id1]
+    vcl = vcl[id1]
+    flagvector = flagvector[id1]
+
+    return vcl, flagvector
+
+
+def GK(mag):
+    #Gardner-Knopoff (1974)
+    dR = 10**(0.1238*mag + 0.983) #in km
+    if mag >=6.5: #in days
+        dT = 10**(0.032*mag+2.7389)
+    else:
+        dT = 10**(0.5409*mag-0.547)
+    return dR,dT
+
+def define_magnitude(index,event_mw,event_mag):
+    
+    import numpy as np
+
+    if not np.isnan(event_mw[index]):
+        mag=event_mw[index]
+    elif not np.isnan(event_mag[index]):
+        mag=event_mag[index]
+    else:
+        mag = 0
+    return mag
+
+def to_julian_date(I, J, K):
+
+    """
+    """
+    JD=K-32075+1461*(I+4800+(J-14)/12)/4+367*(J-2-(J-14)/12*12)/12-3*((I+4900+(J-14)/12)/100)/4
+
+    return JD
+
+
+def haversine(lon1, lat1, lon2, lat2, radians=False, earth_rad=6371.227):
+    """
+    Allows to calculate geographical distance
+    using the haversine formula.
+
+    :param lon1: longitude of the first set of locations
+    :type lon1: numpy.ndarray
+    :param lat1: latitude of the frist set of locations
+    :type lat1: numpy.ndarray
+    :param lon2: longitude of the second set of locations
+    :type lon2: numpy.float64
+    :param lat2: latitude of the second set of locations
+    :type lat2: numpy.float64
+    :keyword radians: states if locations are given in terms of radians
+    :type radians: bool
+    :keyword earth_rad: radius of the earth in km
+    :type earth_rad: float
+    :returns: geographical distance in km
+    :rtype: numpy.ndarray
+    """
+
+    import numpy as np
+
+    if not radians:
+        cfact = np.pi / 180.
+        lon1 = cfact * lon1
+        lat1 = cfact * lat1
+        lon2 = cfact * lon2
+        lat2 = cfact * lat2
+
+    # Number of locations in each set of points
+    if not np.shape(lon1):
+        nlocs1 = 1
+        lon1 = np.array([lon1])
+        lat1 = np.array([lat1])
+    else:
+        nlocs1 = np.max(np.shape(lon1))
+    if not np.shape(lon2):
+        nlocs2 = 1
+        lon2 = np.array([lon2])
+        lat2 = np.array([lat2])
+    else:
+        nlocs2 = np.max(np.shape(lon2))
+    # Pre-allocate array
+    distance = np.zeros((nlocs1, nlocs2))
+    i = 0
+    while i < nlocs2:
+        # Perform distance calculation
+        dlat = lat1 - lat2[i]
+        dlon = lon1 - lon2[i]
+        aval = (np.sin(dlat / 2.) ** 2.) + (np.cos(lat1) * np.cos(lat2[i]) *
+                                            (np.sin(dlon / 2.) ** 2.))
+        distance[:, i] = (2. * earth_rad * np.arctan2(np.sqrt(aval),
+                                                      np.sqrt(1 - aval))).T
+        i += 1
+    return distance

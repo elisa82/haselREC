@@ -18,7 +18,7 @@ def optimize_ground_motion(n_loop, n_gm, sample_small, n_big, id_sel, ln_sa1,
                              weights, penalty, rec_id, im_scale_fac, event,
                              station, allowed_index, correlated_motion, 
                              selection_type, period_range, up, low, w, 
-                             id_spectrum_compatibility):
+                             id_spectrum_compatibility, cluster):
     """
     Executes incremental changes to the initially selected ground motion set to
     further optimize its fit to the target spectrum distribution. From:
@@ -28,6 +28,7 @@ def optimize_ground_motion(n_loop, n_gm, sample_small, n_big, id_sel, ln_sa1,
     """
 
     import numpy as np
+    import sys
 
     sample_small = np.array(sample_small)
     print(
@@ -74,50 +75,86 @@ def optimize_ground_motion(n_loop, n_gm, sample_small, n_big, id_sel, ln_sa1,
                     dev_sig = np.std(sample_small, axis=0) - stdevs
                     dev_total = weights[0] * sum(dev_mean ** 2) + weights[
                             1] * sum(dev_sig ** 2)
+                    # Penalize bad spectra
+                    # (set penalty to zero if this is not required)
+                    if penalty != 0:
+                        for m in np.arange(len(sample_small)):
+                            dev_total = dev_total + sum(
+                                np.absolute(
+                                    np.exp(sample_small[m, :]) > np.exp(
+                                        mean_req + 3 * stdevs))) \
+                                       * penalty
 
                 elif(selection_type=='code-spectrum'):
+                    misfit=((np.mean(np.exp(sample_small[:,id_spectrum_compatibility]),axis=0)-np.exp(mean_req[id_spectrum_compatibility]))/np.exp(mean_req[id_spectrum_compatibility]))*100
+                    dev_average = np.mean(np.abs(misfit))
+                    #if np.min(misfit)>0:
+                    #    min_misfit=0
+                    #else:
+                    #    min_misfit=np.max(np.abs(misfit[misfit<0]))
+                    #if min_misfit>low:
+                    #    dev_min_average= 100
+                    #else:
+                    #    dev_min_average = 0
+                    #if np.max(misfit) > 0:
+                    #    max_misfit=np.max(misfit[misfit>0])
+                    #else:
+                    #    max_misfit = 0
+                    #if max_misfit>up:
+                    #    dev_max_average = 100
+                    #else:
+                    #    dev_max_average = 0
+
                     ratio=np.mean(np.exp(sample_small[:,id_spectrum_compatibility]),axis=0)/np.exp(mean_req[id_spectrum_compatibility])
                     if np.min(ratio)<(100-low)/100.:
-                        dev1 = (100-low)/100-np.min(ratio) 
+                        dev_min_average = (100-low)/100-np.min(ratio) 
                     else:
-                        dev1 = 0
+                        dev_min_average = 0
 
                     if np.max(ratio)>(100+up)/100:
-                        dev2 = np.max(ratio)-(100+up)/100 
+                        dev_max_average = np.max(ratio)-(100+up)/100 
                     else:
-                        dev2 = 0
+                        dev_max_average = 0
 
-                    if dev1==0 and dev2==0:
-                        dev_total=np.sqrt(np.mean((np.mean(sample_small[:,id_spectrum_compatibility],axis=0)-mean_req[id_spectrum_compatibility])**2))
-                    else:
-                        dev_total = dev1 + dev2
+                    #dev_average=np.sqrt(np.mean((np.mean(sample_small[:,id_spectrum_compatibility],axis=0)-mean_req[id_spectrum_compatibility])**2))
 
 #                if(sa_mean[0]>=sa_ref[0]):
 #                    dev=0
 #                else:
 #                    dev=1
 
-                # Penalize bad spectra
-                # (set penalty to zero if this is not required)
-                if penalty != 0:
-                    for m in np.arange(len(sample_small)):
-                        dev_total = dev_total + sum(
-                            np.absolute(
-                                np.exp(sample_small[m, :]) > np.exp(
-                                    mean_req + 3 * stdevs))) \
-                                   * penalty
+                    ratio_single=np.exp(sample_big[j,id_spectrum_compatibility])/np.exp(mean_req[id_spectrum_compatibility])
+                    if np.min(ratio_single)<(100-low)/100.:
+                        dev_min_single  = (100-low)/100-np.min(ratio_single)
+                    else:
+                        dev_min_single = 0
+
+                    if np.max(ratio_single)>(100+up)/100:
+                        dev_max_single = np.max(ratio_single)-(100+up)/100
+                    else:
+                        dev_max_single = 0
+
+                    dev_total=weights[0]*(dev_min_average+dev_max_average)+weights[1]*dev_average+weights[2]*(dev_min_single+dev_max_single)
 
                 if scale_fac[j] > maxsf or scale_fac[j] < 1. / maxsf:
                     dev_total = dev_total + 1000000
                 
                 if(correlated_motion=='no'):
+                    dev_station = 0
+                    dev_event = 0
+                    dev_cluster = 0
+
                     rec_idx_j = allowed_index[j]
-                    for l in range(i):
+                    for l in range(len(sample_small)-1):
                         rec_idx_l = allowed_index[rec_id[l]]
-                        if(station[rec_idx_j]==station[rec_idx_l] or
-                                event[rec_idx_j]==event[rec_idx_l]):
-                            dev_total = dev_total + 1000000
-                        
+                        if station[rec_idx_j]==station[rec_idx_l]:
+                            dev_station = 1000000
+                        if event[rec_idx_j]==event[rec_idx_l]:
+                            dev_event = 1000000
+                        if cluster[rec_idx_j]==cluster[rec_idx_l]:
+                            dev_cluster = 1000000
+                        dev_total = dev_total + dev_station + dev_event + dev_cluster
+
                 # Should cause improvement and record should not
                 # be repeated
                 if dev_total < min_dev and not any(rec_id == j):
@@ -127,21 +164,27 @@ def optimize_ground_motion(n_loop, n_gm, sample_small, n_big, id_sel, ln_sa1,
                 end = len(sample_small)
                 sample_small = sample_small[0:end - 1, :]
 
-            # Add new element in the right slot
-            im_scale_fac[i] = scale_fac[min_id]
-            end = len(sample_small)
-            added2 = np.reshape(
-                (sample_big[min_id, :] + np.log(scale_fac[min_id])),
-                (1, len(tgt_per)))
-            if i > 0:
-                sample_small = np.concatenate((sample_small[0:i, :],
-                                               added2,
-                                               sample_small[i:end,
-                                               :]))
-                rec_id = np.concatenate(
-                    (rec_id[0:i], min_id, rec_id[i:end]))
+            if len(min_id)>0:
+
+                # Add new element in the right slot
+                im_scale_fac[i] = scale_fac[min_id]
+                end = len(sample_small)
+                added2 = np.reshape(
+                    (sample_big[min_id, :] + np.log(scale_fac[min_id])),
+                    (1, len(tgt_per)))
+                if i > 0:
+                    sample_small = np.concatenate((sample_small[0:i, :],
+                                                   added2,
+                                                   sample_small[i:end,
+                                                   :]))
+                    rec_id = np.concatenate(
+                        (rec_id[0:i], min_id, rec_id[i:end]))
+                else:
+                    sample_small = np.concatenate(
+                        (added2, sample_small[i:end, :]))
+                    rec_id = np.concatenate((min_id, rec_id[i:end]))
             else:
-                sample_small = np.concatenate(
-                    (added2, sample_small[i:end, :]))
-                rec_id = np.concatenate((min_id, rec_id[i:end]))
+                sys.exit('Set not found')
+
+            
     return rec_id, im_scale_fac, sample_small
