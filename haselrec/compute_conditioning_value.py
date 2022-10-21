@@ -17,7 +17,7 @@ def compute_conditioning_value(rlz, intensity_measures, site, poe, num_disagg,
                                probability_of_exceedance, num_classical,
                                path_results_disagg, investigation_time,
                                path_results_classical, meanMag_disagg, 
-                               meanDist_disagg, hazard_value, hazard_mode):
+                               meanDist_disagg, hazard_value, hazard_mode, site_index_loop):
     """
     Reads 2 output files ('.csv') from OpenQuake: the file with disaggregation
     results and the map with hazard values and computes the IM value at which to
@@ -58,8 +58,8 @@ def compute_conditioning_value(rlz, intensity_measures, site, poe, num_disagg,
         mag = mean_mag
 
     else:
-        mag = meanMag_disagg
-        dist = np.array([meanDist_disagg])
+        mag = meanMag_disagg[site_index_loop]
+        dist = np.array([meanDist_disagg[site_index_loop]])
         im_star = hazard_value
 
     return im_star, dist, mag

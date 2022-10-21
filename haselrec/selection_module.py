@@ -127,8 +127,8 @@ def selection_module(intensity_measures, site_code, rlz_code,
                                                    path_results_disagg,
                                                    investigation_time,
                                                    path_results_classical,
-                                                   meanMag_disagg[ii], meanDist_disagg[ii], 
-                                                   hazard_value, hazard_mode)
+                                                   meanMag_disagg, meanDist_disagg, 
+                                                   hazard_value, hazard_mode, ii )
 
                     [bgmpe, sctx, rctx, dctx, vs30, rrup] = \
                         inizialize_gmm(ii, gmpe_input, rjb, mag, hypo_depth, dip,
