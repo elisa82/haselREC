@@ -57,7 +57,7 @@ def optimize_ground_motion(n_loop, n_gm, sample_small, n_big, id_sel, ln_sa1,
                 elif(selection_type=='code-spectrum'):
                     rec_value = np.exp(
                         sum(sample_big[j, id_sel]) / len(id_sel))
-                    if rec_value == 0:
+                    if rec_value.any() == 0:
                         scale_fac[j] = 1000000
                     else:
                         scale_fac[j]=sum( w * np.log(np.exp(mean_req) / np.exp(sample_big[j, :]))) / sum(w)

@@ -80,11 +80,11 @@ def scale_acc(n_gm, recid, path_nga, path_esm, source, event, station,
                                       '/GMR_time_scaled_acc_' + str(i + 1) +
                                       '_2.txt')
 
-            with open(file_time_scaled_acc_out_1, "wb") as f1:
+            with open(file_time_scaled_acc_out_1, "w") as f1:
                 for j in np.arange(npts1):
                     f1.write("{:10.3f} {:15.10f}\n".format(time1[j],
                                                        inp_acc1[j] * sf[i]))
-            with open(file_time_scaled_acc_out_2, "wb") as f2:
+            with open(file_time_scaled_acc_out_2, "w") as f2:
                 for j in np.arange(npts2):
                     f2.write("{:10.3f} {:15.10f}\n".format(time2[j],
                                                        inp_acc2[j] * sf[i]))
@@ -100,7 +100,7 @@ def scale_acc(n_gm, recid, path_nga, path_esm, source, event, station,
                 time=time2
                 inp_acc=inp_acc2
                 npts=npts2
-            with open(file_time_scaled_acc_out, "wb") as f1:
+            with open(file_time_scaled_acc_out, "w") as f1:
                 for j in np.arange(npts):
                     f1.write("{:10.3f} {:15.10f}\n".format(time[j],
                                                        inp_acc[j] * sf[i]))
@@ -113,7 +113,7 @@ def scale_acc(n_gm, recid, path_nga, path_esm, source, event, station,
             file_time_scaled_vert_acc_out = (output_folder + 
                                       '/GMR_time_scaled_vertical_acc_' + str(i + 1) +
                                       '.txt')
-            with open(file_time_scaled_vert_acc_out, "wb") as f1:
+            with open(file_time_scaled_vert_acc_out, "w") as f1:
                 for j in np.arange(npts):
                     f1.write("{:10.3f} {:15.10f}\n".format(time[j],
                                                        inp_acc[j] * sf[i]))

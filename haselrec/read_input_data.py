@@ -434,10 +434,22 @@ def read_input_data(fileini):
         except KeyError:
             print('Warning: the lower_sd value will be defined inside the code')
 
+        tstar1=-1
+        tstar2=-1
+
     # Code spectrum parameters
     if( selection_type == 'code-spectrum'):
-        scaling_period=float(input['scaling_period'])
-        tstar[0]=scaling_period
+        scaling_period=input['scaling_period']
+        try:
+            tstar[0]=float(scaling_period)
+            tstar1=-1
+            tstar2=-1
+        except ValueError:
+            tstar_temp=[x.strip() for x in
+                             scaling_period.strip('[]').split(',')]
+            tstar1=float(tstar_temp[0])
+            tstar2=float(tstar_temp[1])
+
         im_type_lbl.append(r'None')
         code_spectrum_file = [x.strip() for x in input['code_spectrum_file'].strip('{}').split(',')]
         if len(code_spectrum_file) != len(site_code):
@@ -594,5 +606,6 @@ def read_input_data(fileini):
             hazard_mode, component, correlated_motion, code_spectrum_file,
             period_range_spectrumcompatibility, threshold_up, threshold_low,
             selection_type, path_kiknet_folder, 
-            radius_dist_type_input, radius_mag_type_input, vertical_component)
+            radius_dist_type_input, radius_mag_type_input, vertical_component,
+            tstar1,tstar2)
 

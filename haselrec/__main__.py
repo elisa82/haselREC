@@ -100,7 +100,8 @@ if __name__ == '__main__':
      hazard_value, hazard_mode, component, correlated_motion,
      code_spectrum_file, period_range_spectrumcompatibility, 
      threshold_up, threshold_low, selection_type, path_kiknet_folder,
-     radius_dist_type_input, radius_mag_type_input, vertical_component] = read_input_data(fileini)
+     radius_dist_type_input, radius_mag_type_input, vertical_component,
+     tstar1,tstar2] = read_input_data(fileini)
 
     if calculation_mode == '--run-complete' or \
             calculation_mode == '--run-selection':
@@ -121,7 +122,8 @@ if __name__ == '__main__':
                          hazard_value, hazard_mode, component, correlated_motion,
                          code_spectrum_file, period_range_spectrumcompatibility,
                          threshold_up, threshold_low, selection_type,
-                         radius_dist_type_input, radius_mag_type_input)
+                         radius_dist_type_input, radius_mag_type_input,
+                         tstar1,tstar2)
                         
 
     if calculation_mode == '--check-rec':

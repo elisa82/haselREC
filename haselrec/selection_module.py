@@ -28,7 +28,7 @@ def selection_module(intensity_measures, site_code, rlz_code,
                      hazard_value, hazard_mode, component, correlated_motion,
                      code_spectrum_file, period_range_spectrumcompatibility, 
                      threshold_up, threshold_low, selection_type, 
-                     radius_dist_type_input, radius_mag_type_input):
+                     radius_dist_type_input, radius_mag_type_input,tstar1,tstar2):
     """
     This module is called when mode :code:`--run-selection` is specified.
 
@@ -210,7 +210,7 @@ def selection_module(intensity_measures, site_code, rlz_code,
                                        event_id, station_code, allowed_index,
                                        correlated_motion,selection_type,
                                        period_range_spectrumcompatibility,
-                                       cluster)
+                                       cluster,tstar1,tstar2)
                                       
 
                 # Further optimize the ground motion selection

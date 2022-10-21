@@ -16,7 +16,7 @@
 def find_ground_motion(tgt_per, tstar, avg_periods, intensity_measures, n_gm,
                        sa_known, ind_per, mean_req, n_big, simulated_spectra,
                        maxsf, event, station, allowed_index, correlated_motion,
-                       selection_type, period_range, cluster):
+                       selection_type, period_range, cluster, tstar1, tstar2):
     """
     Select ground motions from the database that individually match the
     statistically simulated spectra. From:
@@ -46,7 +46,11 @@ def find_ground_motion(tgt_per, tstar, avg_periods, intensity_measures, n_gm,
         w = []
     elif(selection_type=='code-spectrum'):
         w=np.zeros(len(tgt_per))
-        id_sel = np.where(tgt_per == tstar)
+        if tstar1>-1 and tstar2>-1:
+            logical = np.logical_and(tgt_per >= tstar1, tgt_per <= tstar2)
+            id_sel = np.where(logical == True)
+        else:
+            id_sel = np.where(tgt_per == tstar)
         if(len(id_sel[0]) == 0):
             sys.exit('Error: tstar not included in tgt_per',tstar,tgt_per)
         w[id_sel] = 1
@@ -81,7 +85,7 @@ def find_ground_motion(tgt_per, tstar, avg_periods, intensity_measures, n_gm,
             elif(selection_type=='code-spectrum'):
                 rec_value = np.exp(
                     sum(sample_big[j, id_sel]) / len(id_sel))
-                if rec_value == 0:
+                if rec_value.any() == 0:
                     scale_fac[j] = 1000000
                 else:
                     scale_fac[j]=sum( w * np.log(np.exp(mean_req) / np.exp(sample_big[j, :]))) / sum(w) 
