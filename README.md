@@ -3,17 +3,18 @@
 # haselREC - HAzard-based SELection of RECords
 
 The code is described in:
-Zuccolo, E., O’Reilly, G.J., Poggi, V. et al. haselREC: an automated open-source ground motion record selection and scaling tool. Bull Earthquake Eng 19, 5747–5767 (2021). https://doi.org/10.1007/s10518-021-01214-w
+Zuccolo, E., O’Reilly, G.J., Poggi, V., Monteiro, R. (2021) haselREC: an automated open-source ground motion record selection and scaling tool. Bull Earthquake Eng 19, 5747–5767 https://doi.org/10.1007/s10518-021-01214-w
 
 Main Contributor:
 * Elisa Zuccolo - EUCENTRE Foundation, Italy 
 
-Supporting developers:
+Supporting Developers:
 * Gerard J. O'Reilly - Scuola Universitaria Superiore IUSS Pavia, Italy, 
 * Andrea Francia - Software architect
 
 For inquiries: ezuccolo@ogs.it
 
+# NEW: Kik-NET strong ground motion database and code-based record selection!
 
 # Installation
 haselREC has the following dependencies:
