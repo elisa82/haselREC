@@ -3,17 +3,20 @@
 # haselREC - HAzard-based SELection of RECords
 
 The code is described in:
-Zuccolo E, Poggi V, O'Reilly GJ, Monteiro R (2021). 
-haselREC: an automated open-source ground motion record selection tool
-compatible with OpenQuake. Under review
+Zuccolo, E., O’Reilly, G.J., Poggi, V., Monteiro, R. (2021) haselREC: an automated open-source ground motion record selection and scaling tool. Bull Earthquake Eng 19, 5747–5767 https://doi.org/10.1007/s10518-021-01214-w
 
-Contributors:
-* Elisa Zuccolo - EUCENTRE Foundation, Italy, elisa.zuccolo@eucentre.it
+Main Contributor:
+* Elisa Zuccolo - EUCENTRE Foundation, Italy 
+
+Supporting Developers:
 * Gerard J. O'Reilly - Scuola Universitaria Superiore IUSS Pavia, Italy, 
-gerard.oreilly@iusspavia.it
-* Andrea Francia - andrea@andreafrancia.it 
+* Andrea Francia - Software architect
 
-# Dependencies
+For inquiries: ezuccolo@ogs.it
+
+# NEW: Kik-NET strong ground motion database and code-based record selection!
+
+# Installation
 haselREC has the following dependencies:
 
  * numpy
@@ -26,12 +29,12 @@ haselREC has the following dependencies:
  intensity measure component is the larger between the two horizontal 
  components).
 
-# Installation
 Add the lib folder to PYTHONPATH. For Linux open the file `~/.bashrc` in your 
 text editor and add the following line at the end:
 ```
 export PYTHONPATH=/path/to/haselREC
 ```
+
 # How to make haselREC to automatically download ESM recordings
 ESM recordings can be stored in advance or automatically downloaded from 
 internet using a token file (token.txt). To obtain the token file you need 
@@ -52,8 +55,6 @@ The documentation will be generated in the *build* folder
 # Demos
 Some demos can be found in the *demo* folder. See the README file in the *demo*
 folder
-
-
 
 # License
 Copyright (C) 2020-2021 Elisa Zuccolo, Eucentre Foundation
