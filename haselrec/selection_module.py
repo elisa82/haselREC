@@ -28,7 +28,8 @@ def selection_module(intensity_measures, site_code, rlz_code,
                      hazard_value, hazard_mode, component, correlated_motion,
                      code_spectrum_file, period_range_spectrumcompatibility, 
                      threshold_up, threshold_low, selection_type, 
-                     radius_dist_type_input, radius_mag_type_input,tstar1,tstar2):
+                     radius_dist_type_input, radius_mag_type_input,tstar1,tstar2,
+                     lon,lat,path_to_AllegatoB):
     """
     This module is called when mode :code:`--run-selection` is specified.
 
@@ -66,6 +67,7 @@ def selection_module(intensity_measures, site_code, rlz_code,
     from .compute_cs import compute_cs
     from .find_ground_motion import find_ground_motion
     from .optimize_ground_motion import optimize_ground_motion
+    from .create_NTC18 import create_NTC18
 
     # %% Start the routine
     print('Inputs loaded, starting selection....')
@@ -142,23 +144,25 @@ def selection_module(intensity_measures, site_code, rlz_code,
                         mag=mag
 
                 elif(selection_type=='code-spectrum'):
-
-                    name = 'site_' + str(site) + '-poe-' + str(poe)
+                    TR=int(probability_of_exceedance[jj])
+                    name = 'site_' + str(site) + '-RT-' + str(TR) + '_years'
 
                     # Print some on screen feedback
                     print('Processing ' + name + ' Case: ' + str(ind) + '/' + str(
                         len(site_code) * len(probability_of_exceedance_num)))
                     ind += 1
-
-                    code = pd.read_csv(code_spectrum_file[ii])
-                    target_periods = code['T'].to_numpy()
-                    code_spectrum = code['Sa'].to_numpy()
+                    if code_spectrum_file[ii]=='NTC18':
+                        target_periods=np.arange(0.,4.01,0.01)
+                        code_spectrum = create_NTC18(lon[ii],lat[ii],TR,target_periods,path_to_AllegatoB)
+                    else:                    
+                        code = pd.read_csv(code_spectrum_file[ii])
+                        target_periods = code['T'].to_numpy()
+                        code_spectrum = code['Sa'].to_numpy()
 
                     mag = meanMag_disagg[ii]
                     rjb = np.array([meanDist_disagg[ii]])
 
                     vs30=[]
-
 
                 [sa_known, ind_per, tgt_per, n_big, allowed_index, event_id,
                  station_code, source, record_sequence_number_nga, event_mw,

@@ -1,0 +1,11 @@
+max_negative_misfit (%) =  15.919760907098238
+max_positive_misfit (%) =  9.035885905611389
+average_misfit (%) =  4.261647218893859
+num source event_id station_code recID component magnitude distance vs30 EC8 scale_factor flowNS2 fhighNS2 flonwEW2 fhighEW2
+1 KiK-net 20001006133000 SMNH10 SMNH100010061330 1 6.6 31.75195984 967.2710347599806 nan 0.79 0.05 100.0 0.05 100.0
+2 ESM EMSC-20161030_0000029 LSS nan 2 6.5 32.6 1091.0 A 3.40 nan nan nan nan
+3 ESM IT-1990-0003 SRT nan 2 5.6 36.9 871.0 A 2.90 nan nan nan nan
+4 KiK-net 20130225162300 TCGH17 TCGH171302251623 2 5.8 27.76987314 1432.7506316295533 nan 5.22 0.07019043 50.0 0.07019043 50.0
+5 NGA-West2 113 24047 703 2 5.99 54.21 996.43 nan 2.71 nan nan nan nan
+6 NGA-West2 118 58338 788 1 6.93 92.21 895.36 nan 2.17 nan nan nan nan
+7 NGA-West2 177 DCPP 8167 2 6.5 57.74 1100.0 nan 3.90 nan nan nan nan

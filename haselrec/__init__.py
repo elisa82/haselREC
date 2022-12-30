@@ -20,6 +20,7 @@ from haselrec.selection_module import selection_module
 from haselrec.simulate_spectra import simulate_spectra
 from haselrec.compute_conditioning_value import compute_conditioning_value
 from haselrec.scaling_nodes_NTC18 import scaling_nodes_NTC18
+from haselrec.create_NTC18 import create_NTC18
 
 __all__ = [
     'simulate_spectra',
@@ -43,4 +44,5 @@ __all__ = [
     'check_module',
     'compute_conditioning_value',
     'scaling_nodes_NTC18'
+    'create_NTC18'
 ]

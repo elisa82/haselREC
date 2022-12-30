@@ -160,7 +160,11 @@ def read_input_data(fileini):
 
     **Code Spectrum Parameters - section**
         - :code:`code_spectrum_file`: path to the files containing the code spectrum (in g).
-          The number of files should be equal to the number of sites
+          The number of files should be equal to the number of sites. If 'NTC18' is written
+	  the spectrum is authomatically computed according to NTC18
+	- :code:`path_to_AllegatoB`: path to AllegatoB (required if NTC18 is selected)
+        - :code:`lon`: longitude of the site (required if NTC18 is selected)
+        - :code:`lat`: latitude of the site (required if NTC18 is selected)
         - :code:`period_range_spectrumcompatibility`: period interval for 
           spectrum compatibility (sec)
         - :code:`threshold_up`: maximum threshold for the maximum positive 
@@ -252,16 +256,18 @@ def read_input_data(fileini):
 
     # %% Extract input parameters
 
+    path_to_AllegatoB = None
+
     # Hazard parameters
 
     site_code = [x.strip() for x in input['site_code'].strip('{}').split(',')]
     site_code = np.array(site_code, dtype=int)
-    probability_of_exceedance_num = [x.strip() for x in input[
-        'probability_of_exceedance_num'].strip('{}').split(',')]
-    probability_of_exceedance_num = np.array(probability_of_exceedance_num,
-                                             dtype=int)
 
     if( selection_type == 'conditional-spectrum'): 
+        probability_of_exceedance_num = [x.strip() for x in input[
+        'probability_of_exceedance_num'].strip('{}').split(',')]
+        probability_of_exceedance_num = np.array(probability_of_exceedance_num,
+                                             dtype=int)
         hazard_mode=int(input['hazard_mode'])
         intensity_measures = [x.strip() for x in
                               input['intensity_measures'].strip('{}').split(',')]
@@ -278,7 +284,7 @@ def read_input_data(fileini):
             probability_of_exceedance = [x.strip() for x in
                                          input['probability_of_exceedance'].strip(
                                              '{}').split(',')]
-            if (len(probability_of_exceedance_num) != len(
+            if (len(probability_of_exceedance) != len(
                     probability_of_exceedance_num)):
                 sys.exit(
                     'Error: probability_of_exceedance_num must be of the same size of '
@@ -300,6 +306,18 @@ def read_input_data(fileini):
             probability_of_exceedance = []
             investigation_time=[]
     elif(selection_type == 'code-spectrum'): 
+        probability_of_exceedance_num = [x.strip() for x in input[
+        'return_period_num'].strip('{}').split(',')]
+        probability_of_exceedance_num = np.array(probability_of_exceedance_num,
+                                             dtype=int)
+        probability_of_exceedance = [x.strip() for x in
+				    input['return_period'].strip(
+				    '{}').split(',')]
+        if (len(probability_of_exceedance) != len(
+	    probability_of_exceedance_num)):
+            sys.exit(
+            'Error: return_period_num must be of the same size of '
+            'return_period')
         meanMag_disagg = [x.strip() for x in input['meanMag_disagg'].strip('{}').split(',')]
         meanMag_disagg = np.array(meanMag_disagg, dtype=float)
         meanDist_disagg = [x.strip() for x in input['meanDist_disagg'].strip('{}').split(',')]
@@ -311,8 +329,6 @@ def read_input_data(fileini):
         path_results_disagg = []
         num_disagg = []
         num_classical = []
-        probability_of_exceedance = [0]
-        probability_of_exceedance = np.array(probability_of_exceedance)
         investigation_time=[]
         rlz_code=np.zeros((len(site_code)))
     else:
@@ -343,6 +359,8 @@ def read_input_data(fileini):
     code_spectrum_file = None
     period_range_spectrumcompatibility = []
     tstar = np.zeros(len(intensity_measures))
+    lon = []
+    lat = []
 
     if( selection_type == 'conditional-spectrum'):
 
@@ -452,9 +470,19 @@ def read_input_data(fileini):
 
         im_type_lbl.append(r'None')
         code_spectrum_file = [x.strip() for x in input['code_spectrum_file'].strip('{}').split(',')]
-        if len(code_spectrum_file) != len(site_code):
-            sys.exit(
-                'Error: code_spectrum_file must be an array of the same length of site_code')
+        if 'NTC18' in code_spectrum_file:
+            code_spectrum_file=[]
+            for j in range(len(site_code)):
+                code_spectrum_file.append('NTC18')
+            lon = [x.strip() for x in input['lon'].strip('{}').split(',')]
+            lon = np.array(lon,dtype=float)
+            lat = [x.strip() for x in input['lat'].strip('{}').split(',')]
+            lat = np.array(lat,dtype=float)
+            path_to_AllegatoB = input['path_to_AllegatoB']
+        else:
+                if len(code_spectrum_file) != len(site_code):
+                    sys.exit(
+                    'Error: code_spectrum_file must be an array of the same length of site_code')	
         period_range_spectrumcompatibility = [x.strip() for x in
             input['period_range_spectrumcompatibility'].strip('[]').split(
                          ',')]
@@ -592,6 +620,7 @@ def read_input_data(fileini):
     # Output folder
     output_folder = input['output_folder']
 
+
     return (intensity_measures, site_code, rlz_code, path_results_classical,
             path_results_disagg, num_disagg, num_classical,
             probability_of_exceedance_num, probability_of_exceedance,
@@ -607,5 +636,5 @@ def read_input_data(fileini):
             period_range_spectrumcompatibility, threshold_up, threshold_low,
             selection_type, path_kiknet_folder, 
             radius_dist_type_input, radius_mag_type_input, vertical_component,
-            tstar1,tstar2)
+            tstar1,tstar2,lon,lat,path_to_AllegatoB)
 

@@ -20,3 +20,7 @@ build/latex/
 GM-Records/kiknet/
 GM-Records/Database_small.hdf5
 GM-Records/attributes.csv
+.DS_Store
+**/.DS_Store
+**/**/.DS_Store
+scaling_nodes_NTC18.py

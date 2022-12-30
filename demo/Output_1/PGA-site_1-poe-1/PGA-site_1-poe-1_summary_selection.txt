@@ -1,4 +1,4 @@
-reference hazard value =  0.5879783000000001
+reference hazard value =  0.5879783
 mean_mag_disag =  6.347683361014376
 mean_dist_disag =  15.909873748773544
 num source event_id station_code recID component magnitude distance vs30 EC8 scale_factor flowNS2 fhighNS2 flonwEW2 fhighEW2
