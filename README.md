@@ -14,7 +14,9 @@ Supporting Developers:
 
 For inquiries: ezuccolo@ogs.it
 
-# NEW: Kik-NET strong ground motion database and code-based record selection!
+# NEW: 
+ * Kik-NET strong ground motion database and code-based record selection!
+ * record selection according to NTC18 (both single and two-component record selection)!
 
 # Installation
 haselREC has the following dependencies:
